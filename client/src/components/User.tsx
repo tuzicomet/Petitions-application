@@ -1,6 +1,9 @@
 import axios from 'axios';
 import React from "react";
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Snackbar, Alert } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
 const User = () => {
     const { id } = useParams();
@@ -17,6 +20,13 @@ const User = () => {
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
     const [editUsername, setEditUsername] = React.useState("");
+    const [openEditDialog, setOpenEditDialog] = React.useState(false);
+    const [snackOpen, setSnackOpen] = React.useState(false);
+    const [snackMessage, setSnackMessage] = React.useState("");
+
+    const handleSnackClose = () => {
+        setSnackOpen(false);
+    };
 
     React.useEffect(() => {
         const getUser = () => {
@@ -35,7 +45,7 @@ const User = () => {
     }, [id]);
 
     const deleteUser = () => {
-        axios.delete(`http://localhost:4941/api/v1/users/${id}`)
+        axios.delete(`http://localhost:4941/api/v1/users/${user.id}`)
             .then(() => {
                 navigate('/users');
             })
@@ -46,9 +56,11 @@ const User = () => {
     };
 
     const editUser = () => {
-        axios.patch(`http://localhost:4941/api/v1/users/${id}`, { username: editUsername })
+        axios.patch(`http://localhost:4941/api/v1/users/${user.id}`, { username: editUsername })
             .then(() => {
-                navigate('/users');
+                setOpenEditDialog(false);
+                setSnackMessage("Username changed successfully");
+                setSnackOpen(true);
             })
             .catch((error) => {
                 setErrorFlag(true);
@@ -56,101 +68,72 @@ const User = () => {
             });
     };
 
-    if (errorFlag) {
-        return (
-            <div>
-                <h1>User</h1>
-                <div style={{ color: "red" }}>
+    return (
+        <div>
+            {/* Show error Alert if errorFlag is there */}
+            {errorFlag &&
+                <Alert severity="error">
                     {errorMessage}
-                </div>
-                <Link to={"/users"}>Back to users</Link>
-            </div>
-        )
-    } else {
-        return (
+                </Alert>
+            }
+
+            <h1>User</h1>
             <div>
-                <h1>User</h1>
-                <div>
-                    <strong>ID:</strong> {user.id}<br />
-                    <strong>Name:</strong> {user.firstName} {user.lastName}<br />
-                    <strong>Email:</strong> {user.email}<br />
-                    <strong>Password:</strong> {user.password}<br />
-                    <strong>Image Filename:</strong> {user.imageFilename}<br />
-                    <strong>Auth Token:</strong> {user.authToken}<br />
-                </div>
-                <Link to={"/users"}>Back to users</Link>
-
-                {/* Edit User Modal */}
-                <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#editUserModal">
-                    Edit
-                </button>
-                <div className="modal fade" id="editUserModal" tabIndex={-1} role="dialog"
-                     aria-labelledby="editUserModalLabel" aria-hidden="true">
-                    <div className="modal-dialog" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="editUserModalLabel">Edit User</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <form onSubmit={editUser}>
-                                    <div className="form-group">
-                                        <label htmlFor="editUsername">Username:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="editUsername"
-                                            value={editUsername}
-                                            onChange={(e) => setEditUsername(e.target.value)}
-                                        />
-                                    </div>
-                                    <button type="submit" className="btn btn-primary">Save Changes</button>
-                                </form>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Delete User Modal */}
-                <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#deleteUserModal">
-                    Delete
-                </button>
-                <div className="modal fade" id="deleteUserModal" tabIndex={-1} role="dialog"
-                     aria-labelledby="deleteUserModalLabel" aria-hidden="true">
-                    <div className="modal-dialog" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="deleteUserModalLabel">Delete User</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                Are you sure that you want to delete this user?
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">
-                                    Close
-                                </button>
-                                <button type="button" className="btn btn-primary" data-dismiss="modal"
-                                        onClick={deleteUser}>
-                                    Delete User
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                <strong>ID:</strong> {user.id}<br />
+                <strong>First Name:</strong> {user.firstName}<br />
+                <strong>Last Name:</strong> {user.lastName}<br />
+                <strong>Email:</strong> {user.email}<br />
+                <strong>Password:</strong> {user.password}<br />
+                <strong>Image Filename:</strong> {user.imageFilename}<br />
+                <strong>Auth Token:</strong> {user.authToken}<br />
             </div>
-        )
-    }
-}
+
+            <Link to={"/users"}>Back to users</Link>
+
+            <Button variant="outlined" startIcon={<EditIcon />} onClick={() => setOpenEditDialog(true)}>
+                Edit
+            </Button>
+
+            <Button variant="outlined" startIcon={<DeleteIcon />} onClick={deleteUser}>
+                Delete
+            </Button>
+
+            {/* Edit User Dialog */}
+            <Dialog
+                open={openEditDialog}
+                onClose={() => setOpenEditDialog(false)}
+            >
+                <DialogTitle>Edit User</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Enter new username:
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="username"
+                        label="Username"
+                        type="text"
+                        fullWidth
+                        value={editUsername}
+                        onChange={(e) => setEditUsername(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
+                    <Button onClick={editUser}>Save</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar component */}
+            <Snackbar
+                open={snackOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackClose}
+                message={snackMessage}
+            />
+        </div>
+    );
+};
 
 export default User;
