@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const loginUser = () => {
         axios.post("http://localhost:4941/api/v1/users/login", {
@@ -12,8 +14,13 @@ const Login = () => {
                 password,
             })
             .then((response) => {
+                // handle successful login
                 console.log("Login successful:", response.data);
-                // Handle successful login here, e.g., redirect
+                // Save authentication token to browser storage
+                localStorage.setItem("savedAuthToken", response.data.token);
+                // DEBUG: redirect to the user 21's user page
+                // (probably change to homepage or something? idk if user stories says anything)
+                navigate("/users/21");
             })
             .catch((error) => {
                 console.error("Login failed:", error);

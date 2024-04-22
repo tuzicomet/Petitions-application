@@ -23,6 +23,7 @@ const User = () => {
     const [openEditDialog, setOpenEditDialog] = React.useState(false);
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
+    const savedAuthToken = localStorage.getItem("savedAuthToken"); // Get the saved authToken from local storage
 
     const handleSnackClose = () => {
         setSnackOpen(false);
@@ -30,7 +31,12 @@ const User = () => {
 
     React.useEffect(() => {
         const getUser = () => {
-            axios.get<User>(`http://localhost:4941/api/v1/users/${id}`)
+            axios.get<User>(`http://localhost:4941/api/v1/users/${id}`, {
+                headers: {
+                    // Include the savedAuthToken in the request header as X-Authorization
+                    'X-Authorization': savedAuthToken
+                }
+            })
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
@@ -45,7 +51,12 @@ const User = () => {
     }, [id]);
 
     const editUser = () => {
-        axios.patch(`http://localhost:4941/api/v1/users/${id}`, editUserDetails)
+        axios.patch(`http://localhost:4941/api/v1/users/${id}`, editUserDetails, {
+            headers: {
+                // Include the savedAuthToken in the request header as X-Authorization
+                'X-Authorization': savedAuthToken
+            }
+        })
             .then(() => {
                 setOpenEditDialog(false);
                 setSnackMessage("User details updated successfully");
