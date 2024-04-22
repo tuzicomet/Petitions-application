@@ -24,6 +24,8 @@ const User = () => {
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
     const savedAuthToken = localStorage.getItem("savedAuthToken"); // Get the saved authToken from local storage
+    // userImage should either accept string or null (if no image/unauthorized)
+    const [userImage, setUserImage] = React.useState<string | null>(null);
 
     const handleSnackClose = () => {
         setSnackOpen(false);
@@ -47,7 +49,34 @@ const User = () => {
                     setErrorMessage(error.toString());
                 });
         };
+
+        // retrieve the user's saved image (if it exists)
+        const getUserImage = async () => {
+            try {
+                // get the auth token from local storage (if user is logged in)
+                const authToken = localStorage.getItem("savedAuthToken");
+                // send a request to retrieve the user's image
+                const response = await axios.get(`http://localhost:4941/api/v1/users/${id}/image`, {
+                    // treat the response as binary data
+                    responseType: 'arraybuffer',
+                    // send the authentication token in the header
+                    headers: {
+                        'X-Authorization': authToken
+                    }
+                });
+                // Create blob object containing the image data, along with its MIME (content) type
+                const blob = new Blob([response.data], { type: response.headers['content-type'] });
+                // Create a URL for the blob object to use it as the image URL
+                const imageUrl = URL.createObjectURL(blob);
+                // Set the image URL in the state to display the image
+                setUserImage(imageUrl);
+            } catch (error) {
+                console.error("Error fetching user image:", error);
+            }
+        };
+
         getUser();
+        getUserImage();
     }, [id]);
 
     const editUser = () => {
@@ -78,14 +107,20 @@ const User = () => {
             }
 
             <h1>User</h1>
+
+            {/* Display user's image if available */}
+            {userImage && (
+                <img
+                    src={userImage}
+                    alt="User Profile"
+                    style={{ width: 100, height: 100, borderRadius: "10%" }}
+                />
+            )}
+
             <div>
-                <strong>ID:</strong> {user.id}<br />
                 <strong>First Name:</strong> {user.firstName}<br />
                 <strong>Last Name:</strong> {user.lastName}<br />
                 <strong>Email:</strong> {user.email}<br />
-                <strong>Password:</strong> {user.password}<br />
-                <strong>Image Filename:</strong> {user.imageFilename}<br />
-                <strong>Auth Token:</strong> {user.authToken}<br />
             </div>
 
             <Link to={"/users"}>Back to users</Link>
