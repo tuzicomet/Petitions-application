@@ -53,15 +53,13 @@ const User = () => {
         // retrieve the user's saved image (if it exists)
         const getUserImage = async () => {
             try {
-                // get the auth token from local storage (if user is logged in)
-                const authToken = localStorage.getItem("savedAuthToken");
                 // send a request to retrieve the user's image
                 const response = await axios.get(`http://localhost:4941/api/v1/users/${id}/image`, {
                     // treat the response as binary data
                     responseType: 'arraybuffer',
-                    // send the authentication token in the header
+                    // send the saved authentication token in the header
                     headers: {
-                        'X-Authorization': authToken
+                        'X-Authorization': savedAuthToken
                     }
                 });
                 // Create blob object containing the image data, along with its MIME (content) type
