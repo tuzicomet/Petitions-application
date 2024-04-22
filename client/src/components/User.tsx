@@ -2,7 +2,6 @@ import axios from 'axios';
 import React from "react";
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Snackbar, Alert } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 const User = () => {
@@ -17,9 +16,10 @@ const User = () => {
         imageFilename: "",
         authToken: ""
     });
+    const [editUserDetails, setEditUserDetails] = React.useState<Partial<User>>({}); // Partial<User> to allow only some fields to be edited
+    const [currentPassword, setCurrentPassword] = React.useState("");
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
-    const [editUsername, setEditUsername] = React.useState("");
     const [openEditDialog, setOpenEditDialog] = React.useState(false);
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
@@ -44,22 +44,11 @@ const User = () => {
         getUser();
     }, [id]);
 
-    const deleteUser = () => {
-        axios.delete(`http://localhost:4941/api/v1/users/${user.id}`)
-            .then(() => {
-                navigate('/users');
-            })
-            .catch((error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
-    };
-
     const editUser = () => {
-        axios.patch(`http://localhost:4941/api/v1/users/${user.id}`, { username: editUsername })
+        axios.patch(`http://localhost:4941/api/v1/users/${id}`, editUserDetails)
             .then(() => {
                 setOpenEditDialog(false);
-                setSnackMessage("Username changed successfully");
+                setSnackMessage("User details updated successfully");
                 setSnackOpen(true);
             })
             .catch((error) => {
@@ -94,10 +83,6 @@ const User = () => {
                 Edit
             </Button>
 
-            <Button variant="outlined" startIcon={<DeleteIcon />} onClick={deleteUser}>
-                Delete
-            </Button>
-
             {/* Edit User Dialog */}
             <Dialog
                 open={openEditDialog}
@@ -106,18 +91,35 @@ const User = () => {
                 <DialogTitle>Edit User</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Enter new username:
+                        Make changes to user details:
                     </DialogContentText>
                     <TextField
-                        autoFocus
-                        margin="dense"
-                        id="username"
-                        label="Username"
-                        type="text"
-                        fullWidth
-                        value={editUsername}
-                        onChange={(e) => setEditUsername(e.target.value)}
-                    />
+                        label="First Name"
+                        value={editUserDetails.firstName || ""}
+                        onChange={(e) => setEditUserDetails({ ...editUserDetails, firstName: e.target.value })}
+                    /><br />
+                    <TextField
+                        label="Last Name"
+                        value={editUserDetails.lastName || ""}
+                        onChange={(e) => setEditUserDetails({ ...editUserDetails, lastName: e.target.value })}
+                    /><br />
+                    <TextField
+                        label="Email"
+                        value={editUserDetails.email || ""}
+                        onChange={(e) => setEditUserDetails({ ...editUserDetails, email: e.target.value })}
+                    /><br />
+                    <TextField
+                        label="Password"
+                        type="password"
+                        value={editUserDetails.password || ""}
+                        onChange={(e) => setEditUserDetails({ ...editUserDetails, password: e.target.value })}
+                    /><br />
+                    <TextField
+                        label="Current Password"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                    /><br />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
