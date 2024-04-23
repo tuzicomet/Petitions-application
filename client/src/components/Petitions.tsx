@@ -3,7 +3,7 @@ import React from "react";
 import {Link} from 'react-router-dom';
 
 const Petitions = () => {
-    const [petitions, setPetitions] = React.useState < Array < Petition >> ([])
+    const [petitions, setPetitions] = React.useState < Array < PetitionFull >> ([])
     const [errorFlag, setErrorFlag] = React.useState(false)
     const [errorMessage, setErrorMessage] = React.useState("")
 
@@ -28,7 +28,7 @@ const Petitions = () => {
     }
 
     const list_of_petitions = () => {
-        return petitions.map((item: Petition) =>
+        return petitions.map((item: PetitionFull) =>
             <tr key={item.petitionId}>
                 <th scope="row">{item.petitionId}</th>
                 <td>{item.title}</td>
