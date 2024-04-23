@@ -6,6 +6,7 @@ import Login from "./components/Login";
 import User from "./components/User";
 import NotFound from "./components/NotFound";
 import Petitions from "./components/Petitions";
+import Petition from "./components/Petition";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/users/:id" element={<User/>}/>
                 <Route path="/petitions" element={<Petitions/>}/>
+                <Route path="/petitions/:id" element={<Petition/>}/>
                 <Route path="*" element={<NotFound/>}/>
             </Routes>
           </div>
