@@ -134,7 +134,7 @@ const Petition = () => {
                 <strong>numberOfSupporters:</strong> {petition.numberOfSupporters}<br/>
                 <strong>description:</strong> {petition.description}<br/>
                 <strong>moneyRaised:</strong> {petition.moneyRaised}<br/>
-            {/* TODO: cannot show supportTiers here, but idk if i need to */}
+            {/* TODO: need to show all support tiers */}
             </div>
 
             <Link to={"/petitions"}>Back to petitions</Link>

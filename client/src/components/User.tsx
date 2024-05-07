@@ -69,6 +69,7 @@ const User = () => {
                 // Set the image URL in the state to display the image
                 setUserImage(imageUrl);
             } catch (error) {
+                // TODO: if user has no image, must give a default image
                 console.error("Error fetching user image:", error);
             }
         };
@@ -78,6 +79,10 @@ const User = () => {
     }, [id]);
 
     const editUser = () => {
+        /* TODO: Filter out fields with empty values
+        TODO: (otherwise, if you type in a field then delete it, it still submits as "")
+        */
+
         axios.patch(`http://localhost:4941/api/v1/users/${id}`, editUserDetails, {
             headers: {
                 // Include the savedAuthToken in the request header as X-Authorization
