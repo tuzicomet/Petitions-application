@@ -1,22 +1,27 @@
-import axios from 'axios';
-import React from "react";
-import {Link} from 'react-router-dom';
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead, TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import CSS from 'csstype';
 
+import axios from 'axios'; // Import Axios for making HTTP requests
+import React from "react"; // Import React library
+import {Link} from 'react-router-dom'; // Import Link component from React Router DOM for navigation
+import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead, TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar} from "@mui/material"; // Import Material-UI components for styling
+import DeleteIcon from "@mui/icons-material/Delete"; // Import DeleteIcon component from Material-UI icons
+import EditIcon from "@mui/icons-material/Edit"; // Import EditIcon component from Material-UI icons
+import CSS from 'csstype'; // Import CSSType for defining CSS properties
+
+// CSS properties for the card style
 const card: CSS.Properties = {
     padding: "10px",
     margin: "20px",
 };
 
+// interface for table head cell
 interface HeadCell {
     id: string;
     label: string;
     numeric: boolean;
 }
 
+// Define table head cells
+// (the columns in the petitions list)
 const headCells: readonly HeadCell[] = [
     { id: 'ID', label: 'ID', numeric: true },
     { id: 'title', label: 'Title', numeric: false },
@@ -24,7 +29,12 @@ const headCells: readonly HeadCell[] = [
     { id: 'actions', label: 'Actions', numeric: false }
 ];
 
+/**
+ * Petitions component for managing petitions.
+ * This component fetches, displays, creates, edits, and deletes petitions.
+ */
 const Petitions = () => {
+    // State variables
     const [petitions, setPetitions] = React.useState<Array<PetitionFull>>([]);
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
@@ -41,6 +51,7 @@ const Petitions = () => {
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
 
+    // Function to close Snackbar
     const handleSnackClose = () => {
         setSnackOpen(false);
     };
@@ -50,6 +61,7 @@ const Petitions = () => {
         getPetitions();
     }, []);
 
+    // Function to fetch petitions from API
     const getPetitions = () => {
         axios.get('http://localhost:4941/api/v1/petitions')
             .then((response) => {
@@ -62,6 +74,7 @@ const Petitions = () => {
             });
     };
 
+    // Function to render rows for petitions
     const petitionRows = () => {
         return petitions.map((petition: PetitionFull) => (
             <TableRow key={petition.petitionId}>
@@ -82,6 +95,7 @@ const Petitions = () => {
         ));
     };
 
+    // Function to add a new petition
     const addPetition = () => {
         axios.post('http://localhost:4941/api/v1/petitions', { title: newPetitionTitle })
             .then(() => {
@@ -94,6 +108,7 @@ const Petitions = () => {
             });
     };
 
+    // Function to delete a petition
     const deletePetition = () => {
         axios.delete(`http://localhost:4941/api/v1/petitions/${dialogPetition.petitionId}`)
             .then(() => {
@@ -106,15 +121,18 @@ const Petitions = () => {
             });
     };
 
+    // Function to open delete petition dialog
     const handleDeleteDialogOpen = (petition: PetitionFull) => {
         setDialogPetition(petition);
         setOpenDeleteDialog(true);
     };
 
+    // Function to close delete petition dialog
     const handleDeleteDialogClose = () => {
         setOpenDeleteDialog(false);
     };
 
+    // Function to edit a petition
     const editPetition = () => {
         axios.put(`http://localhost:4941/api/v1/petitions/${dialogPetition.petitionId}`, { title: titleEdit })
             .then(() => {
@@ -129,23 +147,26 @@ const Petitions = () => {
             });
     };
 
+    // Function to update title edit state
     const updateTitleEditState = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitleEdit(e.target.value);
     };
 
+    // Function to open edit petition dialog
     const handleEditDialogOpen = (petition: PetitionFull) => {
         setTitleEdit(petition.title); // Set initial value for title edit
         setDialogPetition(petition); // Set the dialogPetition state with the correct petition object
         setOpenEditDialog(true);
     };
 
+    // Function to close edit petition dialog
     const handleEditDialogClose = () => {
         setOpenEditDialog(false);
     };
 
     return (
         <div>
-            {/* Show error Alert if errorFlag is there */}
+            {/* Show error Alert if errorFlag is true */}
             {errorFlag &&
                 <Alert severity="error">
                     <AlertTitle>Error</AlertTitle>
