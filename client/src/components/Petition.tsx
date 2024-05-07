@@ -4,9 +4,16 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Snackbar, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 
+/**
+ * Petition component displays the details of a single petition.
+ * It allows users to view, edit, and delete a petition.
+ */
 const Petition = () => {
+    // Extracts the id parameter from the URL
     const { id } = useParams();
+    // Navigates programmatically to other pages
     const navigate = useNavigate();
+    // State variables for petition details and edit mode
     const [petition, setPetition] = React.useState<PetitionFull>({
         petitionId: 0,
         title: "",
@@ -30,11 +37,13 @@ const Petition = () => {
     // petitionImage should either accept string or null (if no image/unauthorized)
     const [petitionImage, setPetitionImage] = React.useState<string | null>(null);
 
+    // Function to close the Snackbar
     const handleSnackClose = () => {
         setSnackOpen(false);
     };
 
     React.useEffect(() => {
+        // Function to fetch petition details
         const getPetition = () => {
             axios.get<PetitionFull>(`http://localhost:4941/api/v1/petitions/${id}`, {
                 headers: {
@@ -53,19 +62,19 @@ const Petition = () => {
                 });
         };
 
-        // retrieve the petition's saved image (if it exists)
+        // Function to retrieve the petition's saved image (if it exists)
         const getPetitionImage = async () => {
             try {
-                // send a request to retrieve the petition's image
+                // Send a request to retrieve the petition's image
                 const response = await axios.get(`http://localhost:4941/api/v1/petitions/${id}/image`, {
-                    // treat the response as binary data
+                    // Treat the response as binary data
                     responseType: 'arraybuffer',
-                    // send the saved authentication token in the header
+                    // Send the saved authentication token in the header
                     headers: {
                         'X-Authorization': savedAuthToken
                     }
                 });
-                // Create blob object containing the image data, along with its MIME (content) type
+                // Create a blob object containing the image data, along with its MIME (content) type
                 const blob = new Blob([response.data], { type: response.headers['content-type'] });
                 // Create a URL for the blob object to use it as the image URL
                 const imageUrl = URL.createObjectURL(blob);
@@ -81,6 +90,7 @@ const Petition = () => {
         getPetitionImage();
     }, [id]);
 
+    // Function to edit the petition details
     const editPetition = () => {
         /* TODO: Filter out fields with empty values
         TODO: (otherwise, if you type in a field then delete it, it still submits as "")
@@ -134,7 +144,7 @@ const Petition = () => {
                 <strong>numberOfSupporters:</strong> {petition.numberOfSupporters}<br/>
                 <strong>description:</strong> {petition.description}<br/>
                 <strong>moneyRaised:</strong> {petition.moneyRaised}<br/>
-            {/* TODO: need to show all support tiers */}
+                {/* TODO: need to show all support tiers */}
             </div>
 
             <Link to={"/petitions"}>Back to petitions</Link>
