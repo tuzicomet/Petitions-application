@@ -1,6 +1,6 @@
 # App Specific
-storage/images/*
-!storage/images/.gitkeep
+server/storage/images/*
+!server/storage/images/.gitkeep
 dist
 
 # Created by .ignore support plugin (hsz.mobi)
