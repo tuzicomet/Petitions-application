@@ -41,6 +41,7 @@ const Petitions = () => {
     const [errorMessage, setErrorMessage] = React.useState("");
     const [showCreateModal, setShowCreateModal] = React.useState(false);
     const [newPetitionTitle, setNewPetitionTitle] = React.useState("");
+    const [openSearchDialog, setOpenSearchDialog] = React.useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
     const [dialogPetition, setDialogPetition] = React.useState<Partial<PetitionFull>>({
         title: "",
@@ -73,6 +74,29 @@ const Petitions = () => {
                 setErrorFlag(true);
                 setErrorMessage(error.toString());
             });
+    };
+
+    // Function to fetch petitions from API
+    const searchPetitions = () => {
+        axios.get('http://localhost:4941/api/v1/petitions')
+            .then((response) => {
+                setErrorFlag(false);
+                setErrorMessage("");
+                setPetitions(response.data.petitions);
+            }, (error) => {
+                setErrorFlag(true);
+                setErrorMessage(error.toString());
+            });
+    };
+
+    // Function to open the search petition dialog
+    const handleSearchDialogOpen = () => {
+        setOpenSearchDialog(true);
+    };
+
+    // Function to close the search petition dialog
+    const handleSearchDialogClose = () => {
+        setOpenSearchDialog(false);
     };
 
     // Function to render rows for petitions
@@ -124,7 +148,7 @@ const Petitions = () => {
 
     // Function to open delete petition dialog
     const handleDeleteDialogOpen = (petition: PetitionFull) => {
-        setDialogPetition(petition);
+        setDialogPetition(petition); // Set the dialogPetition state with the correct petition object
         setOpenDeleteDialog(true);
     };
 
@@ -175,9 +199,38 @@ const Petitions = () => {
                 </Alert>
             }
 
+            {/* Search Petition Dialog */}
+            <Dialog
+                open={openSearchDialog}
+                onClose={handleSearchDialogClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Search Petition"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Search for a petition
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleSearchDialogClose}>Cancel</Button>
+                    <Button variant="outlined" color="error" onClick={searchPetitions} autoFocus>
+                        Search
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Petition table section */}
             <Paper elevation={3} style={card}>
+                {/* Title */}
                 <h1>Petitions</h1>
+                {/* Search Petitions button */}
+                <Button variant="outlined" onClick={handleSearchDialogOpen}>
+                    Search
+                </Button>
+                {/* Petition table */}
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
