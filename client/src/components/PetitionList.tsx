@@ -1,9 +1,9 @@
-import axios from 'axios'; // Import Axios for making HTTP requests
-import React from "react"; // Import React library
-import CSS from 'csstype'; // Import CSSType for defining CSS properties
-import { Paper, AlertTitle, Alert } from "@mui/material"; // Import Paper, AlertTitle, and Alert components from Material-UI
-import PetitionListObject from "./PetitionListObject"; // Import PetitionListObject component
-import {usePetitionStore} from "../store"; // Import custom hook from store
+import axios from 'axios'; // used for making HTTP requests
+import React from "react";
+import CSS from 'csstype';
+import { Paper, AlertTitle, Alert } from "@mui/material";
+import PetitionListObject from "./PetitionListObject"; // import PetitionListObject component
+import {usePetitionStore} from "../store";
 
 /**
  * PetitionList component displays a list of petitions.
@@ -11,15 +11,13 @@ import {usePetitionStore} from "../store"; // Import custom hook from store
  * If there's an error during the fetch operation, it displays an error message.
  */
 const PetitionList = () => {
-    // use the PetitionStore state from store/index.ts
-    const petitions = usePetitionStore(state => state.petitions); // Retrieve petitions from store
-    const setPetitions = usePetitionStore(state => state.setPetitions); // Function to update petitions in the store
+    const petitions = usePetitionStore(state => state.petitions);
+    const setPetitions = usePetitionStore(state => state.setPetitions);
 
-    const [errorFlag, setErrorFlag] = React.useState(false); // State for error flag
-    const [errorMessage, setErrorMessage] = React.useState(""); // State for error message
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
 
     React.useEffect(() => {
-        // Fetch petitions when component mounts or when setPetitions changes
         const getPetitions = () => {
             axios.get('http://localhost:4941/api/v1/petitions') // Make GET request to fetch petitions
                 .then((response) => {
@@ -40,7 +38,6 @@ const PetitionList = () => {
         <PetitionListObject key={petition.petitionId + petition.title} petition={petition} />
     ));
 
-    // CSS properties for the card style
     const card: CSS.Properties = {
         padding: "10px",
         margin: "20px",

@@ -1,11 +1,12 @@
-
-import axios from 'axios'; // Import Axios for making HTTP requests
-import React from "react"; // Import React library
-import {Link} from 'react-router-dom'; // Import Link component from React Router DOM for navigation
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead, TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar} from "@mui/material"; // Import Material-UI components for styling
-import DeleteIcon from "@mui/icons-material/Delete"; // Import DeleteIcon component from Material-UI icons
-import EditIcon from "@mui/icons-material/Edit"; // Import EditIcon component from Material-UI icons
-import CSS from 'csstype'; // Import CSSType for defining CSS properties
+import axios from 'axios'; // used for making HTTP requests
+import React from "react";
+import {Link} from 'react-router-dom';
+import {Button, Dialog, DialogActions, DialogContent, DialogContentText,
+    DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead,
+    TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar} from "@mui/material"; // Material-UI components for styling
+import DeleteIcon from "@mui/icons-material/Delete"; // delete icon from MUI icons
+import EditIcon from "@mui/icons-material/Edit"; // edit icon from MUI icons
+import CSS from 'csstype'; // used for defining CSS properties
 
 // CSS properties for the card style
 const card: CSS.Properties = {
@@ -56,7 +57,7 @@ const Petitions = () => {
         setSnackOpen(false);
     };
 
-    // React.useEffect hook, here it simply fetches all petitions when the page loads
+    // React.useEffect hook, runs whenever the page is rendered
     React.useEffect(() => {
         getPetitions();
     }, []);

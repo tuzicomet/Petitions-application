@@ -29,14 +29,14 @@ interface IPetitionProps {
  * It allows users to view, edit, and delete a petition.
  */
 const PetitionListObject = (props: IPetitionProps) => {
-    const [petition] = React.useState<PetitionFull>(props.petition); // State for petition object
-    const [title, setTitle] = React.useState(""); // State for petition title
-    const [description, setDescription] = React.useState(""); // State for petition description
-    const [categoryId, setCategoryId] = React.useState(-1); // State for petition category ID
-    const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false); // State for delete dialog
-    const [openEditDialog, setOpenEditDialog] = React.useState(false); // State for edit dialog
-    const deletePetitionFromStore = usePetitionStore(state => state.removePetition); // Function to remove petition from store
-    const editPetitionFromStore = usePetitionStore(state => state.editPetition); // Function to edit petition in store
+    const [petition] = React.useState<PetitionFull>(props.petition);
+    const [title, setTitle] = React.useState("");
+    const [description, setDescription] = React.useState("");
+    const [categoryId, setCategoryId] = React.useState(-1);
+    const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+    const [openEditDialog, setOpenEditDialog] = React.useState(false);
+    const deletePetitionFromStore = usePetitionStore(state => state.removePetition);
+    const editPetitionFromStore = usePetitionStore(state => state.editPetition);
 
     // Function to close delete dialog
     const handleDeleteDialogClose = () => {
@@ -50,9 +50,10 @@ const PetitionListObject = (props: IPetitionProps) => {
 
     // Function to delete petition
     const deletePetition = () => {
-        axios.delete('http://localhost:3000/api/petitions/' + petition.petitionId) // HTTP DELETE request to delete petition
+        // send a http DELETE request to delete the petition
+        axios.delete('http://localhost:4941/api/petitions/' + petition.petitionId)
             .then(() => {
-                deletePetitionFromStore(petition); // Remove petition from store
+                deletePetitionFromStore(petition); // Remove petition from store as well
             });
     };
 
@@ -67,7 +68,7 @@ const PetitionListObject = (props: IPetitionProps) => {
             });
     };
 
-    // CSS properties for petition card style
+
     const petitionCardStyles: CSS.Properties = {
         display: "inline-block",
         height: "328px",
@@ -77,7 +78,6 @@ const PetitionListObject = (props: IPetitionProps) => {
     };
 
     return (
-        // Render petition card
         <Card sx={petitionCardStyles}>
             <CardMedia
                 component="img"
