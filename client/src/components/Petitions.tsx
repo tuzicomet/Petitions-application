@@ -43,8 +43,13 @@ const Petitions = () => {
     const [errorMessage, setErrorMessage] = React.useState("");
     const [showCreateModal, setShowCreateModal] = React.useState(false);
     const [newPetitionTitle, setNewPetitionTitle] = React.useState("");
+
     const [openSearchDialog, setOpenSearchDialog] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState(""); // query to search the petition list with
+
+    const [openFilterDialog, setOpenFilterDialog] = React.useState(false);
+    const [supportCostQuery, setSupportCostQuery] = React.useState(""); // queried support cost filter
+
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
     const [dialogPetition, setDialogPetition] = React.useState<Partial<PetitionFull>>({
         title: "",
@@ -74,8 +79,15 @@ const Petitions = () => {
         const queryParams: Record<string, string> = {};
 
         // Check if there's a search query
+        // If there is no search query/the field is empty, do not add it
         if (searchQuery !== "") {
             queryParams['q'] = searchQuery; // Add the search query parameter
+        }
+
+        // If there is a maximum support cost filter query given
+        if (supportCostQuery !== "") {
+            // pass in the support cost query directly, it is parsed by backend
+            queryParams['supportingCost'] = supportCostQuery;
         }
 
         axios.get('http://localhost:4941/api/v1/petitions', {
@@ -105,6 +117,21 @@ const Petitions = () => {
     // Function to update the search query state
     const updateSearchQueryState = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
+    };
+
+    // Function to open the filter petition dialog
+    const handleFilterDialogOpen = () => {
+        setOpenFilterDialog(true);
+    };
+
+    // Function to close the filter petition dialog
+    const handleFilterDialogClose = () => {
+        setOpenFilterDialog(false);
+    };
+
+    // Function to update the support cost filter query state, based on the given input
+    const updateSupportCostQueryState = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSupportCostQuery(e.target.value);
     };
 
     // Function to render rows for petitions
@@ -215,7 +242,7 @@ const Petitions = () => {
                 aria-describedby="alert-dialog-description"
             >
                 <DialogTitle id="alert-dialog-title">
-                    {"Search Petition"}
+                    {"Search Petitions"}
                 </DialogTitle>
                 <DialogContent>
                     <TextField
@@ -239,15 +266,56 @@ const Petitions = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Filter Petition Dialog */}
+            <Dialog
+                open={openFilterDialog}
+                onClose={handleFilterDialogClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Filter Petitions"}
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        id="outlined-basic"
+                        label="Maximum Support Cost"
+                        variant="outlined"
+                        value={supportCostQuery}
+                        onChange={updateSupportCostQueryState}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleFilterDialogClose}>Cancel</Button>
+                    {/* Search Button */}
+                    <Button variant="outlined" endIcon={<Filter />}
+                            onClick={() => {
+                                getPetitions(); // perform the search
+                                handleFilterDialogClose(); // close the filter dialog
+                            }} autoFocus>
+                        Filter
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Petition table section */}
             <Paper elevation={3} style={card}>
+
                 {/* Title */}
                 <h1>Petitions</h1>
+
                 {/* Search button which opens the search dialog */}
                 <Button variant="outlined" endIcon={<Search />}
                         onClick={handleSearchDialogOpen}>
                     Search
                 </Button>
+
+                {/* Filter button which opens the filter dialog */}
+                <Button variant="outlined" endIcon={<Filter />}
+                        onClick={handleFilterDialogOpen}>
+                    Filter
+                </Button>
+
                 {/* Petition table */}
                 <TableContainer component={Paper}>
                     <Table>
