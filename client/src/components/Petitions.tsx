@@ -116,6 +116,11 @@ const Petitions = () => {
             queryParams['supportingCost'] = supportCostQuery;
         }
 
+        // check if a sorting method was selected
+        if (sortQuery !== "") {
+            queryParams['sortBy'] = sortQuery; // add as the sortBy parameter
+        }
+
         axios.get('http://localhost:4941/api/v1/petitions', {
             // parameters to filter the petition list with
             params: queryParams
