@@ -168,17 +168,10 @@ const Petitions = () => {
             // (the ... makes a copy of the array that we can add to)
             // see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
             setSelectedCategories([...selectedCategories, categoryId]);
+        } else {
+            // otherwise, un-select the category
+            handleRemoveCategory(categoryId);
         }
-    };
-
-    // Function to open the sort petition dialog
-    const handleSortDialogOpen = () => {
-        setOpenSortDialog(true);
-    };
-
-    // Function to close the sort petition dialog
-    const handleSortDialogClose = () => {
-        setOpenSortDialog(false);
     };
 
     // function to handle removing a category id from the category id list
@@ -194,6 +187,16 @@ const Petitions = () => {
     // Function to update the support cost filter query state, based on the given input
     const updateSupportCostQueryState = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSupportCostQuery(e.target.value);
+    };
+
+    // Function to open the sort petition dialog
+    const handleSortDialogOpen = () => {
+        setOpenSortDialog(true);
+    };
+
+    // Function to close the sort petition dialog
+    const handleSortDialogClose = () => {
+        setOpenSortDialog(false);
     };
 
     // Function to render rows for petitions
