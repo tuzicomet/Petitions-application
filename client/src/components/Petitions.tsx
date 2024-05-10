@@ -4,7 +4,8 @@ import {Link} from 'react-router-dom';
 import {
     Button, Dialog, DialogActions, DialogContent, DialogContentText,
     DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead,
-    TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar, IconButton
+    TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar, IconButton,
+    Chip, MenuItem
 } from "@mui/material"; // Material-UI components for styling
 // import icons from MUI
 import { Delete, Edit, Search, Filter, Sort } from "@mui/icons-material";
@@ -32,6 +33,22 @@ const headCells: readonly HeadCell[] = [
     { id: 'actions', label: 'Actions', numeric: false }
 ];
 
+// Available petition categories
+const categories = [
+    { id: 1, name: "Wildlife" },
+    { id: 2, name: "Environmental Causes" },
+    { id: 3, name: "Animal Rights" },
+    { id: 4, name: "Health and Wellness" },
+    { id: 5, name: "Education" },
+    { id: 6, name: "Human Rights" },
+    { id: 7, name: "Technology and Innovation" },
+    { id: 8, name: "Arts and Culture" },
+    { id: 9, name: "Community Development" },
+    { id: 10, name: "Economic Empowerment" },
+    { id: 11, name: "Science and Research" },
+    { id: 12, name: "Sports and Recreation" }
+];
+
 /**
  * Petitions component for managing petitions.
  * This component fetches, displays, creates, edits, and deletes petitions.
@@ -48,6 +65,8 @@ const Petitions = () => {
     const [searchQuery, setSearchQuery] = React.useState(""); // query to search the petition list with
 
     const [openFilterDialog, setOpenFilterDialog] = React.useState(false);
+    const [selectedCategories, setSelectedCategories] = React.useState<number[]>([]); // categories to filter petitions by
+
     const [supportCostQuery, setSupportCostQuery] = React.useState(""); // queried support cost filter
 
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
@@ -127,6 +146,27 @@ const Petitions = () => {
     // Function to close the filter petition dialog
     const handleFilterDialogClose = () => {
         setOpenFilterDialog(false);
+    };
+
+    // Function to handle when a category id is selected from the dropdown
+    const handleCategorySelection = (categoryId: number) => {
+        // if the category (given by id) is not already selected
+        if (!selectedCategories.includes(categoryId)) {
+            // Add the category id to the list of selected categories
+            // (the ... makes a copy of the array that we can add to)
+            // see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
+            setSelectedCategories([...selectedCategories, categoryId]);
+        }
+    };
+
+    // function to handle removing a category id from the category id list
+    const handleRemoveCategory = (categoryId: number) => {
+        // Copies over all ids in selectedCategories, except for the given category id
+        // if found, which is ignored.
+        const updatedCategories = selectedCategories.filter(
+            (id) => id !== categoryId);
+        // update the selectedCategories state variable
+        setSelectedCategories(updatedCategories);
     };
 
     // Function to update the support cost filter query state, based on the given input
@@ -277,6 +317,43 @@ const Petitions = () => {
                     {"Filter Petitions"}
                 </DialogTitle>
                 <DialogContent>
+                    {/* Dropdown to select categories */}
+                    <div id="category-filter-dropdown">
+                        <TextField
+                            select
+                            label="Select Category"
+                            value=""
+                            onChange={(e) => handleCategorySelection(Number(e.target.value))}
+                            variant="outlined"
+                        >
+                            <MenuItem value="" disabled>
+                                Select Category
+                            </MenuItem>
+
+                            {/* Display each category in the dropdown */}
+                            {categories.map((category) => (
+                                <MenuItem key={category.id} value={category.id}>
+                                    {/* Display as "{id} - {name}" */}
+                                    {`${category.id} - ${category.name}`}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </div>
+
+                    {/* Container containing the chips for all of the selected
+                    categories (the tags showing which have been selected) */}
+                    <div id="category-chip-container">
+                        {selectedCategories.map((categoryId) => (
+                            <Chip
+                                key={categoryId}
+                                label={categories.find((category) => category.id === categoryId)?.name || ""}
+                                onDelete={() => handleRemoveCategory(categoryId)}
+                                style={{ margin: "5px" }}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Maximum support cost input field*/}
                     <TextField
                         id="outlined-basic"
                         label="Maximum Support Cost"
@@ -288,7 +365,7 @@ const Petitions = () => {
                 <DialogActions>
                     <Button onClick={handleFilterDialogClose}>Cancel</Button>
                     {/* Search Button */}
-                    <Button variant="outlined" endIcon={<Filter />}
+                    <Button variant="outlined" endIcon={<Filter/>}
                             onClick={() => {
                                 getPetitions(); // perform the search
                                 handleFilterDialogClose(); // close the filter dialog

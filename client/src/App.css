@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+/* Petition List Page */
+
+/* Styling for the div containing the category filter dropdown */
+#category-filter-dropdown {
+  /* Style as grid display so that it can be displayed properly */
+  display: grid;
+}
