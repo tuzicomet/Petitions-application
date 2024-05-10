@@ -377,10 +377,10 @@ const Petitions = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleFilterDialogClose}>Cancel</Button>
-                    {/* Search Button */}
+                    {/* Filter Button */}
                     <Button variant="outlined" endIcon={<Filter/>}
                             onClick={() => {
-                                getPetitions(); // perform the search
+                                getPetitions(); // refresh the list with the new filter
                                 handleFilterDialogClose(); // close the filter dialog
                             }} autoFocus>
                         Filter
