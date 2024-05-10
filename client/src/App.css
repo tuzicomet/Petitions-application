@@ -45,3 +45,9 @@
    (otherwise it will appear squished when nothing is selected) */
   display: grid;
 }
+
+/* Styling for already selected category items in the filter category dropdown */
+#selected-category {
+  background-color: #0055e9;
+  color: white;
+}

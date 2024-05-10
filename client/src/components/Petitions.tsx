@@ -359,8 +359,13 @@ const Petitions = () => {
 
                             {/* Display each category in the dropdown */}
                             {categories.map((category) => (
-                                <MenuItem key={category.id} value={category.id}>
-                                    {/* Display as "{id} - {name}" */}
+                                <MenuItem key={category.id}
+                                          value={category.id}
+                                          // if the category is already selected, then give it the selected-category
+                                          // id, so it can be styled different to indicate that its already selected
+                                          id={selectedCategories.includes(category.id) ? 'selected-category' : ''}
+                                >
+                                    {/* Display each option as "{id} - {name}" */}
                                     {`${category.id} - ${category.name}`}
                                 </MenuItem>
                             ))}
