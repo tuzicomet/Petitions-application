@@ -1,12 +1,14 @@
 import axios from 'axios'; // used for making HTTP requests
 import React from "react";
 import {Link} from 'react-router-dom';
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText,
+import {
+    Button, Dialog, DialogActions, DialogContent, DialogContentText,
     DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead,
-    TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar} from "@mui/material"; // Material-UI components for styling
-import DeleteIcon from "@mui/icons-material/Delete"; // delete icon from MUI icons
-import EditIcon from "@mui/icons-material/Edit"; // edit icon from MUI icons
-import CSS from 'csstype'; // used for defining CSS properties
+    TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar, IconButton
+} from "@mui/material"; // Material-UI components for styling
+// import icons from MUI
+import { Delete, Edit, Search, Filter, Sort } from "@mui/icons-material";
+import CSS from 'csstype';
 
 // CSS properties for the card style
 const card: CSS.Properties = {
@@ -42,6 +44,7 @@ const Petitions = () => {
     const [showCreateModal, setShowCreateModal] = React.useState(false);
     const [newPetitionTitle, setNewPetitionTitle] = React.useState("");
     const [openSearchDialog, setOpenSearchDialog] = React.useState(false);
+    const [searchQuery, setSearchQuery] = React.useState(""); // query to search the petition list with
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
     const [dialogPetition, setDialogPetition] = React.useState<Partial<PetitionFull>>({
         title: "",
@@ -65,20 +68,20 @@ const Petitions = () => {
 
     // Function to fetch petitions from API
     const getPetitions = () => {
-        axios.get('http://localhost:4941/api/v1/petitions')
-            .then((response) => {
-                setErrorFlag(false);
-                setErrorMessage("");
-                setPetitions(response.data.petitions);
-            }, (error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
-    };
+        // Initialize an object to hold the query parameters
+        // (which are made up of string keys and string values)
+        // Query parameters will be passed in only if they are given
+        const queryParams: Record<string, string> = {};
 
-    // Function to fetch petitions from API
-    const searchPetitions = () => {
-        axios.get('http://localhost:4941/api/v1/petitions')
+        // Check if there's a search query
+        if (searchQuery !== "") {
+            queryParams['q'] = searchQuery; // Add the search query parameter
+        }
+
+        axios.get('http://localhost:4941/api/v1/petitions', {
+            // parameters to filter the petition list with
+            params: queryParams
+        })
             .then((response) => {
                 setErrorFlag(false);
                 setErrorMessage("");
@@ -99,6 +102,11 @@ const Petitions = () => {
         setOpenSearchDialog(false);
     };
 
+    // Function to update the search query state
+    const updateSearchQueryState = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+    };
+
     // Function to render rows for petitions
     const petitionRows = () => {
         return petitions.map((petition: PetitionFull) => (
@@ -109,10 +117,10 @@ const Petitions = () => {
                     <Link to={`/petitions/${petition.petitionId}`}>Go to petition</Link>
                 </TableCell>
                 <TableCell align="right">
-                    <Button variant="outlined" endIcon={<EditIcon />} onClick={() => { handleEditDialogOpen(petition) }}>
+                    <Button variant="outlined" endIcon={<Edit />} onClick={() => { handleEditDialogOpen(petition) }}>
                         Edit
                     </Button>
-                    <Button variant="outlined" endIcon={<DeleteIcon />} onClick={() => { handleDeleteDialogOpen(petition) }}>
+                    <Button variant="outlined" endIcon={<Delete />} onClick={() => { handleDeleteDialogOpen(petition) }}>
                         Delete
                     </Button>
                 </TableCell>
@@ -210,13 +218,22 @@ const Petitions = () => {
                     {"Search Petition"}
                 </DialogTitle>
                 <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        Search for a petition
-                    </DialogContentText>
+                    <TextField
+                        id="outlined-basic"
+                        label="Search query"
+                        variant="outlined"
+                        value={searchQuery}
+                        onChange={updateSearchQueryState}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleSearchDialogClose}>Cancel</Button>
-                    <Button variant="outlined" color="error" onClick={searchPetitions} autoFocus>
+                    {/* Search Button */}
+                    <Button variant="outlined" endIcon={<Search />}
+                            onClick={() => {
+                                getPetitions(); // perform the search
+                                handleSearchDialogClose(); // close the search dialog
+                            }} autoFocus>
                         Search
                     </Button>
                 </DialogActions>
@@ -226,8 +243,9 @@ const Petitions = () => {
             <Paper elevation={3} style={card}>
                 {/* Title */}
                 <h1>Petitions</h1>
-                {/* Search Petitions button */}
-                <Button variant="outlined" onClick={handleSearchDialogOpen}>
+                {/* Search button which opens the search dialog */}
+                <Button variant="outlined" endIcon={<Search />}
+                        onClick={handleSearchDialogOpen}>
                     Search
                 </Button>
                 {/* Petition table */}
