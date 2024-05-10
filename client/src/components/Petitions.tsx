@@ -93,14 +93,19 @@ const Petitions = () => {
     // Function to fetch petitions from API
     const getPetitions = () => {
         // Initialize an object to hold the query parameters
-        // (which are made up of string keys and string values)
         // Query parameters will be passed in only if they are given
-        const queryParams: Record<string, string> = {};
+        const queryParams: Record<string, string | number[]> = {};
 
         // Check if there's a search query
         // If there is no search query/the field is empty, do not add it
         if (searchQuery !== "") {
             queryParams['q'] = searchQuery; // Add the search query parameter
+        }
+
+        // check if there are any categories selected
+        if (selectedCategories.length !== 0) {
+            // if so, pass in the array of selected category ids as parameters
+            queryParams['categoryIds'] = selectedCategories;
         }
 
         // If there is a maximum support cost filter query given
@@ -318,6 +323,11 @@ const Petitions = () => {
                 </DialogTitle>
                 <DialogContent>
                     {/* Dropdown to select categories */}
+                    {/* Resource used:
+                     https://mui.com/material-ui/react-text-field/
+                     (Select prop section)*/}
+                    {/* Could be updated to use https://mui.com/material-ui/react-select/
+                     Multiple select, Chip in the future? */}
                     <div id="category-filter-dropdown">
                         <TextField
                             select
@@ -342,10 +352,13 @@ const Petitions = () => {
 
                     {/* Container containing the chips for all of the selected
                     categories (the tags showing which have been selected) */}
+                    {/* Resource used for creating deletable chips:
+                    https://mui.com/material-ui/react-chip/*/}
                     <div id="category-chip-container">
                         {selectedCategories.map((categoryId) => (
                             <Chip
                                 key={categoryId}
+                                // label the chip with the category's name
                                 label={categories.find((category) => category.id === categoryId)?.name || ""}
                                 onDelete={() => handleRemoveCategory(categoryId)}
                                 style={{ margin: "5px" }}
