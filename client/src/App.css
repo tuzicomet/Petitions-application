@@ -39,8 +39,9 @@
 
 /* Petition List Page */
 
-/* Styling for the div containing the category filter dropdown */
-#category-filter-dropdown {
-  /* Style as grid display so that it can be displayed properly */
+/* Styling for the div containing the filter/sort dropdowns */
+#dropdown-container {
+  /* Style as grid display so that it can be displayed properly
+   (otherwise it will appear squished when nothing is selected) */
   display: grid;
 }

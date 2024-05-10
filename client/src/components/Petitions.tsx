@@ -5,7 +5,7 @@ import {
     Button, Dialog, DialogActions, DialogContent, DialogContentText,
     DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead,
     TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar, IconButton,
-    Chip, MenuItem
+    Chip, MenuItem, InputLabel, Select
 } from "@mui/material"; // Material-UI components for styling
 // import icons from MUI
 import { Delete, Edit, Search, Filter, Sort } from "@mui/icons-material";
@@ -69,6 +69,7 @@ const Petitions = () => {
     const [supportCostQuery, setSupportCostQuery] = React.useState(""); // queried support cost filter
 
     const [openSortDialog, setOpenSortDialog] = React.useState(false);
+    const [sortQuery, setSortQuery] = React.useState(""); // rule to sort the petition list by
 
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
     const [dialogPetition, setDialogPetition] = React.useState<Partial<PetitionFull>>({
@@ -339,7 +340,7 @@ const Petitions = () => {
                      (Select prop section)*/}
                     {/* Could be updated to use https://mui.com/material-ui/react-select/
                      Multiple select, Chip in the future? */}
-                    <div id="category-filter-dropdown">
+                    <div id="dropdown-container">
                         <TextField
                             select
                             label="Select Category"
@@ -410,7 +411,30 @@ const Petitions = () => {
                     {"Sort Petitions"}
                 </DialogTitle>
                 <DialogContent>
-                    {/* TODO */}
+                    {/* Dropdown to select a sorting method */}
+                    {/* Resource used: https://mui.com/material-ui/react-select/ (Basic select) */}
+                    <InputLabel id="sort-label">Sort By</InputLabel>
+
+                    {/*Dropdown to select a sorting method*/}
+                    <div id="dropdown-container">
+                        <Select
+                            labelId="sort-label"
+                            id="sort-select"
+                            value={sortQuery}
+                            // update sortQuery to whatever (value) is picked
+                            onChange={(e) => setSortQuery(e.target.value)}
+                            label="Sort By"
+                        >
+                            {/* Dropdown items, all available sorting methods */}
+                            <MenuItem value="ALPHABETICAL_ASC">Alphabetical (A-Z)</MenuItem>
+                            <MenuItem value="ALPHABETICAL_DESC">Alphabetical (Z-A)</MenuItem>
+                            <MenuItem value="COST_ASC">Cost (Low to High)</MenuItem>
+                            <MenuItem value="COST_DESC">Cost (High to Low)</MenuItem>
+                            <MenuItem value="CREATED_ASC">Created (Oldest to Newest)</MenuItem>
+                            <MenuItem value="CREATED_DESC">Created (Newest to Oldest)</MenuItem>
+                        </Select>
+                    </div>
+
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleSortDialogClose}>Cancel</Button>
