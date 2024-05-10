@@ -343,11 +343,8 @@ const Petitions = () => {
                 </DialogTitle>
                 <DialogContent>
                     {/* Dropdown to select categories */}
-                    {/* Resource used:
-                     https://mui.com/material-ui/react-text-field/
-                     (Select prop section)*/}
-                    {/* Could be updated to use https://mui.com/material-ui/react-select/
-                     Multiple select, Chip in the future? */}
+                    {/* Resource used: (Select prop section)
+                     https://mui.com/material-ui/react-text-field/ */}
                     <div id="dropdown-container">
                         <TextField
                             select
