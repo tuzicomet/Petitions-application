@@ -66,8 +66,9 @@ const Petitions = () => {
 
     const [openFilterDialog, setOpenFilterDialog] = React.useState(false);
     const [selectedCategories, setSelectedCategories] = React.useState<number[]>([]); // categories to filter petitions by
-
     const [supportCostQuery, setSupportCostQuery] = React.useState(""); // queried support cost filter
+
+    const [openSortDialog, setOpenSortDialog] = React.useState(false);
 
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
     const [dialogPetition, setDialogPetition] = React.useState<Partial<PetitionFull>>({
@@ -162,6 +163,16 @@ const Petitions = () => {
             // see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
             setSelectedCategories([...selectedCategories, categoryId]);
         }
+    };
+
+    // Function to open the sort petition dialog
+    const handleSortDialogOpen = () => {
+        setOpenSortDialog(true);
+    };
+
+    // Function to close the sort petition dialog
+    const handleSortDialogClose = () => {
+        setOpenSortDialog(false);
     };
 
     // function to handle removing a category id from the category id list
@@ -388,6 +399,32 @@ const Petitions = () => {
                 </DialogActions>
             </Dialog>
 
+            {/* Sort Petition Dialog */}
+            <Dialog
+                open={openSortDialog}
+                onClose={handleSortDialogClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Sort Petitions"}
+                </DialogTitle>
+                <DialogContent>
+                    {/* TODO */}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleSortDialogClose}>Cancel</Button>
+                    {/* Sort Button */}
+                    <Button variant="outlined" endIcon={<Sort />}
+                            onClick={() => {
+                                getPetitions(); // refresh the list with the new sorting
+                                handleSortDialogClose(); // close the sort dialog
+                            }} autoFocus>
+                        Sort
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Petition table section */}
             <Paper elevation={3} style={card}>
 
@@ -404,6 +441,12 @@ const Petitions = () => {
                 <Button variant="outlined" endIcon={<Filter />}
                         onClick={handleFilterDialogOpen}>
                     Filter
+                </Button>
+
+                {/* Sort button which opens the sort dialog */}
+                <Button variant="outlined" endIcon={<Sort />}
+                        onClick={handleSortDialogOpen}>
+                    Sort
                 </Button>
 
                 {/* Petition table */}
