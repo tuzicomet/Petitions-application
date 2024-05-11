@@ -4,6 +4,7 @@ import './App.css';
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import Register from "./components/Register";
 import Login from "./components/Login";
+import Logout from "./components/Logout";
 import User from "./components/User";
 import NotFound from "./components/NotFound";
 import Petitions from "./components/Petitions";
@@ -17,6 +18,7 @@ function App() {
             <Routes>
                 <Route path="/register" element={<Register/>}/>
                 <Route path="/login" element={<Login/>}/>
+                <Route path="/logout" element={<Logout/>}/>
                 <Route path="/users/:id" element={<User/>}/>
                 <Route path="/petitions" element={<Petitions/>}/>
                 <Route path="/petitions/:id" element={<Petition/>}/>
