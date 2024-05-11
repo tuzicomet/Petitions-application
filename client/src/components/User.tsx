@@ -48,6 +48,11 @@ const User = () => {
                     setErrorFlag(false);
                     setErrorMessage("");
                     setUser(response.data); // Set user data in state
+                    if (response.data.email) {
+                        // email is only returned if the currently authenticated user is viewing their own details
+                        // so if it is returned, set authenticatedAsUser to true
+                        setAuthenticatedAsUser(true);
+                    }
                 })
                 .catch((error) => {
                     setErrorFlag(true);
@@ -79,21 +84,8 @@ const User = () => {
             }
         };
 
-        // function to check whether the client is authenticated as the user they're viewing
-        const checkAuthentication = () => {
-            // if the client is authenticated as the user
-            // (TODO: the current way im doing it is to just check if email is not null,
-            //  since email is only returned if the user is authenticated.
-            //  However, this doesn't seem like a great way to do this)
-            if (user.email !== "") {
-                // set authenticatedAsUser to true
-                setAuthenticatedAsUser(true);
-            }
-        }
-
         getUser(); // Fetch user data
         getUserImage(); // Fetch user image
-        checkAuthentication(); // check if client is authenticated as the user being viewed
     }, [id]); // Dependency array with id to re-fetch data when id changes
 
     const editUser = () => { // Function to edit user details
