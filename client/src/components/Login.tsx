@@ -2,9 +2,10 @@ import React, {useState} from "react";
 import axios from "axios"; // axios library for making HTTP requests
 import {useNavigate} from 'react-router-dom';
 import {
-    Button, Paper, TextField, Alert, AlertTitle
+    Button, Paper, TextField, Alert, AlertTitle, InputAdornment, IconButton
 } from "@mui/material"; // Material-UI components for styling
 import CSS from 'csstype';
+import {Visibility, VisibilityOff} from "@mui/icons-material";
 
 // CSS properties for the card style
 // TODO: can these be moved out?
@@ -22,7 +23,14 @@ const Login = () => {
 
     const [email, setEmail] = useState(""); //email input
     const [password, setPassword] = useState(""); // password input
+    const [showPassword, setShowPassword] = useState(false); // bool for whether to show the password text
     const navigate = useNavigate(); // navigation function for navigating to different pages
+
+    // Function to toggle showing/hiding the password
+    const togglePasswordVisibility = () => {
+        // change the showPassword boolean to its opposite value
+        setShowPassword(!showPassword);
+    };
 
     // Function to log in the user
     const loginUser = () => {
@@ -97,11 +105,29 @@ const Login = () => {
                         <div id="password-input-field">
                             <TextField
                                 label="Password"
-                                type="password"
+                                // if showPassword is true, type=text (password text is shown)
+                                // otherwise if false, type=password (password text is hidden)
+                                type={showPassword ? "text" : "password"}
                                 placeholder="..."
                                 value={password}
                                 // Update password state on input change
                                 onChange={(e) => setPassword(e.target.value)}
+                                // icon which toggles password visibility, using MUI input adornment
+                                // (see https://mui.com/material-ui/react-text-field/)
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={togglePasswordVisibility}
+                                                edge="end"
+                                            >
+                                                {/* the icon shown changes based on showPassword */}
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
                             />
                         </div>
 

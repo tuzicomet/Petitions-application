@@ -58,5 +58,10 @@
   display: flex;
   flex-direction: column;
   gap: 1em; /* gap between components */
-  margin-bottom: 2em;
+  padding-bottom: 2em;
+}
+
+/* Add styling to the input TextFields inside of the vertical form container */
+#vertical-form-container .MuiInputBase-root {
+  width: 20em;
 }
