@@ -225,9 +225,10 @@ const User = () => {
                     <input
                         type="file"
                         accept="image/*"
-                        style={{ display: 'none' }} {/* Hide the element */}
-                        ref={fileInputRef} {/* variable which references this element */}
-                        onChange={handleImageUpload} {/* When an image is uploaded, call this function */}
+                        style={{ display: 'none' }} // Hide the element
+                        ref={fileInputRef} // variable which references this element
+                        // When an image is uploaded, call the handleImageUpload function
+                        onChange={handleImageUpload}
                     />
                 </>
             )}
