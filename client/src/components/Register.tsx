@@ -70,7 +70,7 @@ const Register = () => {
                 // Save authentication token to browser storage so that user stays logged in
                 localStorage.setItem("savedAuthToken", response.data.token);
                 // Redirect after successful login
-                navigate("/users/21"); // DEBUG: Redirect to user 21's page (should be changed)
+                navigate("/");
             })
             // if there was an error with the login
             .catch((error) => {
