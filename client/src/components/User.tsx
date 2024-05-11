@@ -30,6 +30,8 @@ const User = () => {
     // userImage should either accept string or null (if no image/unauthorized)
     const [userImage, setUserImage] = React.useState<string | null>(null); // State variable for user image URL
 
+    const [authenticatedAsUser, setAuthenticatedAsUser] = React.useState(false); // boolean saying whether the client is authenticated as the user
+
     const handleSnackClose = () => { // Snackbar close handler
         setSnackOpen(false);
     };
@@ -77,8 +79,21 @@ const User = () => {
             }
         };
 
+        // function to check whether the client is authenticated as the user they're viewing
+        const checkAuthentication = () => {
+            // if the client is authenticated as the user
+            // (TODO: the current way im doing it is to just check if email is not null,
+            //  since email is only returned if the user is authenticated.
+            //  However, this doesn't seem like a great way to do this)
+            if (user.email !== "") {
+                // set authenticatedAsUser to true
+                setAuthenticatedAsUser(true);
+            }
+        }
+
         getUser(); // Fetch user data
         getUserImage(); // Fetch user image
+        checkAuthentication(); // check if client is authenticated as the user being viewed
     }, [id]); // Dependency array with id to re-fetch data when id changes
 
     const editUser = () => { // Function to edit user details
@@ -125,16 +140,23 @@ const User = () => {
                 {/* Display user details */}
                 <strong>First Name:</strong> {user.firstName}<br/>
                 <strong>Last Name:</strong> {user.lastName}<br/>
-                <strong>Email:</strong> {user.email}<br/>
+                {/* Only display the following fields if client is authenticated as user */}
+                {authenticatedAsUser && (
+                    <>
+                        <strong>Email:</strong> {user.email}<br/>
+                    </>
+                )}
             </div>
 
             {/* Link to navigate back to the users list */}
             <Link to={"/users"}>Back to users</Link>
 
-            {/* Button to open edit dialog */}
-            <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
-                Edit
-            </Button>
+            {/* Button to open edit dialog, only display if client is authenticated as user */}
+            {authenticatedAsUser && (
+                <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
+                    Edit
+                </Button>
+            )}
 
             {/* Edit User Dialog (popup modal) */}
             <Dialog
