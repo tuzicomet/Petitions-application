@@ -1,14 +1,10 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import axios from "axios"; // axios library for making HTTP requests
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {
-    Button, Dialog, DialogActions, DialogContent, DialogContentText,
-    DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead,
-    TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar, IconButton,
-    Chip, MenuItem, InputLabel, Select
+    Button, Paper, TextField, Alert, AlertTitle
 } from "@mui/material"; // Material-UI components for styling
 import CSS from 'csstype';
-import {Search} from "@mui/icons-material";
 
 // CSS properties for the card style
 // TODO: can these be moved out?
@@ -26,7 +22,6 @@ const Login = () => {
 
     const [email, setEmail] = useState(""); //email input
     const [password, setPassword] = useState(""); // password input
-    const [error, setError] = useState<string | null>(null); // error messages
     const navigate = useNavigate(); // navigation function for navigating to different pages
 
     // Function to log in the user
@@ -41,7 +36,7 @@ const Login = () => {
                 console.log("Login successful:", response.data);
                 // Save authentication token to browser storage so that user stays logged in
                 localStorage.setItem("savedAuthToken", response.data.token);
-                // Redirect to the user's page after successful login
+                // Redirect after successful login
                 navigate("/users/21"); // DEBUG: Redirect to user 21's page (should be changed)
             })
             // if there was an error with the login
@@ -49,11 +44,9 @@ const Login = () => {
                 console.error("Login failed:", error);
                 // if the response had an error message
                 if (error.response && error.response.data) {
-                    //setError(error.response.data.message);
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
                 } else { // if not, just set a generic error message
-                    //setError("An unknown error occurred");
                     setErrorFlag(true);
                     setErrorMessage(error.toString());
 
@@ -85,7 +78,9 @@ const Login = () => {
                         loginUser(); // Call loginUser function to handle login
                     }}
                 >
+                    {/* Container for the form components */}
                     <div id="vertical-form-container">
+
                         {/* Email input field */}
                         <div id="email-input-field">
                             <TextField
@@ -93,7 +88,8 @@ const Login = () => {
                                 type="email"
                                 placeholder="example@email.com"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)} // Update email state on input change
+                                // Update email state on input change
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
 
@@ -104,7 +100,8 @@ const Login = () => {
                                 type="password"
                                 placeholder="..."
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)} // Update password state on input change
+                                // Update password state on input change
+                                onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
 
