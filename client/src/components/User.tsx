@@ -32,18 +32,22 @@ const User = () => {
 
     const [authenticatedAsUser, setAuthenticatedAsUser] = React.useState(false); // boolean saying whether the client is authenticated as the user
 
-    const handleSnackClose = () => { // Snackbar close handler
+    // Snackbar close handler
+    const handleSnackClose = () => {
         setSnackOpen(false);
     };
 
-    React.useEffect(() => { // Effect hook to fetch user data and image on component mount
-        const getUser = () => { // Function to fetch user data
+    React.useEffect(() => {
+        // Function to fetch user data
+        const getUser = () => {
+            // send a request to GET the user with the given id
             axios.get<User>(`http://localhost:4941/api/v1/users/${id}`, {
                 headers: {
                     // Include the savedAuthToken in the request header as X-Authorization
                     'X-Authorization': savedAuthToken
                 }
             })
+                // if the request was successful
                 .then((response) => {
                     setErrorFlag(false);
                     setErrorMessage("");
@@ -88,7 +92,8 @@ const User = () => {
         getUserImage(); // Fetch user image
     }, [id]); // Dependency array with id to re-fetch data when id changes
 
-    const editUser = () => { // Function to edit user details
+    // Function to edit user details
+    const editUser = () => {
         axios.patch(`http://localhost:4941/api/v1/users/${id}`, editUserDetails, {
             headers: {
                 // Include the savedAuthToken in the request header as X-Authorization
