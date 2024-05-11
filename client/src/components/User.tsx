@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'; // React Router
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Snackbar, Alert } from "@mui/material"; // Material-UI components
 import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
+import defaultImage from "../assets/default_picture.jpg";
 
 // User functional component
 const User = () => {
@@ -71,8 +72,8 @@ const User = () => {
                 // Set the image URL in the state to display the image
                 setUserImage(imageUrl);
             } catch (error) {
-                // TODO: if user has no image, must give a default image
-                console.error("Error fetching user image:", error);
+                // if user has no image, or user's image cannot be retrieved
+                setUserImage(null);
             }
         };
 
@@ -102,7 +103,7 @@ const User = () => {
         // JSX elements to display on the page
         <div>
             {/* Navigation Bar */}
-            <Navbar />
+            <Navbar/>
 
             {/* Show error Alert if errorFlag is true */}
             {errorFlag &&
@@ -113,27 +114,25 @@ const User = () => {
 
             <h1>User</h1>
 
-            {/* Display user's image if available */}
-            {userImage && (
-                <img
-                    src={userImage}
-                    alt="User Profile"
-                    style={{ width: 100, height: 100, borderRadius: "10%" }}
-                />
-            )}
+            {/* Display user's image.
+             If userImage is null, then display the default image */}
+            <img src={userImage || defaultImage}
+                 alt="User Profile"
+                 style={{width: 100, height: 100, borderRadius: "10%"}}
+            />
 
             <div>
                 {/* Display user details */}
-                <strong>First Name:</strong> {user.firstName}<br />
-                <strong>Last Name:</strong> {user.lastName}<br />
-                <strong>Email:</strong> {user.email}<br />
+                <strong>First Name:</strong> {user.firstName}<br/>
+                <strong>Last Name:</strong> {user.lastName}<br/>
+                <strong>Email:</strong> {user.email}<br/>
             </div>
 
             {/* Link to navigate back to the users list */}
             <Link to={"/users"}>Back to users</Link>
 
             {/* Button to open edit dialog */}
-            <Button variant="outlined" startIcon={<EditIcon />} onClick={() => setOpenEditDialog(true)}>
+            <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
                 Edit
             </Button>
 
@@ -152,30 +151,30 @@ const User = () => {
                     <TextField
                         label="First Name"
                         value={editUserDetails.firstName || ""}
-                        onChange={(e) => setEditUserDetails({ ...editUserDetails, firstName: e.target.value })}
-                    /><br />
+                        onChange={(e) => setEditUserDetails({...editUserDetails, firstName: e.target.value})}
+                    /><br/>
                     <TextField
                         label="Last Name"
                         value={editUserDetails.lastName || ""}
-                        onChange={(e) => setEditUserDetails({ ...editUserDetails, lastName: e.target.value })}
-                    /><br />
+                        onChange={(e) => setEditUserDetails({...editUserDetails, lastName: e.target.value})}
+                    /><br/>
                     <TextField
                         label="Email"
                         value={editUserDetails.email || ""}
-                        onChange={(e) => setEditUserDetails({ ...editUserDetails, email: e.target.value })}
-                    /><br />
+                        onChange={(e) => setEditUserDetails({...editUserDetails, email: e.target.value})}
+                    /><br/>
                     <TextField
                         label="Password"
                         type="password"
                         value={editUserDetails.password || ""}
-                        onChange={(e) => setEditUserDetails({ ...editUserDetails, password: e.target.value })}
-                    /><br />
+                        onChange={(e) => setEditUserDetails({...editUserDetails, password: e.target.value})}
+                    /><br/>
                     <TextField
                         label="Current Password"
                         type="password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                    /><br />
+                    /><br/>
                 </DialogContent>
                 <DialogActions>
                     {/* Cancel and Save buttons for edit dialog */}
