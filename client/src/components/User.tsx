@@ -3,6 +3,7 @@ import React from "react";
 import { Link, useNavigate, useParams } from 'react-router-dom'; // React Router for navigation
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Snackbar, Alert } from "@mui/material"; // Material-UI components
 import EditIcon from "@mui/icons-material/Edit";
+import Navbar from "./Navbar";
 
 // User functional component
 const User = () => {
@@ -100,6 +101,9 @@ const User = () => {
     return (
         // JSX elements to display on the page
         <div>
+            {/* Navigation Bar */}
+            <Navbar />
+
             {/* Show error Alert if errorFlag is true */}
             {errorFlag &&
                 <Alert severity="error">

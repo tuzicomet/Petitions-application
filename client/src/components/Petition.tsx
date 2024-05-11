@@ -3,6 +3,7 @@ import React from "react";
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Snackbar, Alert } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import Navbar from "./Navbar";
 
 /**
  * Petition component displays the details of a single petition.
@@ -115,6 +116,9 @@ const Petition = () => {
 
     return (
         <div>
+            {/* Navigation Bar */}
+            <Navbar />
+
             {/* Show error Alert if errorFlag is there */}
             {errorFlag &&
                 <Alert severity="error">

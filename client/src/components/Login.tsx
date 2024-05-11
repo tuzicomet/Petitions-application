@@ -6,6 +6,7 @@ import {
 } from "@mui/material"; // Material-UI components for styling
 import CSS from 'csstype';
 import {Visibility, VisibilityOff} from "@mui/icons-material";
+import Navbar from "./Navbar";
 
 // CSS properties for the card style
 // TODO: can these be moved out?
@@ -64,6 +65,9 @@ const Login = () => {
 
     return (
         <div>
+            {/* Navigation Bar */}
+            <Navbar />
+
             {/* Show error Alert if errorFlag is true */}
             {errorFlag &&
                 <Alert severity="error">

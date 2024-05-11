@@ -7,6 +7,7 @@ import {
 // icons for the password visibility toggle button
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import CSS from 'csstype';
+import Navbar from "./Navbar";
 
 // CSS properties for the card style
 const card: CSS.Properties = {
@@ -98,6 +99,9 @@ const Register = () => {
 
     return (
         <div>
+            {/* Navigation Bar */}
+            <Navbar />
+
             {/* Show error Alert if errorFlag is true */}
             {errorFlag &&
                 <Alert severity="error">

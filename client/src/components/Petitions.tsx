@@ -10,6 +10,7 @@ import {
 // import icons from MUI
 import { Delete, Edit, Search, Filter, Sort } from "@mui/icons-material";
 import CSS from 'csstype';
+import Navbar from "./Navbar";
 
 // CSS properties for the card style
 const card: CSS.Properties = {
@@ -291,6 +292,9 @@ const Petitions = () => {
 
     return (
         <div>
+            {/* Navigation Bar */}
+            <Navbar />
+
             {/* Show error Alert if errorFlag is true */}
             {errorFlag &&
                 <Alert severity="error">

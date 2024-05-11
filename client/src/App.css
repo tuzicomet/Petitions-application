@@ -37,19 +37,27 @@
   }
 }
 
-/* Petition List Page */
-
-/* Styling for the div containing the filter/sort dropdowns */
-#dropdown-container {
-  /* Style as grid display so that it can be displayed properly
-   (otherwise it will appear squished when nothing is selected) */
-  display: grid;
+/* Styling for the navigation bar */
+#navigation-bar {
+  background-color: #1b61db;
+  height: 3em;
+  /* Centre elements vertically */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Styling for already selected category items in the filter category dropdown */
-#selected-category {
-  background-color: #0055e9;
+/* Styling for links in the navigation bar */
+#navigation-bar a {
   color: white;
+  text-decoration: none;
+  font-size: 1.3em;
+}
+
+/* Styling for the buttons in the navigation bar */
+#navigation-bar .MuiButtonBase-root {
+  /* Overrides the default all-capitalization added to MUI buttons */
+  text-transform: none !important;
 }
 
 /* Styling for vertical forms, where everything in it is stacked vertically */
@@ -64,4 +72,17 @@
 /* Add styling to the input TextFields inside of the vertical form container */
 #vertical-form-container .MuiInputBase-root {
   width: 20em;
+}
+
+/* Styling for the div containing the filter/sort dropdowns */
+#dropdown-container {
+  /* Style as grid display so that it can be displayed properly
+   (otherwise it will appear squished when nothing is selected) */
+  display: grid;
+}
+
+/* Styling for already selected category items in the filter category dropdown */
+#selected-category {
+  background-color: #0055e9;
+  color: white;
 }
