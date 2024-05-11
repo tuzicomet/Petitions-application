@@ -85,33 +85,35 @@ const Login = () => {
                         loginUser(); // Call loginUser function to handle login
                     }}
                 >
-                    {/* Email input field */}
-                    <div id="email-input-field">
-                        <TextField
-                            label="Email"
-                            type="email"
-                            placeholder="example@email.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)} // Update email state on input change
-                        />
-                    </div>
+                    <div id="vertical-form-container">
+                        {/* Email input field */}
+                        <div id="email-input-field">
+                            <TextField
+                                label="Email"
+                                type="email"
+                                placeholder="example@email.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)} // Update email state on input change
+                            />
+                        </div>
 
-                    {/* Password input field */}
-                    <div id="password-input-field">
-                        <TextField
-                            label="Password"
-                            type="password"
-                            placeholder="..."
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)} // Update password state on input change
-                        />
-                    </div>
+                        {/* Password input field */}
+                        <div id="password-input-field">
+                            <TextField
+                                label="Password"
+                                type="password"
+                                placeholder="..."
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)} // Update password state on input change
+                            />
+                        </div>
 
-                    {/* Submit button */}
-                    <div id="submit-button">
-                        <Button variant="outlined" type="submit">
-                            Login
-                        </Button>
+                        {/* Submit button */}
+                        <div id="submit-button">
+                            <Button variant="outlined" type="submit">
+                                Login
+                            </Button>
+                        </div>
                     </div>
                 </form>
 

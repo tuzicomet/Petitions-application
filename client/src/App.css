@@ -51,3 +51,12 @@
   background-color: #0055e9;
   color: white;
 }
+
+/* Styling for vertical forms, where everything in it is stacked vertically */
+#vertical-form-container {
+  /* Stack elements vertically */
+  display: flex;
+  flex-direction: column;
+  gap: 1em; /* gap between components */
+  margin-bottom: 2em;
+}
