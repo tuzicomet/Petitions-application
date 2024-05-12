@@ -13,6 +13,8 @@ import CSS from 'csstype';
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 
+import { getPetitions, getPetitionImage } from "../services/PetitionService";
+
 // CSS properties for the card style
 const card: CSS.Properties = {
     padding: "10px",
@@ -87,8 +89,16 @@ const Petitions = () => {
 
     // React.useEffect hook, runs whenever the page is rendered
     React.useEffect(() => {
-
-        getPetitions()
+        // get the petitions which match the current specifications,
+        // using the getPetitions method from PetitionService
+        getPetitions(
+            searchQuery,
+            selectedCategories,
+            supportCostQuery,
+            sortQuery,
+            setPetitions,
+            setErrorFlag,
+            setErrorMessage);
     }, []);
 
 
@@ -96,14 +106,17 @@ const Petitions = () => {
     React.useEffect(() => {
         // create the rows for the petition list
         const createPetitionRows = async () => {
-            console.log("starting to make rows")
             // store all rows in this variable, Promise.all is used to wait until all of them are finished
             const rows = await Promise.all(
                 // Map through each petition in the petitions array, so we can make a TableRow for each
                 petitions.map(async (petition: PetitionFull) => {
-                    // get the petition image url
-                    const imageUrl = await getPetitionImage(petition.petitionId);
-                    console.log(petition.petitionId);
+                    // get the petition image url, using the getPetitionImage
+                    // method from PetitionService
+                    const imageUrl = await getPetitionImage(
+                        petition.petitionId,
+                        setPetitionRows,
+                        petitions
+                    );
                     return (
                         // TableRow created for each petition, with the petition id as the key
                         <TableRow key={petition.petitionId} className="petition-row">
@@ -147,75 +160,10 @@ const Petitions = () => {
                     );
                 }));
             setPetitionRows(rows);
-            console.log("done?");
         };
 
         createPetitionRows();
     }, [petitions]);
-
-    // Function to fetch petitions from API
-    const getPetitions = () => {
-        // Initialize an object to hold the query parameters
-        // Query parameters will be passed in only if they are given
-        const queryParams: Record<string, string | number[]> = {};
-
-        // Check if there's a search query
-        // If there is no search query/the field is empty, do not add it
-        if (searchQuery !== "") {
-            queryParams['q'] = searchQuery; // Add the search query parameter
-        }
-
-        // check if there are any categories selected
-        if (selectedCategories.length !== 0) {
-            // if so, pass in the array of selected category ids as parameters
-            queryParams['categoryIds'] = selectedCategories;
-        }
-
-        // If there is a maximum support cost filter query given
-        if (supportCostQuery !== "") {
-            // pass in the support cost query directly, it is parsed by backend
-            queryParams['supportingCost'] = supportCostQuery;
-        }
-
-        // check if a sorting method was selected
-        if (sortQuery !== "") {
-            queryParams['sortBy'] = sortQuery; // add as the sortBy parameter
-        }
-
-        axios.get('http://localhost:4941/api/v1/petitions', {
-            // parameters to filter the petition list with
-            params: queryParams
-        })
-            .then((response) => {
-                setErrorFlag(false);
-                setErrorMessage("");
-                setPetitions(response.data.petitions);
-            }, (error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
-    };
-
-    // Function to get the hero image for the petition with the given id
-    const getPetitionImage = async (id: number) => {
-        try {
-            // send a request to retrieve the given petition's image
-            const response = await axios.get(
-                `http://localhost:4941/api/v1/petitions/${id}/image`, {
-                // treat the response as binary data
-                responseType: 'arraybuffer'
-            });
-            // Create blob object containing the image data, along with its MIME (content) type
-            const blob = new Blob([response.data], {
-                type: response.headers['content-type']
-            });
-            // Create an image url out of the blob object, and return it
-            return URL.createObjectURL(blob);
-        } catch (error) {
-            // if petition has no image, or the petition's image cannot be retrieved
-            return;
-        }
-    };
 
     // Function to open the search petition dialog
     const handleSearchDialogOpen = () => {
@@ -286,7 +234,14 @@ const Petitions = () => {
         axios.post('http://localhost:4941/api/v1/petitions', { title: newPetitionTitle })
             .then(() => {
                 setNewPetitionTitle(""); // Reset the title field after submission
-                getPetitions();
+                getPetitions(
+                    searchQuery,
+                    selectedCategories,
+                    supportCostQuery,
+                    sortQuery,
+                    setPetitions,
+                    setErrorFlag,
+                    setErrorMessage);
             })
             .catch((error) => {
                 setErrorFlag(true);
@@ -331,7 +286,14 @@ const Petitions = () => {
                     {/* Search Button */}
                     <Button variant="outlined" endIcon={<Search />}
                             onClick={() => {
-                                getPetitions(); // perform the search
+                                getPetitions(
+                                    searchQuery,
+                                    selectedCategories,
+                                    supportCostQuery,
+                                    sortQuery,
+                                    setPetitions,
+                                    setErrorFlag,
+                                    setErrorMessage); // perform the search
                                 handleSearchDialogClose(); // close the search dialog
                             }} autoFocus>
                         Search
@@ -410,7 +372,14 @@ const Petitions = () => {
                     {/* Filter Button */}
                     <Button variant="outlined" endIcon={<Filter/>}
                             onClick={() => {
-                                getPetitions(); // refresh the list with the new filter
+                                getPetitions(
+                                    searchQuery,
+                                    selectedCategories,
+                                    supportCostQuery,
+                                    sortQuery,
+                                    setPetitions,
+                                    setErrorFlag,
+                                    setErrorMessage); // refresh the list with the new filter
                                 handleFilterDialogClose(); // close the filter dialog
                             }} autoFocus>
                         Filter
@@ -459,7 +428,14 @@ const Petitions = () => {
                     {/* Sort Button */}
                     <Button variant="outlined" endIcon={<Sort />}
                             onClick={() => {
-                                getPetitions(); // refresh the list with the new sorting
+                                getPetitions(
+                                    searchQuery,
+                                    selectedCategories,
+                                    supportCostQuery,
+                                    sortQuery,
+                                    setPetitions,
+                                    setErrorFlag,
+                                    setErrorMessage); // refresh the list with the new sorting
                                 handleSortDialogClose(); // close the sort dialog
                             }} autoFocus>
                         Sort
