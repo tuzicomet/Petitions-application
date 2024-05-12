@@ -8,7 +8,7 @@ import {
     Chip, MenuItem, InputLabel, Select
 } from "@mui/material"; // Material-UI components for styling
 // import icons from MUI
-import { Delete, Edit, Search, Filter, Sort } from "@mui/icons-material";
+import { Search, Filter, Sort } from "@mui/icons-material";
 import CSS from 'csstype';
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
@@ -53,7 +53,7 @@ const categories = [
 
 /**
  * Petitions component for managing petitions.
- * This component fetches, displays, creates, edits, and deletes petitions.
+ * This component fetches, displays, and creates petitions.
  */
 const Petitions = () => {
     // State variables
@@ -73,14 +73,6 @@ const Petitions = () => {
     const [openSortDialog, setOpenSortDialog] = React.useState(false);
     const [sortQuery, setSortQuery] = React.useState(""); // rule to sort the petition list by
 
-    const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
-    const [dialogPetition, setDialogPetition] = React.useState<Partial<PetitionFull>>({
-        title: "",
-        categoryId: 0,
-        description: "",
-    });
-    const [titleEdit, setTitleEdit] = React.useState("");
-    const [openEditDialog, setOpenEditDialog] = React.useState(false);
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
 
@@ -133,12 +125,6 @@ const Petitions = () => {
                             </TableCell>
 
                             <TableCell align="right">
-                                <Button variant="outlined" endIcon={<Edit />} onClick={() => { handleEditDialogOpen(petition) }}>
-                                    Edit
-                                </Button>
-                                <Button variant="outlined" endIcon={<Delete />} onClick={() => { handleDeleteDialogOpen(petition) }}>
-                                    Delete
-                                </Button>
                             </TableCell>
 
                         </TableRow>
@@ -290,62 +276,6 @@ const Petitions = () => {
                 setErrorFlag(true);
                 setErrorMessage(error.toString());
             });
-    };
-
-    // Function to delete a petition
-    const deletePetition = () => {
-        axios.delete(`http://localhost:4941/api/v1/petitions/${dialogPetition.petitionId}`)
-            .then(() => {
-                getPetitions(); // Refresh petition list after deletion
-                handleDeleteDialogClose();
-            })
-            .catch((error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
-    };
-
-    // Function to open delete petition dialog
-    const handleDeleteDialogOpen = (petition: PetitionFull) => {
-        setDialogPetition(petition); // Set the dialogPetition state with the correct petition object
-        setOpenDeleteDialog(true);
-    };
-
-    // Function to close delete petition dialog
-    const handleDeleteDialogClose = () => {
-        setOpenDeleteDialog(false);
-    };
-
-    // Function to edit a petition
-    const editPetition = () => {
-        axios.put(`http://localhost:4941/api/v1/petitions/${dialogPetition.petitionId}`, { title: titleEdit })
-            .then(() => {
-                getPetitions(); // Refresh petition list after edit
-                handleEditDialogClose();
-                setSnackMessage("Title changed successfully");
-                setSnackOpen(true);
-            })
-            .catch((error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
-    };
-
-    // Function to update title edit state
-    const updateTitleEditState = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTitleEdit(e.target.value);
-    };
-
-    // Function to open edit petition dialog
-    const handleEditDialogOpen = (petition: PetitionFull) => {
-        setTitleEdit(petition.title); // Set initial value for title edit
-        setDialogPetition(petition); // Set the dialogPetition state with the correct petition object
-        setOpenEditDialog(true);
-    };
-
-    // Function to close edit petition dialog
-    const handleEditDialogClose = () => {
-        setOpenEditDialog(false);
     };
 
     return (
@@ -585,58 +515,6 @@ const Petitions = () => {
                     </Button>
                 </Stack>
             </Paper>
-
-            {/* Delete Petition Dialog */}
-            <Dialog
-                open={openDeleteDialog}
-                onClose={handleDeleteDialogClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">
-                    {"Delete Petition?"}
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        Are you sure you want to delete this petition?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDeleteDialogClose}>Cancel</Button>
-                    <Button variant="outlined" color="error" onClick={deletePetition} autoFocus>
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Edit Petition Dialog */}
-            <Dialog
-                open={openEditDialog}
-                onClose={handleEditDialogClose}
-                aria-labelledby="edit-dialog-title"
-                aria-describedby="edit-dialog-description"
-            >
-                <DialogTitle id="edit-dialog-title">
-                    {"Edit Petition"}
-                </DialogTitle>
-                <DialogContent>
-                    <TextField
-                        id="outlined-basic"
-                        label="Title"
-                        variant="outlined"
-                        value={titleEdit}
-                        onChange={updateTitleEditState}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleEditDialogClose}>
-                        Cancel
-                    </Button>
-                    <Button variant="outlined" color="primary" onClick={editPetition}>
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
 
             {/* Snackbar component to wrap the error Alert in */}
             {/* This displays a pop-up message on screen informing the user of the error */}
