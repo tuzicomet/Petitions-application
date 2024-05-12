@@ -75,16 +75,15 @@ const User = () => {
     const getUserImage = async () => { // Function to fetch user image
         try {
             // send a request to retrieve the user's image
-            const response = await axios.get(`http://localhost:4941/api/v1/users/${id}/image`, {
+            const response = await axios.get(
+                `http://localhost:4941/api/v1/users/${id}/image`, {
                 // treat the response as binary data
-                responseType: 'arraybuffer',
-                // send the saved authentication token in the header
-                headers: {
-                    'X-Authorization': savedAuthToken
-                }
+                responseType: 'arraybuffer'
             });
             // Create blob object containing the image data, along with its MIME (content) type
-            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const blob = new Blob([response.data], {
+                type: response.headers['content-type']
+            });
             // Create a URL for the blob object to use it as the image URL
             const imageUrl = URL.createObjectURL(blob);
             // Set the image URL in the state to display the image
@@ -216,7 +215,8 @@ const User = () => {
 
                     {/* Button to upload a new profile picture */}
                     {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
-                    {/* TODO: make a button on top of the curent image instead */}
+                    {/* TODO: make a button on top of the curent image instead? */}
+                    {/* TODO: let users remove their profile picture (how would this fit with above?) */}
                     <Button variant="outlined" onClick={() => fileInputRef.current?.click()}>
                         {/* When clicked, it clicks the hidden file input element */}
                         Change Picture
