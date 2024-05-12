@@ -96,52 +96,62 @@ const Petitions = () => {
     // React.useEffect hook, runs whenever the page is rendered
     React.useEffect(() => {
 
+        getPetitions()
+    }, []);
+
+
+    // React.useEffect hook, runs whenever the page is rendered
+    React.useEffect(() => {
         // create the rows for the petition list
         const createPetitionRows = async () => {
+            console.log("starting to make rows")
             // store all rows in this variable, Promise.all is used to wait until all of them are finished
             const rows = await Promise.all(
                 // Map through each petition in the petitions array, so we can make a TableRow for each
                 petitions.map(async (petition: PetitionFull) => {
                     // get the petition image url
                     const imageUrl = await getPetitionImage(petition.petitionId);
+                    console.log(petition.petitionId);
                     return (
-                        // TableRow created for each petition, with the petition id as the key
-                        <TableRow key={petition.petitionId}>
+                        <div className="petition-row">
+                            {/* TableRow created for each petition, with the petition id as the key */}
+                            <TableRow key={petition.petitionId}>
 
-                            <TableCell>{petition.petitionId}</TableCell>
+                                <TableCell>{petition.petitionId}</TableCell>
 
-                            <TableCell align="right">{petition.title}</TableCell>
+                                <TableCell align="right">{petition.title}</TableCell>
 
-                            <TableCell>
-                                {/* If the petition's imageUrl is present, display it */}
-                                {/* (all petitions should have an image, but we can do this to be safe) */}
-                                {imageUrl &&
-                                    <img src={imageUrl} alt="Petition Image"
-                                         style={{ width: 100, height: 100, borderRadius: "10%" }} />}
-                            </TableCell>
+                                <TableCell>
+                                    {/* If the petition's imageUrl is present, display it */}
+                                    {/* (all petitions should have an image, but we can do this to be safe) */}
+                                    {imageUrl &&
+                                        <img src={imageUrl} alt="Petition Image"
+                                             style={{ width: 100, height: 100, borderRadius: "10%" }} />}
+                                </TableCell>
 
-                            <TableCell align="right">
-                                <Link to={`/petitions/${petition.petitionId}`}>Go to petition</Link>
-                            </TableCell>
+                                <TableCell align="right">
+                                    <Link to={`/petitions/${petition.petitionId}`}>Go to petition</Link>
+                                </TableCell>
 
-                            <TableCell align="right">
-                                <Button variant="outlined" endIcon={<Edit />} onClick={() => { handleEditDialogOpen(petition) }}>
-                                    Edit
-                                </Button>
-                                <Button variant="outlined" endIcon={<Delete />} onClick={() => { handleDeleteDialogOpen(petition) }}>
-                                    Delete
-                                </Button>
-                            </TableCell>
+                                <TableCell align="right">
+                                    <Button variant="outlined" endIcon={<Edit />} onClick={() => { handleEditDialogOpen(petition) }}>
+                                        Edit
+                                    </Button>
+                                    <Button variant="outlined" endIcon={<Delete />} onClick={() => { handleDeleteDialogOpen(petition) }}>
+                                        Delete
+                                    </Button>
+                                </TableCell>
 
-                        </TableRow>
-                );
-            }));
+                            </TableRow>
+                        </div>
+                    );
+                }));
             setPetitionRows(rows);
+            console.log("done?");
         };
 
-        getPetitions();
         createPetitionRows();
-    }, []);
+    }, [petitions]);
 
     // Function to fetch petitions from API
     const getPetitions = () => {
