@@ -6,6 +6,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg";
 
+import { getUser, getUserImage, editUser, changeUserImage } from "../services/userService";
+
 // User functional component
 const User = () => {
     const { id } = useParams(); // Get route parameters
@@ -35,137 +37,47 @@ const User = () => {
     // reference to the hidden file input element
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+    // whenever component is rendered
+    React.useEffect(() => {
+        getUser(id, savedAuthToken, setUser, setAuthenticatedAsUser, setErrorFlag, setErrorMessage);
+        getUserImage(id, savedAuthToken, setUserImage);
+    }, [id]);
+
     // Snackbar close handler
     const handleSnackClose = () => {
         setSnackOpen(false);
     };
 
-    React.useEffect(() => {
-        getUser(); // Fetch user data
-        getUserImage(); // Fetch user image
-    }, [id]); // Dependency array with id to re-fetch data when id changes
-
-    // Function to fetch user data
-    const getUser = () => {
-        // send a request to GET the user with the given id
-        axios.get<User>(`http://localhost:4941/api/v1/users/${id}`, {
-            headers: {
-                // Include the savedAuthToken in the request header as X-Authorization
-                'X-Authorization': savedAuthToken
-            }
-        })
-            // if the request was successful
-            .then((response) => {
-                setErrorFlag(false);
-                setErrorMessage("");
-                setUser(response.data); // Set user data in state
-                if (response.data.email) {
-                    // email is only returned if the currently authenticated user is viewing their own details
-                    // so if it is returned, set authenticatedAsUser to true
-                    setAuthenticatedAsUser(true);
-                }
-            })
-            .catch((error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString()); // Set error message
-            });
+    // method to handle editing the user's information
+    const handleEditUser = () => {
+        // call the editUser method from userService with the relevant parameters,
+        // and it will handle editing the user
+        editUser(
+            id,
+            savedAuthToken,
+            editUserDetails,
+            setErrorFlag,
+            setErrorMessage,
+            setSnackMessage,
+            setSnackOpen,
+            setOpenEditDialog
+        );
     };
 
-    // retrieve the user's saved image (if it exists)
-    const getUserImage = async () => { // Function to fetch user image
-        try {
-            // send a request to retrieve the user's image
-            const response = await axios.get(
-                `http://localhost:4941/api/v1/users/${id}/image`, {
-                // treat the response as binary data
-                responseType: 'arraybuffer'
-            });
-            // Create blob object containing the image data, along with its MIME (content) type
-            const blob = new Blob([response.data], {
-                type: response.headers['content-type']
-            });
-            // Create a URL for the blob object to use it as the image URL
-            const imageUrl = URL.createObjectURL(blob);
-            // Set the image URL in the state to display the image
-            setUserImage(imageUrl);
-        } catch (error) {
-            // if user has no image, or user's image cannot be retrieved
-            setUserImage(null);
-        }
-    };
-
-    // Function to edit user details
-    const editUser = () => {
-        axios.patch(`http://localhost:4941/api/v1/users/${id}`, editUserDetails, {
-            headers: {
-                // Include the savedAuthToken in the request header as X-Authorization
-                'X-Authorization': savedAuthToken
-            }
-        })
-            .then(() => {
-                setOpenEditDialog(false); // Close edit dialog
-                setSnackMessage("User details updated successfully"); // Set success message for snackbar
-                setSnackOpen(true); // Open snackbar
-            })
-            .catch((error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString()); // Set error message
-            });
-    };
-
-    // Function to handle image upload
-    const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-        if (!event.target.files) {
-            // if no files were selected, then return early
-            return;
-        }
-
-        // Get the first selected file
-        const imageFile = event.target.files[0];
-
-        // Resource used for turning the uploaded image into binary data
-        // (which is what the image needs to be sent as to the server)
-        // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
-
-        // Create a FileReader object to read the file content
-        const fileReader = new FileReader();
-
-        // Start reading the contents of the image file, with the result containing
-        // an ArrayBuffer representing the file's data
-        fileReader.readAsArrayBuffer(imageFile);
-
-        // after file reading is complete
-        fileReader.onload = () => {
-            const fileData = fileReader.result as ArrayBuffer;
-            // Send a PUT request to set the user's image,
-            // with the raw binary data in the request body
-            axios.put(`http://localhost:4941/api/v1/users/${id}/image`, fileData, {
-                headers: {
-                    'X-Authorization': savedAuthToken,
-                    // Set the content type based on the type of the image file
-                    'Content-Type': imageFile.type
-                }
-            })
-                .then(() => {
-                    // Refresh user image after successful upload
-                    getUserImage();
-                    // Display success message in Snackbar
-                    setSnackMessage("Image uploaded successfully");
-                    setSnackOpen(true);
-                })
-                .catch((error) => {
-                    // Set error flag and message if upload fails
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
-        };
-
-        // if there was an error reading the file
-        fileReader.onerror = () => {
-            // Set error flag and message
-            setErrorFlag(true);
-            setErrorMessage("Error reading the file.");
-        };
+    // method to handle uploading a new image for a user's profile picture
+    const handleChangeUserImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // call the uploadUserImage method from userService with the relevant parameters,
+        // and it will handle uploading and updating the user's profile photo
+        changeUserImage(
+            event,
+            id,
+            savedAuthToken,
+            setErrorFlag,
+            setErrorMessage,
+            setSnackMessage,
+            setSnackOpen,
+            setUserImage
+        );
     };
 
     return (
@@ -228,7 +140,7 @@ const User = () => {
                         style={{ display: 'none' }} // Hide the element
                         ref={fileInputRef} // variable which references this element
                         // When an image is uploaded, call the handleImageUpload function
-                        onChange={handleImageUpload}
+                        onChange={handleChangeUserImage}
                     />
                 </>
             )}
@@ -276,7 +188,7 @@ const User = () => {
                 <DialogActions>
                     {/* Cancel and Save buttons for edit dialog */}
                     <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
-                    <Button onClick={editUser}>Save</Button>
+                    <Button onClick={handleEditUser}>Save</Button>
                 </DialogActions>
             </Dialog>
 
