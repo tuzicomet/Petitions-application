@@ -9,19 +9,12 @@ import {
 } from "@mui/material"; // Material-UI components for styling
 // import icons from MUI
 import { Search, Filter, Sort } from "@mui/icons-material";
-import CSS from 'csstype';
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 
 import { datetimeToDDMMYYYY } from "../utils/Utils";
 import { getPetitions, getPetitionImage } from "../services/PetitionService";
 import { getUserImage } from "../services/UserService";
-
-// CSS properties for the card style
-const card: CSS.Properties = {
-    padding: "10px",
-    margin: "20px",
-};
 
 // interface for table head cell
 interface HeadCell {
@@ -179,6 +172,11 @@ const Petitions = () => {
                                 <Link to={`/users/${petition.ownerId}`}>
                                     {petition.ownerFirstName} {petition.ownerLastName}
                                 </Link>
+                            </TableCell>
+
+                            {/* Petition supporting cost (of the minimum tier) */}
+                            <TableCell align="right">
+                                {/* TODO */}
                             </TableCell>
 
                         </TableRow>
@@ -469,7 +467,7 @@ const Petitions = () => {
             </Dialog>
 
             {/* Petition table section */}
-            <Paper elevation={3} style={card}>
+            <Paper elevation={3} className="card">
 
                 {/* Title */}
                 <h1>Petitions</h1>
@@ -517,7 +515,7 @@ const Petitions = () => {
             </Paper>
 
             {/* Add Petition section */}
-            <Paper elevation={3} style={card}>
+            <Paper elevation={3} className="card">
                 <h1>Add a new petition</h1>
                 <Stack direction="row" spacing={2} justifyContent="center">
                     <TextField

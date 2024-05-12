@@ -4,16 +4,8 @@ import {useNavigate} from 'react-router-dom';
 import {
     Button, Paper, TextField, Alert, AlertTitle, InputAdornment, IconButton
 } from "@mui/material"; // Material-UI components for styling
-import CSS from 'csstype';
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import Navbar from "./Navbar";
-
-// CSS properties for the card style
-// TODO: can these be moved out?
-const card: CSS.Properties = {
-    padding: "10px",
-    margin: "20px",
-};
 
 // Login functional component
 const Login = () => {
@@ -77,7 +69,7 @@ const Login = () => {
             }
 
             {/* Petition table section */}
-            <Paper elevation={3} style={card}>
+            <Paper elevation={3} className="card">
 
                 {/* Page Title */}
                 <h1>Login</h1>

@@ -68,17 +68,8 @@ const PetitionListObject = (props: IPetitionProps) => {
             });
     };
 
-
-    const petitionCardStyles: CSS.Properties = {
-        display: "inline-block",
-        height: "328px",
-        width: "300px",
-        margin: "10px",
-        padding: "0px"
-    };
-
     return (
-        <Card sx={petitionCardStyles}>
+        <Card className="petition-card">
             <CardMedia
                 component="img"
                 height="200"

@@ -60,6 +60,26 @@
   text-transform: none !important;
 }
 
+.card {
+  padding: 10px;
+  margin: 20px;
+}
+
+.petition-list-card {
+  padding: 10px;
+  margin: 20px;
+  display: block;
+  width: fit-content;
+}
+
+.petition-card {
+  display: inline-block;
+  height: 328px;
+  width: 300px;
+  margin: 10px;
+  padding: 0;
+}
+
 /* Styling for vertical forms, where everything in it is stacked vertically */
 #vertical-form-container {
   /* Stack elements vertically */

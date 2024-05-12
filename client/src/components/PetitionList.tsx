@@ -38,16 +38,9 @@ const PetitionList = () => {
         <PetitionListObject key={petition.petitionId + petition.title} petition={petition} />
     ));
 
-    const card: CSS.Properties = {
-        padding: "10px",
-        margin: "20px",
-        display: "block",
-        width: "fit-content"
-    };
-
     return (
         // Render PetitionList component
-        <Paper elevation={3} style={card}>
+        <Paper elevation={3} className="petition-list-card">
             <h1>PetitionList</h1> {/* Heading for the PetitionList */}
             <div style={{ display: "inline-block", maxWidth: "965px", minWidth: "320" }}>
                 {/* Render error alert if errorFlag is true */}

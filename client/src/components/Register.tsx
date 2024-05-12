@@ -116,6 +116,8 @@ const Register = () => {
                 {/* Page Title */}
                 <h1>Register</h1>
 
+                {/* TODO: show default image and let user submit a photo */}
+
                 {/* registration form */}
                 <form
                     // handle form submission
