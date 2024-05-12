@@ -154,16 +154,22 @@ const Petitions = () => {
 
                             {/* Petition owner's profile picture */}
                             <TableCell className="petition-owner-tablecell">
-                                {/* If owner has no image (imageUrl is null),
-                                 display the default image */}
-                                <img src={ownerImageUrl || defaultImage}
-                                     alt="Owner Profile Picture"
-                                />
+                                {/* Clicking the owner's name links to their user page */}
+                                <Link to={`/users/${petition.ownerId}`}>
+                                    {/* If owner has no image (imageUrl is null),
+                                     display the default image */}
+                                    <img src={ownerImageUrl || defaultImage}
+                                         alt="Owner Profile Picture"
+                                    />
+                                </Link>
                             </TableCell>
 
                             {/* Petition owner name */}
                             <TableCell align="right">
-                                {petition.ownerFirstName} {petition.ownerLastName}
+                                {/* Clicking the owner's name links to their user page */}
+                                <Link to={`/users/${petition.ownerId}`}>
+                                    {petition.ownerFirstName} {petition.ownerLastName}
+                                </Link>
                             </TableCell>
 
                         </TableRow>
