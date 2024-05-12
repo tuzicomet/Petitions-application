@@ -11,6 +11,7 @@ import {
 import { Delete, Edit, Search, Filter, Sort } from "@mui/icons-material";
 import CSS from 'csstype';
 import Navbar from "./Navbar";
+import defaultImage from "../assets/default_picture.jpg"; // default user image
 
 // CSS properties for the card style
 const card: CSS.Properties = {
@@ -83,6 +84,10 @@ const Petitions = () => {
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
 
+    // State variable to hold the petition rows in the petition list
+    const [petitionRows, setPetitionRows] = React.useState<React.ReactNode[]>([]);
+
+
     // Function to close Snackbar
     const handleSnackClose = () => {
         setSnackOpen(false);
@@ -90,7 +95,52 @@ const Petitions = () => {
 
     // React.useEffect hook, runs whenever the page is rendered
     React.useEffect(() => {
+
+        // create the rows for the petition list
+        const createPetitionRows = async () => {
+            // store all rows in this variable, Promise.all is used to wait until all of them are finished
+            const rows = await Promise.all(
+                // Map through each petition in the petitions array, so we can make a TableRow for each
+                petitions.map(async (petition: PetitionFull) => {
+                    // get the petition image url
+                    const imageUrl = await getPetitionImage(petition.petitionId);
+                    return (
+                        // TableRow created for each petition, with the petition id as the key
+                        <TableRow key={petition.petitionId}>
+
+                            <TableCell>{petition.petitionId}</TableCell>
+
+                            <TableCell align="right">{petition.title}</TableCell>
+
+                            <TableCell>
+                                {/* If the petition's imageUrl is present, display it */}
+                                {/* (all petitions should have an image, but we can do this to be safe) */}
+                                {imageUrl &&
+                                    <img src={imageUrl} alt="Petition Image"
+                                         style={{ width: 100, height: 100, borderRadius: "10%" }} />}
+                            </TableCell>
+
+                            <TableCell align="right">
+                                <Link to={`/petitions/${petition.petitionId}`}>Go to petition</Link>
+                            </TableCell>
+
+                            <TableCell align="right">
+                                <Button variant="outlined" endIcon={<Edit />} onClick={() => { handleEditDialogOpen(petition) }}>
+                                    Edit
+                                </Button>
+                                <Button variant="outlined" endIcon={<Delete />} onClick={() => { handleDeleteDialogOpen(petition) }}>
+                                    Delete
+                                </Button>
+                            </TableCell>
+
+                        </TableRow>
+                );
+            }));
+            setPetitionRows(rows);
+        };
+
         getPetitions();
+        createPetitionRows();
     }, []);
 
     // Function to fetch petitions from API
@@ -134,6 +184,27 @@ const Petitions = () => {
                 setErrorFlag(true);
                 setErrorMessage(error.toString());
             });
+    };
+
+    // Function to get the hero image for the petition with the given id
+    const getPetitionImage = async (id: number) => {
+        try {
+            // send a request to retrieve the given petition's image
+            const response = await axios.get(
+                `http://localhost:4941/api/v1/petitions/${id}/image`, {
+                // treat the response as binary data
+                responseType: 'arraybuffer'
+            });
+            // Create blob object containing the image data, along with its MIME (content) type
+            const blob = new Blob([response.data], {
+                type: response.headers['content-type']
+            });
+            // Create an image url out of the blob object, and return it
+            return URL.createObjectURL(blob);
+        } catch (error) {
+            // if petition has no image, or the petition's image cannot be retrieved
+            return;
+        }
     };
 
     // Function to open the search petition dialog
@@ -198,27 +269,6 @@ const Petitions = () => {
     // Function to close the sort petition dialog
     const handleSortDialogClose = () => {
         setOpenSortDialog(false);
-    };
-
-    // Function to render rows for petitions
-    const petitionRows = () => {
-        return petitions.map((petition: PetitionFull) => (
-            <TableRow key={petition.petitionId}>
-                <TableCell>{petition.petitionId}</TableCell>
-                <TableCell align="right">{petition.title}</TableCell>
-                <TableCell align="right">
-                    <Link to={`/petitions/${petition.petitionId}`}>Go to petition</Link>
-                </TableCell>
-                <TableCell align="right">
-                    <Button variant="outlined" endIcon={<Edit />} onClick={() => { handleEditDialogOpen(petition) }}>
-                        Edit
-                    </Button>
-                    <Button variant="outlined" endIcon={<Delete />} onClick={() => { handleDeleteDialogOpen(petition) }}>
-                        Delete
-                    </Button>
-                </TableCell>
-            </TableRow>
-        ));
     };
 
     // Function to add a new petition
@@ -504,7 +554,8 @@ const Petitions = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {petitionRows()}
+                            {/* Display the petition rows */}
+                            {petitionRows}
                         </TableBody>
                     </Table>
                 </TableContainer>
