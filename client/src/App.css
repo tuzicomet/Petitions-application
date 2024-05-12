@@ -93,3 +93,8 @@
   height: 4em;
   border-radius: 0.5em;
 }
+
+/* Styling for the petition owners' profile pictures, in the petition list */
+.petition-owner-tablecell img {
+  border-radius: 2em;
+}

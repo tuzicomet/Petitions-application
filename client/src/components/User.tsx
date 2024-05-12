@@ -103,6 +103,7 @@ const User = () => {
              If userImage is null, then display the default image */}
             <img src={imageUrl || defaultImage}
                  alt="User Profile"
+                 // TODO move this styling out
                  style={{width: 100, height: 100, borderRadius: "10%"}}
             />
 

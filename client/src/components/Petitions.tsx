@@ -114,6 +114,10 @@ const Petitions = () => {
                     // get the petition image url, using the getPetitionImage
                     // method from PetitionService
                     const imageUrl = await getPetitionImage(petition.petitionId);
+                    // get the image url for the petition owner's profile picture, using getUserImage
+                    // method from UserService
+                    const ownerImageUrl = await getUserImage(petition.ownerId.toString());
+
                     return (
                         // TableRow created for each petition, with the petition id as the key
                         <TableRow key={petition.petitionId} className="petition-row">
@@ -125,7 +129,7 @@ const Petitions = () => {
                                 {/* If the petition's imageUrl is present, display it */}
                                 {/* (all petitions should have an image, but we can do this to be safe) */}
                                 {imageUrl &&
-                                    <img src={imageUrl} alt="Petition Image" />}
+                                    <img src={imageUrl} alt="Petition Image"/>}
                             </TableCell>
 
                             {/* Petition title */}
@@ -146,6 +150,15 @@ const Petitions = () => {
                             <TableCell align="right">
                                 {/* TODO: make it show the actual category name */}
                                 {petition.categoryId}
+                            </TableCell>
+
+                            {/* Petition owner's profile picture */}
+                            <TableCell className="petition-owner-tablecell">
+                                {/* If owner has no image (imageUrl is null),
+                                 display the default image */}
+                                <img src={ownerImageUrl || defaultImage}
+                                     alt="Owner Profile Picture"
+                                />
                             </TableCell>
 
                             {/* Petition owner name */}
