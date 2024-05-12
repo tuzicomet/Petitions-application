@@ -13,6 +13,7 @@ import CSS from 'csstype';
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 
+import { datetimeToDDMMYYYY } from "../utils/Utils";
 import { getPetitions, getPetitionImage } from "../services/PetitionService";
 import { getUserImage } from "../services/UserService";
 
@@ -111,6 +112,8 @@ const Petitions = () => {
             const rows = await Promise.all(
                 // Map through each petition in the petitions array, so we can make a TableRow for each
                 petitions.map(async (petition: PetitionFull) => {
+                    // Convert the creation-date column (in timestamp format), into DD/MM/YYYY (NZ time)
+                    const creationDate = datetimeToDDMMYYYY(petition.creationDate);
                     // get the petition image url, using the getPetitionImage
                     // method from PetitionService
                     const imageUrl = await getPetitionImage(petition.petitionId);
@@ -142,8 +145,7 @@ const Petitions = () => {
 
                             {/* Petition creation date */}
                             <TableCell align="right">
-                                {/* TODO: parse timestamp to nz date*/}
-                                {petition.creationDate}
+                                {creationDate}
                             </TableCell>
 
                             {/* Petition category */}
