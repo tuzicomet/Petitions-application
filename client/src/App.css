@@ -86,3 +86,10 @@
   background-color: #0055e9;
   color: white;
 }
+
+/* Styling for the images in the petitions list rows */
+.petition-row img {
+  width: 4em;
+  height: 4em;
+  border-radius: 0.5em;
+}
