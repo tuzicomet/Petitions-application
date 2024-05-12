@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg";
 
-import { getUser, getUserImage, editUser, changeUserImage } from "../services/userService";
+import { getUser, getUserImage, editUser, changeUserImage } from "../services/UserService";
 
 // User functional component
 const User = () => {
@@ -21,6 +21,7 @@ const User = () => {
         imageFilename: "",
         authToken: ""
     });
+    const [imageUrl, setImageUrl] = React.useState<string | null>(null); // url to the user's image file
     const [editUserDetails, setEditUserDetails] = React.useState<Partial<User>>({}); // Partial<User> to allow only some fields to be edited
     const [currentPassword, setCurrentPassword] = React.useState(""); // State variable for current password input
     const [errorFlag, setErrorFlag] = React.useState(false); // Flag for error status
@@ -29,18 +30,22 @@ const User = () => {
     const [snackOpen, setSnackOpen] = React.useState(false); // Snackbar open state
     const [snackMessage, setSnackMessage] = React.useState(""); // Snackbar message
     const savedAuthToken = localStorage.getItem("savedAuthToken"); // Get the saved authToken from local storage
-    // userImage should either accept string or null (if no image/unauthorized)
-    const [userImage, setUserImage] = React.useState<string | null>(null); // State variable for user image URL
-
     const [authenticatedAsUser, setAuthenticatedAsUser] = React.useState(false); // boolean saying whether the client is authenticated as the user
 
     // reference to the hidden file input element
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    // whenever component is rendered
+    // run whenever id changes
     React.useEffect(() => {
         getUser(id, savedAuthToken, setUser, setAuthenticatedAsUser, setErrorFlag, setErrorMessage);
-        getUserImage(id, savedAuthToken, setUserImage);
+        // get the user's profile image
+        const getProfileImage = async () => {
+            // use the getUserImage method from UserService to get the user's profile photo
+            const userImage = await getUserImage(id);
+            // set the image to the imageUrl variable
+            setImageUrl(userImage);
+        }
+        getProfileImage();
     }, [id]);
 
     // Snackbar close handler
@@ -75,8 +80,7 @@ const User = () => {
             setErrorFlag,
             setErrorMessage,
             setSnackMessage,
-            setSnackOpen,
-            setUserImage
+            setSnackOpen
         );
     };
 
@@ -97,7 +101,7 @@ const User = () => {
 
             {/* Display user's image.
              If userImage is null, then display the default image */}
-            <img src={userImage || defaultImage}
+            <img src={imageUrl || defaultImage}
                  alt="User Profile"
                  style={{width: 100, height: 100, borderRadius: "10%"}}
             />

@@ -50,8 +50,7 @@ export const getPetitions = async (searchQuery: string, selectedCategories: numb
 };
 
 // Function to get the hero image for the petition with the given id
-export const getPetitionImage = async ( id: number, setPetitionRows: Function,
-                                        petitions: Array<PetitionFull> ) => {
+export const getPetitionImage = async ( id: number ) => {
     try {
         // send a request to retrieve the given petition's image
         const response = await axios.get(

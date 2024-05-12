@@ -34,9 +34,8 @@ export const getUser = async (id: string | undefined, savedAuthToken: string | n
 };
 
 
-// retrieve the user's saved image (if it exists)
-export const getUserImage = async (id: string | undefined, savedAuthToken: string | null,
-                                   setUserImage: Function) => {
+// retrieve the saved image of a user, given by their id
+export const getUserImage = async (id: string | undefined) => {
     try {
         // send a request to retrieve the user's image
         const response = await axios.get(
@@ -48,13 +47,11 @@ export const getUserImage = async (id: string | undefined, savedAuthToken: strin
         const blob = new Blob([response.data], {
             type: response.headers['content-type']
         });
-        // Create a URL for the blob object to use it as the image URL
-        const imageUrl = URL.createObjectURL(blob);
-        // Set the image URL in the state to display the image
-        setUserImage(imageUrl);
+        // Create an image url out of the blob object, and return it
+        return URL.createObjectURL(blob);
     } catch (error) {
-        // if user has no image, or user's image cannot be retrieved
-        setUserImage(null);
+        // if user has no image, or user's image cannot be retrieved, return null
+        return null;
     }
 };
 
@@ -88,7 +85,7 @@ export const changeUserImage = async (event: React.ChangeEvent<HTMLInputElement>
                                  id: string | undefined, savedAuthToken: string | null,
                                  setErrorFlag: (flag: boolean) => void, setErrorMessage: (message: string) => void,
                                  setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void,
-                                 setUserImage: (url: string | null) => void) => {
+                                 ) => {
     if (!event.target.files) {
         // if no files were selected, then return early
         return;
@@ -122,7 +119,7 @@ export const changeUserImage = async (event: React.ChangeEvent<HTMLInputElement>
         })
             .then(() => {
                 // Refresh user image after successful upload
-                getUserImage(id, savedAuthToken, setUserImage);
+                getUserImage(id);
                 // Display success message in Snackbar
                 setSnackMessage("Image uploaded successfully");
                 setSnackOpen(true);

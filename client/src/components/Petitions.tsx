@@ -14,6 +14,7 @@ import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 
 import { getPetitions, getPetitionImage } from "../services/PetitionService";
+import { getUserImage } from "../services/UserService";
 
 // CSS properties for the card style
 const card: CSS.Properties = {
@@ -112,11 +113,7 @@ const Petitions = () => {
                 petitions.map(async (petition: PetitionFull) => {
                     // get the petition image url, using the getPetitionImage
                     // method from PetitionService
-                    const imageUrl = await getPetitionImage(
-                        petition.petitionId,
-                        setPetitionRows,
-                        petitions
-                    );
+                    const imageUrl = await getPetitionImage(petition.petitionId);
                     return (
                         // TableRow created for each petition, with the petition id as the key
                         <TableRow key={petition.petitionId} className="petition-row">
