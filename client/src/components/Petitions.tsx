@@ -118,13 +118,29 @@ const Petitions = () => {
                                     <img src={imageUrl} alt="Petition Image" />}
                             </TableCell>
 
-                            <TableCell align="right">{petition.title}</TableCell>
-
+                            {/* Petition title */}
                             <TableCell align="right">
-                                <Link to={`/petitions/${petition.petitionId}`}>Go to petition</Link>
+                                {/* Clicking the title links the client to that petition's page */}
+                                <Link to={`/petitions/${petition.petitionId}`}>
+                                    {petition.title}
+                                </Link>
                             </TableCell>
 
+                            {/* Petition creation date */}
                             <TableCell align="right">
+                                {/* TODO: parse timestamp to nz date*/}
+                                {petition.creationDate}
+                            </TableCell>
+
+                            {/* Petition category */}
+                            <TableCell align="right">
+                                {/* TODO: make it show the actual category name */}
+                                {petition.categoryId}
+                            </TableCell>
+
+                            {/* Petition owner name */}
+                            <TableCell align="right">
+                                {petition.ownerFirstName} {petition.ownerLastName}
                             </TableCell>
 
                         </TableRow>
