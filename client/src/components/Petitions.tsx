@@ -150,8 +150,15 @@ const Petitions = () => {
 
                             {/* Petition category */}
                             <TableCell align="right">
-                                {/* TODO: make it show the actual category name */}
-                                {petition.categoryId}
+                                {/* From the categories array, find the record where the
+                                 id value matches the petition.categoryId value */}
+                                {/* See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
+                                under 'Using arrow function and destructuring'*/}
+                                {categories.find(
+                                    category =>
+                                        category.id === petition.categoryId
+                                )?.name} {/* Use optional chaining to select the 'name' value, if the category exists */}
+                                         {/* see https://www.geeksforgeeks.org/how-to-use-optional-chaining-with-arrays-and-functions-in-typescript/ */}
                             </TableCell>
 
                             {/* Petition owner's profile picture */}
