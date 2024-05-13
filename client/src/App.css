@@ -213,3 +213,24 @@
 #category-selection-field {
   text-align: left;
 }
+
+/* Styling for the support tier cards on Create Petition */
+.support-tier-creation-card {
+  display: inline-block;
+  margin: 0.5em;
+}
+
+/* Styling for the container holding the input fields in the support tier cards on Create Petition */
+.support-tier-creation-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em; /* gap between components */
+  padding-bottom: 1em;
+}
+
+/* Styling for delete buttons */
+.delete-button {
+  /* !important added to override MUI element styling */
+  color: red !important;
+  border-color: red !important;
+}

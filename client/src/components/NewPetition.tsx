@@ -4,7 +4,18 @@ import React, {useState} from "react";
 import axios from "axios"; // axios library for making HTTP requests
 import {useNavigate} from 'react-router-dom';
 import {
-    Button, Paper, TextField, Alert, AlertTitle, InputAdornment, IconButton, MenuItem
+    Button,
+    Paper,
+    TextField,
+    Alert,
+    AlertTitle,
+    InputAdornment,
+    IconButton,
+    MenuItem,
+    TableRow,
+    TableCell,
+    Table,
+    TableBody
 } from "@mui/material"; // Material-UI components for styling
 // icons for the password visibility toggle button
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -41,10 +52,51 @@ const NewPetition = () => {
     const [categoryId, setCategoryId] = React.useState<number>(0);
 
     const navigate = useNavigate(); // navigation function for navigating to different pages
+    // state variable to hold objects, each containing information for a new support tier
+    // (initialised for only one support tier, but up to two more can be added later)
+    const [supportTiers, setSupportTiers] = React.useState([
+        { title: "", description: "", cost: "" }
+    ]);
+
+    // Function to handle updating a specific support tier
+    const handleTierChange = (index: number, field: string, value: string) => {
+        const newSupportTiers = [...supportTiers];
+        (newSupportTiers[index] as any)[field] = value;
+        setSupportTiers(newSupportTiers);
+    };
+
+    // Function to handle adding a new support tier
+    const handleAddTier = () => {
+        // Only allow if there are less than 3 support tiers already
+        if (supportTiers.length <3) {
+            // add a new support tier (object with values for it) to the existing supportTiers
+            // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
+            setSupportTiers([...supportTiers, { title: "", description: "", cost: "" }]);
+        }
+    };
+
+    // Function to handle removing a specific support tier, given by its index
+    const handleRemoveTier = (index: number) => {
+        // Do not allow if there is only one support tier
+        if (supportTiers.length > 1) {
+            // use filter to get every support tier, where the index (i) they find is not the same
+            // as the passed in index (the index of the tier we're removing)
+            const upadtedSupportTiers = supportTiers.filter(
+                (tier, i) => i !== index);
+            setSupportTiers(upadtedSupportTiers);
+        }
+    };
 
     // Function to handle category selection
     const handleCategorySelection = (selectedCategoryId : number) => {
         setCategoryId(selectedCategoryId); // set the selected category id
+    };
+
+    // Function to handle form submission
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        // Call createPetition function to handle creating the petition
+        createPetition(title, description, categoryId, [], setErrorFlag, setErrorMessage);
     };
 
     return (
@@ -60,28 +112,12 @@ const NewPetition = () => {
                 </Alert>
             }
 
-            {/* Petition table section */}
+            {/* Petition form */}
             <Paper elevation={3} className="card">
-
-                {/* Page Title */}
+                {/* Form title */}
                 <h1>Create Petition</h1>
+                <form onSubmit={handleSubmit}>
 
-                {/* Add petition form */}
-                <form
-                    // handle form submission
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        // Call createPetition function to handle creating the petition
-                        createPetition(
-                            title,
-                            description,
-                            categoryId,
-                            [],
-                            setErrorFlag,
-                            setErrorMessage
-                        );
-                    }}
-                >
                     {/* Container for the form components */}
                     <div id="vertical-form-container">
 
@@ -134,6 +170,61 @@ const NewPetition = () => {
                             </TextField>
                         </div>
 
+                        {/* Support Tiers section */}
+                        <div id="support-tiers-container">
+                            <h3>Support Tiers</h3>
+
+                            {/* Only show if there are less than 3 support tiers */}
+                            {supportTiers.length <3 &&
+                                // Button to add a new Support Tier
+                                <Button variant="outlined" onClick={handleAddTier}>
+                                    Add Tier
+                                </Button>
+                            }
+
+                            {/* For each object (tier) in the supportTiers state variable */}
+                            {/* (if we add/remove tiers, it automatically updates) */}
+                            {supportTiers.map((tier, index) => (
+                                // Individual support tier
+                                <Paper elevation={3} className="card">
+                                    <div key={index} className="support-tier-creation-card">
+                                        <div className="support-tier-creation-fields">
+                                            <TextField
+                                                label="Title"
+                                                value={tier.title}
+                                                // Changes the title value for its respective support tier
+                                                onChange={(e) => handleTierChange(index, "title", e.target.value)}
+                                            />
+                                            <TextField
+                                                label="Description"
+                                                value={tier.description}
+                                                multiline
+                                                // Changes the description value for its respective support tier
+                                                onChange={(e) => handleTierChange(index, "description", e.target.value)}
+                                            />
+                                            <TextField
+                                                label="Cost"
+                                                value={tier.cost}
+                                                // Changes the cost value for its respective support tier
+                                                onChange={(e) => handleTierChange(index, "cost", e.target.value)}
+                                            />
+                                        </div>
+
+                                        {/* Only show if there are more than 1 support tiers */}
+                                        {supportTiers.length > 1 &&
+                                            // Button to remove the specific support tier
+                                            <Button className="delete-button"
+                                                    variant="outlined"
+                                                    onClick={() => handleRemoveTier(index)}>
+                                                Remove
+                                            </Button>
+                                        }
+                                    </div>
+                                </Paper>
+                                ))}
+
+                        </div>
+
                         {/* TODO: allow user to add image, needs separate request */}
 
                         {/* Submit registration form button */}
@@ -148,7 +239,7 @@ const NewPetition = () => {
             </Paper>
 
         </div>
-    );
+);
 };
 
 export default NewPetition;
