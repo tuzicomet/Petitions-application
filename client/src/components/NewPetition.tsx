@@ -45,13 +45,17 @@ const NewPetition = () => {
     ]);
 
     const [petitionImage, setPetitionImage] = React.useState<File | null>(null); // State variable for petition image file
+    const supportedTypes = ['image/png', 'image/jpeg', 'image/gif']; // allowed MIME types for uploaded images
     // reference to the hidden file input element
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     // Function to handle change in petition image input
     const handleChangePetitionImage = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
-            setPetitionImage(event.target.files[0]); // Set the selected image file
+            // the uploaded file must be an accepted type (png, jpeg, gif)
+            if (supportedTypes.includes(event.target.files[0].type)) {
+                setPetitionImage(event.target.files[0]); // Set the selected image file
+            } // TODO: display an error message otherwise
         }
     };
 
