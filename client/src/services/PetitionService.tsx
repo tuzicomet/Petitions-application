@@ -95,6 +95,8 @@ export const createPetition = async (savedAuthToken: string | null,
             console.log("Petition successfully created ", response.data);
             setErrorFlag(false);
             setErrorMessage("");
+            // return the id of the created petition
+            return response.data.petitionId;
         })
         // if there was an error with the registration
         .catch((error) => {

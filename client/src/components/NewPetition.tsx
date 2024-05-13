@@ -57,10 +57,19 @@ const NewPetition = () => {
         { title: "", description: "", cost: "" }
     ]);
 
-    // Function to handle updating a specific support tier
+    // Function to handle updating a field value for a specific support tier
     const handleTierChange = (index: number, field: string, value: string) => {
+        // create a copy of supportTiers
         const newSupportTiers = [...supportTiers];
-        (newSupportTiers[index] as any)[field] = value;
+        // if the field is cost
+        if (field === 'cost') {
+            // turn the value into an int and save it to the correct field
+            (newSupportTiers[index] as any)[field] = parseInt(value);
+        } else {
+            // otherwise, save the input to the correct field
+            (newSupportTiers[index] as any)[field] = value;
+        }
+        // save changes by overwriting supportTiers
         setSupportTiers(newSupportTiers);
     };
 
@@ -92,13 +101,16 @@ const NewPetition = () => {
     };
 
     // Function to handle form submission
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         // Call createPetition function to handle creating the petition
-        createPetition(title, description, categoryId, [], setErrorFlag, setErrorMessage);
         // if successful, it will return the newly created petition's id
         const createPetitionResult = await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
                                                                 setErrorFlag, setErrorMessage);
+        // if an id was returned, navigate to the newly created petition's page
+        if (Number.isInteger(createPetitionResult)) {
+            navigate(`/petition/${createPetitionResult}`);
+        }
     };
 
     return (
