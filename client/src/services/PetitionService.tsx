@@ -78,7 +78,9 @@ export const createPetition = async (savedAuthToken: string | null,
                                      // supportTiers is an array made up of objects following this format:
                                      supportTiers: { title: string; description: string; cost: string }[],
                                      setErrorFlag: Function,
-                                     setErrorMessage: Function) => {
+                                     setErrorMessage: Function,
+                                     // pass in the navigate function, so we can redirect from here
+                                     navigate: (path: string) => void) => {
     // Make a post request to the petition endpoint with the entered in values
     axios.post("http://localhost:4941/api/v1/petitions", {
         title,
@@ -95,8 +97,8 @@ export const createPetition = async (savedAuthToken: string | null,
             console.log("Petition successfully created ", response.data);
             setErrorFlag(false);
             setErrorMessage("");
-            // return the id of the created petition
-            return response.data.petitionId;
+            // navigate to the newly created petition's page
+            navigate(`/petitions/${response.data.petitionId}`);
         })
         // if there was an error with the registration
         .catch((error) => {

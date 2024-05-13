@@ -1,22 +1,8 @@
 // Page for creating a new petition
 
-import React, {useState} from "react";
-import axios from "axios"; // axios library for making HTTP requests
+import React from "react";
 import {useNavigate} from 'react-router-dom';
-import {
-    Button,
-    Paper,
-    TextField,
-    Alert,
-    AlertTitle,
-    InputAdornment,
-    IconButton,
-    MenuItem,
-    TableRow,
-    TableCell,
-    Table,
-    TableBody
-} from "@mui/material"; // Material-UI components for styling
+import { Button, Paper, TextField, Alert, AlertTitle, MenuItem } from "@mui/material"; // Material-UI components for styling
 import Navbar from "./Navbar";
 import { createPetition } from "../services/PetitionService";
 
@@ -104,13 +90,9 @@ const NewPetition = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         // Call createPetition function to handle creating the petition
-        // if successful, it will return the newly created petition's id
-        const createPetitionResult = await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
-                                                                setErrorFlag, setErrorMessage);
-        // if an id was returned, navigate to the newly created petition's page
-        if (Number.isInteger(createPetitionResult)) {
-            navigate(`/petition/${createPetitionResult}`);
-        }
+        // if successful, it will redirect to the newly created petition's page
+        await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
+                             setErrorFlag, setErrorMessage, navigate);
     };
 
     return (
