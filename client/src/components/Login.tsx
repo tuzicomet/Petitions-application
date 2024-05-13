@@ -37,6 +37,8 @@ const Login = () => {
                 console.log("Login successful:", response.data);
                 // Save authentication token to browser storage so that user stays logged in
                 localStorage.setItem("savedAuthToken", response.data.token);
+                // Save the id of the user which the client is logged in as
+                localStorage.setItem("clientUserId", response.data.userId);
                 // Redirect after successful login
                 navigate("/");
             })
