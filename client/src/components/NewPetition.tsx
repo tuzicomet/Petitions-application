@@ -49,10 +49,16 @@ const NewPetition = () => {
         const newSupportTiers = [...supportTiers];
         // if the field is cost
         if (field === 'cost') {
-            // turn the value into an int and save it to the correct field
-            (newSupportTiers[index] as any)[field] = parseInt(value);
+            // if the entered value is a number
+            if (!isNaN(parseInt(value)) ) {
+                // turn the value into an int and save it to the correct field
+                (newSupportTiers[index] as any)[field] = parseInt(value);
+            } else {
+                // otherwise clear it
+                (newSupportTiers[index] as any)[field] = "";
+            }
         } else {
-            // otherwise, save the input to the correct field
+            // otherwise, save the full input to the correct field
             (newSupportTiers[index] as any)[field] = value;
         }
         // save changes by overwriting supportTiers
