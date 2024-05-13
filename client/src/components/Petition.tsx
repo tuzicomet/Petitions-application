@@ -180,16 +180,23 @@ const Petition = () => {
 
             <Paper elevation={3} className="card">
 
-                <h1>Petition</h1>
-
-                {/* Display petition's image if available */}
-                {petitionImage && (
-                    <img
-                        src={petitionImage}
-                        alt="Petition Profile"
-                        style={{ width: 100, height: 100, borderRadius: "10%" }}
-                    />
-                )}
+                {/* Header section for the petition page */}
+                <div id="petition-header">
+                    {/* Use the petition image as the header background */}
+                    <div id="petition-header-background">
+                        {/* Display petition's image if available */}
+                        {petitionImage && (
+                            <img
+                                src={petitionImage}
+                                alt="Petition Profile"
+                            />
+                        )}
+                    </div>
+                    {/* Petition title as the page header */}
+                    <div id="petition-header-title">
+                        {petition.title}
+                    </div>
+                </div>
 
                 <div>
                     <strong>petitionId:</strong> {petition.petitionId}<br/>
