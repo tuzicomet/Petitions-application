@@ -94,6 +94,11 @@
   width: 20em;
 }
 
+/* Styling for the Add Petition button on the petitions page */
+#button-to-create-petition {
+  margin-bottom: 1em;
+}
+
 /* Styling for the div containing the filter/sort dropdowns */
 #dropdown-container {
   /* Style as grid display so that it can be displayed properly

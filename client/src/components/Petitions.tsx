@@ -74,6 +74,8 @@ const Petitions = () => {
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
 
+    const savedAuthToken = localStorage.getItem("savedAuthToken"); // Get the saved authToken from local storage
+
     // State variable to hold the petition rows in the petition list
     const [petitionRows, setPetitionRows] = React.useState<React.ReactNode[]>([]);
 
@@ -477,6 +479,18 @@ const Petitions = () => {
 
                 {/* Title */}
                 <h1>Petitions</h1>
+
+                {/* Only show if client is logged in as a user (has an auth token) */}
+                {savedAuthToken &&
+                    <div id="button-to-create-petition">
+                        {/* Link to create a petition */}
+                        <Link to="/petitions/create">
+                            <Button variant="outlined">
+                                Add Petition
+                            </Button>
+                        </Link>
+                    </div>
+                }
 
                 {/* Search button which opens the search dialog */}
                 <Button variant="outlined" endIcon={<Search />}
