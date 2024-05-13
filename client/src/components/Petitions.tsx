@@ -181,7 +181,8 @@ const Petitions = () => {
 
                         </TableRow>
                     );
-                }));
+                })
+            );
             setPetitionRows(rows);
         };
 
