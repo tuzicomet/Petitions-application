@@ -86,8 +86,9 @@ const NewPetition = () => {
                     <div id="vertical-form-container">
 
                         {/* Title input field */}
-                        <div id="title-input-field">
+                        <div id="title-input-field-container">
                             <TextField
+                                id="title-input-field"
                                 label="Title"
                                 placeholder="..."
                                 value={title}
@@ -97,20 +98,26 @@ const NewPetition = () => {
                         </div>
 
                         {/* Description input field */}
-                        <div id="description-input-field">
+                        <div id="description-input-field-container">
                             <TextField
+                                id="description-input-field"
                                 label="Description"
                                 placeholder="..."
                                 value={description}
+                                // allow the description to be over multiple lines & makes it extend vertically
+                                // see https://mui.com/material-ui/react-text-field/ (Multiline section)
+                                multiline
                                 // Update description state on input change
                                 onChange={(e) => setDescription(e.target.value)}
                             />
                         </div>
 
                         {/* Category selection */}
-                        <div id="category-selection-field">
+                        {/* See https://mui.com/material-ui/react-text-field/ (Select section, example 1) */}
+                        <div id="category-selection-field-container">
                             {/* Dropdown to select a single category */}
                             <TextField
+                                id="category-selection-field"
                                 select
                                 label="Category"
                                 value={categoryId}

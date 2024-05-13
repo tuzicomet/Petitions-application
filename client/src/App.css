@@ -208,3 +208,8 @@
   text-decoration: none;
   color: #08007e;
 }
+
+/* Category selection input field on the create petition page */
+#category-selection-field {
+  text-align: left;
+}
