@@ -30,6 +30,7 @@ const User = () => {
     const [snackOpen, setSnackOpen] = React.useState(false); // Snackbar open state
     const [snackMessage, setSnackMessage] = React.useState(""); // Snackbar message
     const savedAuthToken = localStorage.getItem("savedAuthToken"); // Get the saved authToken from local storage
+    const clientUserId = localStorage.getItem("clientUserId"); // get the client's user id from local storage
     const [authenticatedAsUser, setAuthenticatedAsUser] = React.useState(false); // boolean saying whether the client is authenticated as the user
 
     // reference to the hidden file input element
@@ -37,7 +38,11 @@ const User = () => {
 
     // run whenever id changes
     React.useEffect(() => {
-        getUser(id, savedAuthToken, setUser, setAuthenticatedAsUser, setErrorFlag, setErrorMessage);
+        // if the client is logged in as the user whose page they are viewing
+        if (clientUserId == id) {
+            setAuthenticatedAsUser(true);
+        }
+        getUser(id, savedAuthToken, setUser, setErrorFlag, setErrorMessage);
         // get the user's profile image
         const getProfileImage = async () => {
             // use the getUserImage method from UserService to get the user's profile photo

@@ -6,7 +6,7 @@ import React from "react";
 
 // Function to fetch user data
 export const getUser = async (id: string | undefined, savedAuthToken: string | null,
-                              setUser: Function, setAuthenticatedAsUser: Function,
+                              setUser: Function,
                               setErrorFlag: Function, setErrorMessage: Function) => {
     // send a request to GET the user with the given id
     axios.get<User>(`http://localhost:4941/api/v1/users/${id}`, {
@@ -20,11 +20,6 @@ export const getUser = async (id: string | undefined, savedAuthToken: string | n
             setErrorFlag(false);
             setErrorMessage("");
             setUser(response.data); // Set user data in state
-            if (response.data.email) {
-                // email is only returned if the currently authenticated user is viewing their own details
-                // so if it is returned, set authenticatedAsUser to true
-                setAuthenticatedAsUser(true);
-            }
         })
         .catch((error) => {
             setErrorFlag(true);
@@ -136,25 +131,4 @@ export const changeUserImage = async (event: React.ChangeEvent<HTMLInputElement>
         setErrorFlag(true);
         setErrorMessage("Error reading the file.");
     };
-};
-
-
-// Function to fetch user data
-export const isClientAuthenticatedAsUser = async (userId: string | undefined,
-                                                  savedAuthToken: string | null): Promise<boolean> => {
-    try {
-        // send a request to GET the user with the given id
-        const response = await axios.get<User>(`http://localhost:4941/api/v1/users/${userId}`, {
-            headers: {
-                // Include the savedAuthToken in the request header as X-Authorization
-                'X-Authorization': savedAuthToken
-            }
-        });
-        // if request is successful
-        // email will only be returned if the savedAuthToken matches the user's authToken
-        // so if email is present, return true, otherwise return false
-        return !!response.data.email;
-    } catch (error) {
-        return false;
-    }
 };

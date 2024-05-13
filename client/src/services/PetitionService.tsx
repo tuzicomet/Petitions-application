@@ -2,7 +2,6 @@
 // contains methods for to getting or modifying petition-related data
 
 import axios from "axios";
-import React from "react";
 
 // Function to fetch petitions from API, which match the specifications given
 export const getPetitions = async (searchQuery: string, selectedCategories: number[],
