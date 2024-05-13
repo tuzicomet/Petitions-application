@@ -107,6 +107,11 @@
   color: white;
 }
 
+/* Override default font size for MUI TableCell elements in the petition list rows */
+.petition-row .MuiTableCell-root {
+  font-size: 1em !important;
+}
+
 /* Styling for the images in the petitions list rows */
 .petition-row img {
   width: 4em;
@@ -117,6 +122,11 @@
 /* Styling for the petition owners' profile pictures, in the petition list */
 .petition-owner-tablecell img {
   border-radius: 2em;
+}
+
+/* Styling for the table cells in the individual petition page */
+#individual-petition-page .MuiTableCell-root {
+  font-size: 1em;
 }
 
 /* Styling for the individual-petition page header */
@@ -160,4 +170,41 @@
   font-style: italic;
   padding: 1.3em;
   font-size: 1.1em;
+}
+
+/* Styling for the general information section of the petition page */
+#petition-information {
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Styling for the petition owner information section of the petition page */
+#petition-owner-section {
+  width: 29em;
+  /* Centre horizontally */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Styling for the owner's image the petition page */
+#petition-owner-section img {
+  width: 5em;
+  height: 5em;
+  border-radius: 5em;
+}
+
+/* Styling for the any names which are links */
+.name-link {
+  font-size: 1.3em;
+}
+.name-link a {
+  /* Remove underline */
+  text-decoration: none;
+  color: #0055e9;
+}
+.name-link a:hover {
+  /* Remove underline */
+  text-decoration: none;
+  color: #08007e;
 }

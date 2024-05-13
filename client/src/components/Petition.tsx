@@ -15,19 +15,37 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
+import { datetimeToDDMMYYYY } from "../utils/Utils";
+import defaultImage from "../assets/default_picture.jpg"; // default user image
+import { getUserImage } from "../services/UserService";
 
 // interface for table head cell
 interface HeadCell {
     id: string;
     label: string;
-    numeric: boolean;
 }
 
 // Define the head cells (column names) for the Support Tier list
 const supportTierHeadCells: readonly HeadCell[] = [
-    { id: 'title', label: 'Title', numeric: false },
-    { id: 'description', label: 'Description', numeric: false },
-    { id: 'cost', label: 'Cost', numeric: true }
+    { id: 'title', label: 'Title' },
+    { id: 'description', label: 'Description' },
+    { id: 'cost', label: 'Cost' }
+];
+
+// Available petition categories
+const categories = [
+    { id: 1, name: "Wildlife" },
+    { id: 2, name: "Environmental Causes" },
+    { id: 3, name: "Animal Rights" },
+    { id: 4, name: "Health and Wellness" },
+    { id: 5, name: "Education" },
+    { id: 6, name: "Human Rights" },
+    { id: 7, name: "Technology and Innovation" },
+    { id: 8, name: "Arts and Culture" },
+    { id: 9, name: "Community Development" },
+    { id: 10, name: "Economic Empowerment" },
+    { id: 11, name: "Science and Research" },
+    { id: 12, name: "Sports and Recreation" }
 ];
 
 /**
@@ -62,7 +80,7 @@ const Petition = () => {
     const savedAuthToken = localStorage.getItem("savedAuthToken"); // Get the saved authToken from local storage
     // petitionImage should either accept string or null (if no image/unauthorized)
     const [petitionImage, setPetitionImage] = React.useState<string | null>(null);
-
+    const [petitionOwnerImage, setPetitionOwnerImage] = React.useState<string | null>("");
     // State variable to hold the support tier rows in the petition list
     const [supportTierRows, setSupportTierRows] = React.useState<React.ReactNode[]>([]);
 
@@ -122,6 +140,11 @@ const Petition = () => {
 
     // React useEffect hook which runs whenever petition changes
     React.useEffect(() => {
+        // get and set the petition owner's image url
+        const findOwnerImageUrl = async () => {
+            // get and set the petition owner's profile image
+            setPetitionOwnerImage(await getUserImage(petition.ownerId.toString()));
+        }
         // create the rows for the support tier list
         const createSupportTierRows = async () => {
             // Map through each row and make a TableRow for it with all necessary information
@@ -139,6 +162,7 @@ const Petition = () => {
             // save the rows to the support tier rows variable
             setSupportTierRows(rows);
         };
+        findOwnerImageUrl();
         createSupportTierRows();
     }, [petition]);
 
@@ -178,120 +202,172 @@ const Petition = () => {
                 </Alert>
             }
 
-            <Paper elevation={3} className="card">
+            <div id="individual-petition-page">
+                <Paper elevation={3} className="card">
 
-                {/* Header section for the petition page */}
-                <div id="petition-header">
-                    {/* Use the petition image as the header background */}
-                    <div id="petition-header-background">
-                        {/* Display petition's image if available */}
-                        {petitionImage && (
-                            <img
-                                src={petitionImage}
-                                alt="Petition Profile"
-                            />
-                        )}
+                    {/* Header section for the petition page */}
+                    <div id="petition-header">
+                        {/* Use the petition image as the header background */}
+                        <div id="petition-header-background">
+                            {/* Display petition's image if available */}
+                            {petitionImage && (
+                                <img
+                                    src={petitionImage}
+                                    alt="Petition Profile"
+                                />
+                            )}
+                        </div>
+                        {/* Petition title as the page header */}
+                        <div id="petition-header-title">
+                            {petition.title}
+                        </div>
                     </div>
-                    {/* Petition title as the page header */}
-                    <div id="petition-header-title">
-                        {petition.title}
+
+                    {/* Petition description section */}
+                    <div id="petition-description">
+                        {petition.description}
                     </div>
-                </div>
 
-                {/* Petition description section */}
-                <div id="petition-description">
-                    {petition.description}
-                </div>
+                    {/* Button to edit the petition, opens the edit dialog */}
+                    <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
+                        Edit
+                    </Button>
 
-                <div>
-                    <strong>petitionId:</strong> {petition.petitionId}<br/>
-                    <strong>Title:</strong> {petition.title}<br/>
-                    <strong>categoryId:</strong> {petition.categoryId}<br/>
-                    <strong>creationDate:</strong> {petition.creationDate}<br/>
-                    <strong>ownerId:</strong> {petition.ownerId}<br/>
-                    <strong>ownerFirstName:</strong> {petition.ownerFirstName}<br/>
-                    <strong>ownerLastName:</strong> {petition.ownerLastName}<br/>
-                    <strong>numberOfSupporters:</strong> {petition.numberOfSupporters}<br/>
-                    <strong>description:</strong> {petition.description}<br/>
-                    <strong>moneyRaised:</strong> {petition.moneyRaised}<br/>
-                    {/* TODO: need to show all support tiers */}
-                </div>
+                    {/* Display information about the petition */}
+                    <div id="petition-information">
+                        <Paper elevation={1} className="card">
+                            <h4>Information</h4>
+                            <Table>
+                                <TableBody>
+                                    {/* Display category name based on category id */}
+                                    <TableRow>
+                                        <TableCell><strong>Category:</strong></TableCell>
+                                        <TableCell>{categories.find(category => category.id === petition.categoryId)?.name}</TableCell>
+                                    </TableRow>
+                                    {/* Display the petition creation date, in DD/MM/YYYY */}
+                                    <TableRow>
+                                        <TableCell><strong>Created:</strong></TableCell>
+                                        <TableCell>{datetimeToDDMMYYYY(petition.creationDate)}</TableCell>
+                                    </TableRow>
+                                    {/* Display the petition's number of supporters */}
+                                    <TableRow>
+                                        <TableCell><strong>Number of Supporters:</strong></TableCell>
+                                        <TableCell>{petition.numberOfSupporters}</TableCell>
+                                    </TableRow>
+                                    {/* Display the petition's total amount of money raised */}
+                                    <TableRow>
+                                        <TableCell><strong>Money Raised:</strong></TableCell>
+                                        <TableCell>{petition.moneyRaised}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </Paper>
+                    </div>
 
-                <Link to={"/petitions"}>Back to petitions</Link>
+                    {/* Petition owner information section */}
+                    <div id="petition-owner-section">
+                        <Paper elevation={3} className="card">
+                            <h4>Petition Owner</h4>
+                            <Table>
+                                <TableBody>
+                                    <TableRow>
+                                        {/* Petition owner's profile picture */}
+                                        <TableCell className="petition-owner-tablecell" align="right">
+                                            {/* Clicking the owner's name links to their user page */}
+                                            <Link to={`/users/${petition.ownerId}`}>
+                                                {/* If owner has no image (imageUrl is null),
+                                                    display the default image */}
+                                                <img src={petitionOwnerImage || defaultImage}
+                                                     alt="Owner Profile Picture"
+                                                />
+                                            </Link>
+                                        </TableCell>
 
-                <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
-                    Edit
-                </Button>
+                                        {/* Petition owner name */}
+                                        <TableCell align="left">
+                                            <div className="name-link">
+                                                {/* Clicking the owner's name links to their user page */}
+                                                <Link to={`/users/${petition.ownerId}`}>
+                                                    {petition.ownerFirstName} {petition.ownerLastName}
+                                                </Link>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </Paper>
+                    </div>
 
-                {/* Edit Petition Dialog */}
-                <Dialog
-                    open={openEditDialog}
-                    onClose={() => setOpenEditDialog(false)}
-                >
-                    <DialogTitle>Edit Petition</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            Make changes to petition details:
-                        </DialogContentText>
-                        <TextField
-                            label="Title"
-                            value={editPetitionDetails.title || ""}
-                            onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, title: e.target.value })}
-                        /><br />
-                        <TextField
-                            label="Description"
-                            value={editPetitionDetails.description || ""}
-                            onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, description: e.target.value })}
-                        /><br />
-                        <TextField
-                            label="CategoryId"
-                            value={editPetitionDetails.categoryId || ""}
-                            onChange={(e) =>
-                                setEditPetitionDetails({
-                                    ...editPetitionDetails,
-                                    categoryId: parseInt(e.target.value, 10)
-                                })} // TODO: maybe a selector instead?
-                        /><br />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
-                        <Button onClick={editPetition}>Save</Button>
-                    </DialogActions>
-                </Dialog>
+                    {/* Edit Petition Dialog */}
+                    <Dialog
+                        open={openEditDialog}
+                        onClose={() => setOpenEditDialog(false)}
+                    >
+                        <DialogTitle>Edit Petition</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                Make changes to petition details:
+                            </DialogContentText>
+                            <TextField
+                                label="Title"
+                                value={editPetitionDetails.title || ""}
+                                onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, title: e.target.value })}
+                            /><br />
+                            <TextField
+                                label="Description"
+                                value={editPetitionDetails.description || ""}
+                                onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, description: e.target.value })}
+                            /><br />
+                            <TextField
+                                label="CategoryId"
+                                value={editPetitionDetails.categoryId || ""}
+                                onChange={(e) =>
+                                    setEditPetitionDetails({
+                                        ...editPetitionDetails,
+                                        categoryId: parseInt(e.target.value, 10)
+                                    })} // TODO: maybe a selector instead?
+                            /><br />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
+                            <Button onClick={editPetition}>Save</Button>
+                        </DialogActions>
+                    </Dialog>
 
-                <h3> Support Tiers </h3>
+                    <h3> Support Tiers </h3>
 
-                {/* Support Tier table */}
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                {supportTierHeadCells.map((headCell) => (
-                                    <TableCell
-                                        key={headCell.id}
-                                        align={headCell.numeric ? 'right' : 'left'}
-                                        padding={'normal'}
-                                    >
-                                        {headCell.label}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {/* Display the petition's support tier rows */}
-                            {supportTierRows}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                    {/* Support Tier table */}
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    {supportTierHeadCells.map((headCell) => (
+                                        <TableCell
+                                            key={headCell.id}
+                                            align={'left'}
+                                            padding={'normal'}
+                                        >
+                                            {headCell.label}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {/* Display the petition's support tier rows */}
+                                {supportTierRows}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
 
-                {/* Snackbar component */}
-                <Snackbar
-                    open={snackOpen}
-                    autoHideDuration={6000}
-                    onClose={handleSnackClose}
-                    message={snackMessage}
-                />
-            </Paper>
+                    {/* Snackbar component */}
+                    <Snackbar
+                        open={snackOpen}
+                        autoHideDuration={6000}
+                        onClose={handleSnackClose}
+                        message={snackMessage}
+                    />
+                </Paper>
+            </div>
         </div>
     );
 };

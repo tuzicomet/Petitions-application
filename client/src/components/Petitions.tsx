@@ -20,16 +20,17 @@ import { getUserImage } from "../services/UserService";
 interface HeadCell {
     id: string;
     label: string;
-    numeric: boolean;
 }
 
 // Define table head cells
 // (the columns in the petitions list)
 const headCells: readonly HeadCell[] = [
-    { id: 'ID', label: 'ID', numeric: true },
-    { id: 'title', label: 'Title', numeric: false },
-    { id: 'link', label: 'Link', numeric: false },
-    { id: 'actions', label: 'Actions', numeric: false }
+    { id: 'ID', label: 'ID' },
+    { id: 'image', label: 'Image' },
+    { id: 'title', label: 'Title' },
+    { id: 'creationDate', label: 'Creation Date' },
+    { id: 'category', label: 'Category' },
+    { id: 'owner', label: 'Owner' }
 ];
 
 // Available petition categories
@@ -129,20 +130,22 @@ const Petitions = () => {
                             </TableCell>
 
                             {/* Petition title */}
-                            <TableCell align="right">
-                                {/* Clicking the title links the client to that petition's page */}
-                                <Link to={`/petitions/${petition.petitionId}`}>
-                                    {petition.title}
-                                </Link>
+                            <TableCell>
+                                <div className="name-link">
+                                    {/* Clicking the title links the client to that petition's page */}
+                                    <Link to={`/petitions/${petition.petitionId}`}>
+                                        {petition.title}
+                                    </Link>
+                                </div>
                             </TableCell>
 
                             {/* Petition creation date */}
-                            <TableCell align="right">
+                            <TableCell>
                                 {creationDate}
                             </TableCell>
 
                             {/* Petition category */}
-                            <TableCell align="right">
+                            <TableCell>
                                 {/* From the categories array, find the record where the
                                  id value matches the petition.categoryId value */}
                                 {/* See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
@@ -167,15 +170,17 @@ const Petitions = () => {
                             </TableCell>
 
                             {/* Petition owner name */}
-                            <TableCell align="right">
-                                {/* Clicking the owner's name links to their user page */}
-                                <Link to={`/users/${petition.ownerId}`}>
-                                    {petition.ownerFirstName} {petition.ownerLastName}
-                                </Link>
+                            <TableCell>
+                                <div className="name-link">
+                                    {/* Clicking the owner's name links to their user page */}
+                                    <Link to={`/users/${petition.ownerId}`}>
+                                        {petition.ownerFirstName} {petition.ownerLastName}
+                                    </Link>
+                                </div>
                             </TableCell>
 
                             {/* Petition supporting cost (of the minimum tier) */}
-                            <TableCell align="right">
+                            <TableCell>
                                 {/* TODO */}
                             </TableCell>
 
@@ -499,7 +504,7 @@ const Petitions = () => {
                                 {headCells.map((headCell) => (
                                     <TableCell
                                         key={headCell.id}
-                                        align={headCell.numeric ? 'right' : 'left'}
+                                        align={'left'}
                                         padding={'normal'}
                                     >
                                         {headCell.label}

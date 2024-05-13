@@ -8,7 +8,6 @@ import React from "react";
 export const getUser = async (id: string | undefined, savedAuthToken: string | null,
                               setUser: Function, setAuthenticatedAsUser: Function,
                               setErrorFlag: Function, setErrorMessage: Function) => {
-    console.log("gettig user: ", id)
     // send a request to GET the user with the given id
     axios.get<User>(`http://localhost:4941/api/v1/users/${id}`, {
         headers: {
