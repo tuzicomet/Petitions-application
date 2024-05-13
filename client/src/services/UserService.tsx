@@ -137,3 +137,24 @@ export const changeUserImage = async (event: React.ChangeEvent<HTMLInputElement>
         setErrorMessage("Error reading the file.");
     };
 };
+
+
+// Function to fetch user data
+export const isClientAuthenticatedAsUser = async (userId: string | undefined,
+                                                  savedAuthToken: string | null): Promise<boolean> => {
+    try {
+        // send a request to GET the user with the given id
+        const response = await axios.get<User>(`http://localhost:4941/api/v1/users/${userId}`, {
+            headers: {
+                // Include the savedAuthToken in the request header as X-Authorization
+                'X-Authorization': savedAuthToken
+            }
+        });
+        // if request is successful
+        // email will only be returned if the savedAuthToken matches the user's authToken
+        // so if email is present, return true, otherwise return false
+        return !!response.data.email;
+    } catch (error) {
+        return false;
+    }
+};
