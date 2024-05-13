@@ -4,7 +4,7 @@ import React from "react";
 import {useNavigate} from 'react-router-dom';
 import { Button, Paper, TextField, Alert, AlertTitle, MenuItem } from "@mui/material"; // Material-UI components for styling
 import Navbar from "./Navbar";
-import { createPetition } from "../services/PetitionService";
+import {changePetitionImage, createPetition} from "../services/PetitionService";
 import defaultImage from "../assets/default_picture.jpg";
 
 // Available petition categories
@@ -108,9 +108,14 @@ const NewPetition = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         // Call createPetition function to handle creating the petition
-        // if successful, it will redirect to the newly created petition's page
-        await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
-                             setErrorFlag, setErrorMessage, navigate);
+        const createdPetitionId = await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
+                                                       setErrorFlag, setErrorMessage);
+        console.log(createdPetitionId);
+        // If the result was not null (i.e. was successful, thus returning the created petition's id)
+        if (createdPetitionId !== null) {
+            // navigate to the newly created petition's page
+            navigate(`/petitions/${createdPetitionId}`);
+        }
     };
 
     return (

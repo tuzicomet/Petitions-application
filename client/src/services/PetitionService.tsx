@@ -2,6 +2,7 @@
 // contains methods for to getting or modifying petition-related data
 
 import axios from "axios";
+import React from "react";
 
 // Function to fetch petitions from API, which match the specifications given
 export const getPetitions = async (searchQuery: string, selectedCategories: number[],
@@ -70,8 +71,8 @@ export const getPetitionImage = async ( id: number ) => {
     }
 }
 
-// Function to add a new petition
-export const createPetition = async (savedAuthToken: string | null,
+// Function to add a new petition, returns the petition id if successful, otherwise null
+export const createPetition = async  (savedAuthToken: string | null,
                                      title: string,
                                      description: string,
                                      categoryId: number,
@@ -79,10 +80,12 @@ export const createPetition = async (savedAuthToken: string | null,
                                      supportTiers: { title: string; description: string; cost: string }[],
                                      setErrorFlag: Function,
                                      setErrorMessage: Function,
-                                     // pass in the navigate function, so we can redirect from here
-                                     navigate: (path: string) => void) => {
+                                     ): Promise<number | null> => {
+    // initialize the variable to return
+    let createdPetitionId: number | null = null;
+
     // Make a post request to the petition endpoint with the entered in values
-    axios.post("http://localhost:4941/api/v1/petitions", {
+    await axios.post("http://localhost:4941/api/v1/petitions", {
         title,
         description,
         categoryId,
@@ -97,8 +100,8 @@ export const createPetition = async (savedAuthToken: string | null,
             console.log("Petition successfully created ", response.data);
             setErrorFlag(false);
             setErrorMessage("");
-            // navigate to the newly created petition's page
-            navigate(`/petitions/${response.data.petitionId}`);
+            // save the id of the created petition
+            createdPetitionId = response.data.petitionId;
         })
         // if there was an error with the registration
         .catch((error) => {
@@ -106,5 +109,9 @@ export const createPetition = async (savedAuthToken: string | null,
             // if the response had an error message
             setErrorFlag(true);
             setErrorMessage(error.toString());
+            return null;
         });
+    return createdPetitionId;
+};
+
 };
