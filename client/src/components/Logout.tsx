@@ -9,6 +9,8 @@ const Logout = () => {
     const handleLogout = () => {
         // remove the auth token from local storage
         localStorage.removeItem("savedAuthToken");
+        // remove the saved user id from local storage
+        localStorage.removeItem("clientUserId");
         // redirect the user to another page
         navigate("/");
     };
