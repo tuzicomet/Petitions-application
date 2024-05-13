@@ -69,3 +69,38 @@ export const getPetitionImage = async ( id: number ) => {
         return;
     }
 }
+
+// Function to add a new petition
+export const createPetition = async (title: string,
+                                     description: string,
+                                     categoryId: number,
+                                     supportTiers: SupportTier[],
+                                     setErrorFlag: Function,
+                                     setErrorMessage: Function) => {
+    // Make a post request to the petition endpoint with the entered in values
+    axios.post("http://localhost:4941/api/v1/petitions", {
+        title,
+        description,
+        categoryId,
+        supportTiers
+    })
+        // if petition creation was successful
+        .then((response) => {
+            console.log("Petition successfully created ", response.data);
+            setErrorFlag(false);
+            setErrorMessage("");
+        })
+        // if there was an error with the registration
+        .catch((error) => {
+            console.error("Petition creation failed: ", error);
+            // if the response had an error message
+            if (error.response && error.response.data) {
+                setErrorFlag(true);
+                setErrorMessage(error.toString());
+            } else { // if not, just set a generic error message
+                setErrorFlag(true);
+                setErrorMessage(error.toString());
+
+            }
+        });
+};
