@@ -17,7 +17,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
 import { datetimeToDDMMYYYY } from "../utils/Utils";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
-import { getUserImage } from "../services/UserService";
+import {getUserImage, isClientAuthenticatedAsUser} from "../services/UserService";
 
 // interface for table head cell
 interface HeadCell {
@@ -83,6 +83,8 @@ const Petition = () => {
     const [petitionOwnerImage, setPetitionOwnerImage] = React.useState<string | null>("");
     // State variable to hold the support tier rows in the petition list
     const [supportTierRows, setSupportTierRows] = React.useState<React.ReactNode[]>([]);
+    // State variable boolean, true if the user is authenticated as the owner of the petition, false otherwise
+    const [authenticatedAsOwner, setAuthenticatedAsOwner] = React.useState(false);
 
 
     // Function to close the Snackbar
@@ -145,6 +147,11 @@ const Petition = () => {
             // get and set the petition owner's profile image
             setPetitionOwnerImage(await getUserImage(petition.ownerId.toString()));
         }
+        // check whether client is authenticated as the owner of the petition they're viewing
+        const isClientAuthenticatedAsOwner = async () => {
+            // set the result to the authenticatedAsOwner state variable
+            setAuthenticatedAsOwner(await isClientAuthenticatedAsUser(petition.ownerId.toString(), savedAuthToken));
+        }
         // create the rows for the support tier list
         const createSupportTierRows = async () => {
             // Map through each row and make a TableRow for it with all necessary information
@@ -164,6 +171,7 @@ const Petition = () => {
         };
         findOwnerImageUrl();
         createSupportTierRows();
+        isClientAuthenticatedAsOwner();
     }, [petition]);
 
     // Function to edit the petition details
@@ -228,10 +236,13 @@ const Petition = () => {
                         {petition.description}
                     </div>
 
-                    {/* Button to edit the petition, opens the edit dialog */}
-                    <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
-                        Edit
-                    </Button>
+                    {/* Only display if the client is authenticated as the owner fo the petition they're viewing */}
+                    {authenticatedAsOwner &&
+                        // Button to edit the petition, opens the edit dialog
+                        <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
+                            Edit
+                        </Button>
+                    }
 
                     {/* Display information about the petition */}
                     <div id="petition-information">
