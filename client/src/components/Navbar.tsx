@@ -7,6 +7,8 @@ import {Button} from "@mui/material";
 const Navbar = () => {
     // boolean saying whether the client is logged in
     const [clientIsLoggedIn, setClientIsLoggedIn] = React.useState(false);
+    // id of the user which the client is logged in as, from local storage (null if client is not logged in)
+    const clientUserId = localStorage.getItem("clientUserId");
 
     React.useEffect(() => {
         const checkIfUserIsLoggedIn = () => {
@@ -36,7 +38,8 @@ const Navbar = () => {
                 {/* Only show if client is logged in */}
                 {clientIsLoggedIn && (
                     <Button>
-                        <Link to="/profile">Profile</Link>
+                        {/* Profile button, links to the user's respective user page */}
+                        <Link to={`/users/${clientUserId}`}>Profile</Link>
                     </Button>
                 )}
 
