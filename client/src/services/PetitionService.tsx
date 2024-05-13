@@ -71,10 +71,12 @@ export const getPetitionImage = async ( id: number ) => {
 }
 
 // Function to add a new petition
-export const createPetition = async (title: string,
+export const createPetition = async (savedAuthToken: string | null,
+                                     title: string,
                                      description: string,
                                      categoryId: number,
-                                     supportTiers: SupportTier[],
+                                     // supportTiers is an array made up of objects following this format:
+                                     supportTiers: { title: string; description: string; cost: string }[],
                                      setErrorFlag: Function,
                                      setErrorMessage: Function) => {
     // Make a post request to the petition endpoint with the entered in values
@@ -83,6 +85,10 @@ export const createPetition = async (title: string,
         description,
         categoryId,
         supportTiers
+    }, {
+        headers: {
+            'X-Authorization': savedAuthToken
+        }
     })
         // if petition creation was successful
         .then((response) => {
@@ -94,13 +100,7 @@ export const createPetition = async (title: string,
         .catch((error) => {
             console.error("Petition creation failed: ", error);
             // if the response had an error message
-            if (error.response && error.response.data) {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            } else { // if not, just set a generic error message
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-
-            }
+            setErrorFlag(true);
+            setErrorMessage(error.toString());
         });
 };

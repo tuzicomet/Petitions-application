@@ -17,9 +17,6 @@ import {
     Table,
     TableBody
 } from "@mui/material"; // Material-UI components for styling
-// icons for the password visibility toggle button
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import CSS from 'csstype';
 import Navbar from "./Navbar";
 import { createPetition } from "../services/PetitionService";
 
@@ -50,6 +47,8 @@ const NewPetition = () => {
     const [title, setTitle] = React.useState("");
     const [description, setDescription] = React.useState("");
     const [categoryId, setCategoryId] = React.useState<number>(0);
+    // Get the saved authToken from local storage
+    const savedAuthToken = localStorage.getItem("savedAuthToken");
 
     const navigate = useNavigate(); // navigation function for navigating to different pages
     // state variable to hold objects, each containing information for a new support tier
@@ -97,6 +96,9 @@ const NewPetition = () => {
         e.preventDefault();
         // Call createPetition function to handle creating the petition
         createPetition(title, description, categoryId, [], setErrorFlag, setErrorMessage);
+        // if successful, it will return the newly created petition's id
+        const createPetitionResult = await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
+                                                                setErrorFlag, setErrorMessage);
     };
 
     return (
