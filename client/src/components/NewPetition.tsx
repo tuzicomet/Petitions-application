@@ -107,14 +107,19 @@ const NewPetition = () => {
     // Function to handle form submission
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Call createPetition function to handle creating the petition
-        const createdPetitionId = await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
-                                                       setErrorFlag, setErrorMessage);
-        console.log(createdPetitionId);
-        // If the result was not null (i.e. was successful, thus returning the created petition's id)
-        if (createdPetitionId !== null) {
-            // navigate to the newly created petition's page
-            navigate(`/petitions/${createdPetitionId}`);
+        // An image must have been uploaded in order to attempt submission
+        if (petitionImage !== null) {
+            // Call createPetition function to handle creating the petition
+            const createdPetitionId = await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
+                setErrorFlag, setErrorMessage);
+            // If the result was not null (i.e. was successful, thus returning the created petition's id)
+            if (createdPetitionId !== null) {
+                // Change the petition's image with the uploaded image
+                await changePetitionImage(petitionImage, createdPetitionId, savedAuthToken, setErrorFlag, setErrorMessage)
+
+                // navigate to the newly created petition's page
+                navigate(`/petitions/${createdPetitionId}`);
+            }
         }
     };
 
@@ -153,6 +158,7 @@ const NewPetition = () => {
                                 />
                             ) : (
                                 // Otherwise, display a default image
+                                // TODO: change default image
                                 <img
                                     src={defaultImage}
                                     alt="Default"
