@@ -239,3 +239,10 @@
   color: red !important;
   border-color: red !important;
 }
+
+/* Styling for the preview image on the create petition form */
+#petition-image-preview img {
+  width: 8em;
+  height: 8em;
+  border-radius: 1em;
+}

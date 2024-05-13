@@ -5,6 +5,7 @@ import {useNavigate} from 'react-router-dom';
 import { Button, Paper, TextField, Alert, AlertTitle, MenuItem } from "@mui/material"; // Material-UI components for styling
 import Navbar from "./Navbar";
 import { createPetition } from "../services/PetitionService";
+import defaultImage from "../assets/default_picture.jpg";
 
 // Available petition categories
 const categories = [
@@ -42,6 +43,17 @@ const NewPetition = () => {
     const [supportTiers, setSupportTiers] = React.useState([
         { title: "", description: "", cost: "" }
     ]);
+
+    const [petitionImage, setPetitionImage] = React.useState<File | null>(null); // State variable for petition image file
+    // reference to the hidden file input element
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    // Function to handle change in petition image input
+    const handleChangePetitionImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setPetitionImage(event.target.files[0]); // Set the selected image file
+        }
+    };
 
     // Function to handle updating a field value for a specific support tier
     const handleTierChange = (index: number, field: string, value: string) => {
@@ -122,6 +134,36 @@ const NewPetition = () => {
 
                     {/* Container for the form components */}
                     <div id="vertical-form-container">
+
+                        {/* Preview of petition image. When clicked, prompts user to upload an image */}
+                        {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
+                        <div id="petition-image-preview"
+                             onClick={() => fileInputRef.current?.click()}>
+                            {petitionImage ? (
+                                // If the user has uploaded an image (petitionImage exists)
+                                <img
+                                    // create a URL from the uploaded petitionImage to display
+                                    src={URL.createObjectURL(petitionImage)}
+                                    alt="Petition Preview"
+                                />
+                            ) : (
+                                // Otherwise, display a default image
+                                <img
+                                    src={defaultImage}
+                                    alt="Default"
+                                />
+                            )}
+                        </div>
+
+                        {/* Hidden petition image upload input */}
+                        <input
+                            id="file-input"
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef} // variable which references this element
+                            style={{ display: 'none' }} // Hide the input
+                            onChange={handleChangePetitionImage}
+                        />
 
                         {/* Title input field */}
                         <div id="title-input-field-container">
