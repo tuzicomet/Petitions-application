@@ -198,6 +198,11 @@ const Petition = () => {
                     </div>
                 </div>
 
+                {/* Petition description section */}
+                <div id="petition-description">
+                    {petition.description}
+                </div>
+
                 <div>
                     <strong>petitionId:</strong> {petition.petitionId}<br/>
                     <strong>Title:</strong> {petition.title}<br/>

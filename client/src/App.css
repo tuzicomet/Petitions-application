@@ -154,3 +154,10 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* Styling for the petition description section */
+#petition-description {
+  font-style: italic;
+  padding: 1.3em;
+  font-size: 1.1em;
+}
