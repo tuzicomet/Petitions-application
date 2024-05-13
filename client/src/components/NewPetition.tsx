@@ -55,7 +55,10 @@ const NewPetition = () => {
             // the uploaded file must be an accepted type (png, jpeg, gif)
             if (supportedTypes.includes(event.target.files[0].type)) {
                 setPetitionImage(event.target.files[0]); // Set the selected image file
-            } // TODO: display an error message otherwise
+            } else {
+                setErrorFlag(true);
+                setErrorMessage("Uploaded images must be of MIME type: image/png, image/jpeg, or image/gif")
+            }
         }
     };
 
@@ -124,6 +127,10 @@ const NewPetition = () => {
                 // navigate to the newly created petition's page
                 navigate(`/petitions/${createdPetitionId}`);
             }
+        } else {
+            // if no image was provided
+            setErrorFlag(true);
+            setErrorMessage("You must provide an image for the petition.")
         }
     };
 
@@ -283,8 +290,6 @@ const NewPetition = () => {
                                 ))}
 
                         </div>
-
-                        {/* TODO: allow user to add image, needs separate request */}
 
                         {/* Submit registration form button */}
                         <div id="submit-button">
