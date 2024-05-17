@@ -62,14 +62,22 @@ const Petitions = () => {
     const [newPetitionTitle, setNewPetitionTitle] = React.useState("");
 
     const [openSearchDialog, setOpenSearchDialog] = React.useState(false);
-    const [searchQuery, setSearchQuery] = React.useState(""); // query to search the petition list with
+    // query to search the petition list with
+    const [searchQuery, setSearchQuery] = React.useState("");
+    // temporary query to store as the user is still modifying their query
+    // (NOTE: these temporary queries are to make sure that queries only apply if the user confirms them)
+    const [tempSearchQuery, setTempSearchQuery] = React.useState("");
 
     const [openFilterDialog, setOpenFilterDialog] = React.useState(false);
     const [selectedCategories, setSelectedCategories] = React.useState<number[]>([]); // categories to filter petitions by
+    const [tempSelectedCategories, setTempSelectedCategories] = React.useState<number[]>([]);
     const [supportCostQuery, setSupportCostQuery] = React.useState(""); // queried support cost filter
+    const [tempSupportCostQuery, setTempSupportCostQuery] = React.useState("");
+
 
     const [openSortDialog, setOpenSortDialog] = React.useState(false);
     const [sortQuery, setSortQuery] = React.useState(""); // rule to sort the petition list by
+    const [tempSortQuery, setTempSortQuery] = React.useState("");
 
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
@@ -198,6 +206,8 @@ const Petitions = () => {
 
     // Function to open the search petition dialog
     const handleSearchDialogOpen = () => {
+        // reset the temporary search query
+        setTempSearchQuery(searchQuery);
         setOpenSearchDialog(true);
     };
 
@@ -206,13 +216,22 @@ const Petitions = () => {
         setOpenSearchDialog(false);
     };
 
-    // Function to update the search query state
-    const updateSearchQueryState = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
+    // Function to update the temporary search query state
+    const updateTempSearchQueryState = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTempSearchQuery(e.target.value);
+    };
+
+    // Function to handle confirming the search action
+    const handleSearch = () => {
+        setSearchQuery(tempSearchQuery); // Update search query
+        getPetitions(tempSearchQuery, selectedCategories, supportCostQuery, sortQuery, setPetitions, setErrorFlag, setErrorMessage); // Perform search
     };
 
     // Function to open the filter petition dialog
-    const handleFilterDialogOpen = () => {
+    const handleFilterDialogOpen = ()  => {
+        // reset the temporary filter values
+        setTempSelectedCategories(selectedCategories);
+        setTempSupportCostQuery(supportCostQuery);
         setOpenFilterDialog(true);
     };
 
@@ -222,42 +241,63 @@ const Petitions = () => {
     };
 
     // Function to handle when a category id is selected from the dropdown
-    const handleCategorySelection = (categoryId: number) => {
+    const handleTempCategorySelection = (categoryId: number) => {
         // if the category (given by id) is not already selected
-        if (!selectedCategories.includes(categoryId)) {
+        if (!tempSelectedCategories.includes(categoryId)) {
             // Add the category id to the list of selected categories
             // (the ... makes a copy of the array that we can add to)
             // see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
-            setSelectedCategories([...selectedCategories, categoryId]);
+            setTempSelectedCategories([...tempSelectedCategories, categoryId]);
         } else {
             // otherwise, un-select the category
-            handleRemoveCategory(categoryId);
+            handleRemoveTempCategory(categoryId);
         }
     };
 
-    // function to handle removing a category id from the category id list
-    const handleRemoveCategory = (categoryId: number) => {
-        // Copies over all ids in selectedCategories, except for the given category id
+    // function to handle removing a category id from the temporary category id list
+    const handleRemoveTempCategory = (categoryId: number) => {
+        // Copies over all ids in tempSelectedCategories, except for the given category id
         // if found, which is ignored.
-        const updatedCategories = selectedCategories.filter(
+        const updatedCategories = tempSelectedCategories.filter(
             (id) => id !== categoryId);
-        // update the selectedCategories state variable
-        setSelectedCategories(updatedCategories);
+        // update the tempSelectedCategories state variable
+        setTempSelectedCategories(updatedCategories);
     };
 
-    // Function to update the support cost filter query state, based on the given input
-    const updateSupportCostQueryState = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSupportCostQuery(e.target.value);
+    // Function to handle confirming the filter action
+    const handleFilter = () => {
+        setSelectedCategories(tempSelectedCategories); // Update selected categories
+        setSupportCostQuery(tempSupportCostQuery); // Update support cost query
+        getPetitions(searchQuery, tempSelectedCategories, tempSupportCostQuery, sortQuery, setPetitions, setErrorFlag, setErrorMessage); // Perform filter
+    };
+
+    // Function to update the temporary support cost filter query state, based on the given input
+    const updateTempSupportCostQueryState = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTempSupportCostQuery(e.target.value);
     };
 
     // Function to open the sort petition dialog
     const handleSortDialogOpen = () => {
+        // reset the temporary sort query
+        setTempSortQuery(sortQuery);
         setOpenSortDialog(true);
     };
 
     // Function to close the sort petition dialog
     const handleSortDialogClose = () => {
         setOpenSortDialog(false);
+    };
+
+    // apply any temporary sorting query
+    const applySortQuery = () => {
+        setSortQuery(tempSortQuery);
+        setOpenSortDialog(false);
+    };
+
+    // Function to handle the confirm sort action
+    const handleSort = () => {
+        setSortQuery(tempSortQuery); // Update sort query
+        getPetitions(searchQuery, selectedCategories, supportCostQuery, tempSortQuery, setPetitions, setErrorFlag, setErrorMessage); // Perform sort
     };
 
     // Function to add a new petition
@@ -308,8 +348,8 @@ const Petitions = () => {
                         id="outlined-basic"
                         label="Search query"
                         variant="outlined"
-                        value={searchQuery}
-                        onChange={updateSearchQueryState}
+                        value={tempSearchQuery}
+                        onChange={updateTempSearchQueryState}
                     />
                 </DialogContent>
                 <DialogActions>
@@ -317,14 +357,7 @@ const Petitions = () => {
                     {/* Search Button */}
                     <Button variant="outlined" endIcon={<Search />}
                             onClick={() => {
-                                getPetitions(
-                                    searchQuery,
-                                    selectedCategories,
-                                    supportCostQuery,
-                                    sortQuery,
-                                    setPetitions,
-                                    setErrorFlag,
-                                    setErrorMessage); // perform the search
+                                handleSearch();
                                 handleSearchDialogClose(); // close the search dialog
                             }} autoFocus>
                         Search
@@ -351,7 +384,7 @@ const Petitions = () => {
                             select
                             label="Select Category"
                             value=""
-                            onChange={(e) => handleCategorySelection(Number(e.target.value))}
+                            onChange={(e) => handleTempCategorySelection(Number(e.target.value))}
                             variant="outlined"
                         >
                             <MenuItem value="" disabled>
@@ -364,7 +397,7 @@ const Petitions = () => {
                                           value={category.id}
                                           // if the category is already selected, then give it the selected-category
                                           // id, so it can be styled different to indicate that its already selected
-                                          id={selectedCategories.includes(category.id) ? 'selected-category' : ''}
+                                          id={tempSelectedCategories.includes(category.id) ? 'selected-category' : ''}
                                 >
                                     {/* Display each option as "{id} - {name}" */}
                                     {`${category.id} - ${category.name}`}
@@ -378,12 +411,12 @@ const Petitions = () => {
                     {/* Resource used for creating deletable chips:
                     https://mui.com/material-ui/react-chip/*/}
                     <div id="category-chip-container">
-                        {selectedCategories.map((categoryId) => (
+                        {tempSelectedCategories.map((categoryId) => (
                             <Chip
                                 key={categoryId}
                                 // label the chip with the category's name
                                 label={categories.find((category) => category.id === categoryId)?.name || ""}
-                                onDelete={() => handleRemoveCategory(categoryId)}
+                                onDelete={() => handleRemoveTempCategory(categoryId)}
                                 style={{ margin: "5px" }}
                             />
                         ))}
@@ -394,8 +427,8 @@ const Petitions = () => {
                         id="outlined-basic"
                         label="Maximum Support Cost"
                         variant="outlined"
-                        value={supportCostQuery}
-                        onChange={updateSupportCostQueryState}
+                        value={tempSupportCostQuery}
+                        onChange={updateTempSupportCostQueryState}
                     />
                 </DialogContent>
                 <DialogActions>
@@ -403,14 +436,8 @@ const Petitions = () => {
                     {/* Filter Button */}
                     <Button variant="outlined" endIcon={<Filter/>}
                             onClick={() => {
-                                getPetitions(
-                                    searchQuery,
-                                    selectedCategories,
-                                    supportCostQuery,
-                                    sortQuery,
-                                    setPetitions,
-                                    setErrorFlag,
-                                    setErrorMessage); // refresh the list with the new filter
+                                // apply the filter and refresh the list
+                                handleFilter();
                                 handleFilterDialogClose(); // close the filter dialog
                             }} autoFocus>
                         Filter
@@ -438,9 +465,9 @@ const Petitions = () => {
                         <Select
                             labelId="sort-label"
                             id="sort-select"
-                            value={sortQuery}
-                            // update sortQuery to whatever (value) is picked
-                            onChange={(e) => setSortQuery(e.target.value)}
+                            value={tempSortQuery}
+                            // update temporary sortQuery to whatever (value) is picked
+                            onChange={(e) => setTempSortQuery(e.target.value)}
                             label="Sort By"
                         >
                             {/* Dropdown items, all available sorting methods */}
@@ -459,14 +486,8 @@ const Petitions = () => {
                     {/* Sort Button */}
                     <Button variant="outlined" endIcon={<Sort />}
                             onClick={() => {
-                                getPetitions(
-                                    searchQuery,
-                                    selectedCategories,
-                                    supportCostQuery,
-                                    sortQuery,
-                                    setPetitions,
-                                    setErrorFlag,
-                                    setErrorMessage); // refresh the list with the new sorting
+                                // set the temp sort query values to the actual query variable and refresh
+                                handleSort();
                                 handleSortDialogClose(); // close the sort dialog
                             }} autoFocus>
                         Sort
