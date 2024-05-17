@@ -58,7 +58,6 @@ const Petitions = () => {
     const [petitions, setPetitions] = React.useState<Array<PetitionFull>>([]);
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
-    const [showCreateModal, setShowCreateModal] = React.useState(false);
     const [newPetitionTitle, setNewPetitionTitle] = React.useState("");
 
     const [openSearchDialog, setOpenSearchDialog] = React.useState(false);
@@ -553,23 +552,6 @@ const Petitions = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Paper>
-
-            {/* Add Petition section */}
-            <Paper elevation={3} className="card">
-                <h1>Add a new petition</h1>
-                <Stack direction="row" spacing={2} justifyContent="center">
-                    <TextField
-                        id="outlined-basic"
-                        label="Title"
-                        variant="outlined"
-                        value={newPetitionTitle}
-                        onChange={(event) => setNewPetitionTitle(event.target.value)}
-                    />
-                    <Button variant="outlined" onClick={addPetition}>
-                        Submit
-                    </Button>
-                </Stack>
             </Paper>
 
             {/* Snackbar component to wrap the error Alert in */}
