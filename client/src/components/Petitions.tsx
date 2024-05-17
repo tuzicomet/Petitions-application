@@ -141,6 +141,12 @@ const Petitions = () => {
         fetchPetitionsWithPagination();
     }, [currentPage, pageSize, searchQuery, selectedCategories, supportCostQuery, sortQuery]);
 
+    // Function to change to the selected page size (number of petitions per page)
+    // based on what the user selects from the dropdown select element
+    const handleChangePageSize = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newPageSize = parseInt(e.target.value, 10);
+        setPageSize(newPageSize);
+    };
 
     // Function to close Snackbar
     const handleSnackClose = () => {
@@ -385,7 +391,7 @@ const Petitions = () => {
     return (
         <div>
             {/* Navigation Bar */}
-            <Navbar />
+            <Navbar/>
 
             {/* Show error Alert if errorFlag is true */}
             {errorFlag &&
@@ -417,7 +423,7 @@ const Petitions = () => {
                 <DialogActions>
                     <Button onClick={handleSearchDialogClose}>Cancel</Button>
                     {/* Search Button */}
-                    <Button variant="outlined" endIcon={<Search />}
+                    <Button variant="outlined" endIcon={<Search/>}
                             onClick={() => {
                                 handleSearch();
                                 handleSearchDialogClose(); // close the search dialog
@@ -457,8 +463,8 @@ const Petitions = () => {
                             {categories.map((category) => (
                                 <MenuItem key={category.id}
                                           value={category.id}
-                                          // if the category is already selected, then give it the selected-category
-                                          // id, so it can be styled different to indicate that its already selected
+                                    // if the category is already selected, then give it the selected-category
+                                    // id, so it can be styled different to indicate that its already selected
                                           id={tempSelectedCategories.includes(category.id) ? 'selected-category' : ''}
                                 >
                                     {/* Display each option as "{id} - {name}" */}
@@ -479,7 +485,7 @@ const Petitions = () => {
                                 // label the chip with the category's name
                                 label={categories.find((category) => category.id === categoryId)?.name || ""}
                                 onDelete={() => handleRemoveTempCategory(categoryId)}
-                                style={{ margin: "5px" }}
+                                style={{margin: "5px"}}
                             />
                         ))}
                     </div>
@@ -546,7 +552,7 @@ const Petitions = () => {
                 <DialogActions>
                     <Button onClick={handleSortDialogClose}>Cancel</Button>
                     {/* Sort Button */}
-                    <Button variant="outlined" endIcon={<Sort />}
+                    <Button variant="outlined" endIcon={<Sort/>}
                             onClick={() => {
                                 // set the temp sort query values to the actual query variable and refresh
                                 handleSort();
@@ -576,19 +582,19 @@ const Petitions = () => {
                 }
 
                 {/* Search button which opens the search dialog */}
-                <Button variant="outlined" endIcon={<Search />}
+                <Button variant="outlined" endIcon={<Search/>}
                         onClick={handleSearchDialogOpen}>
                     Search
                 </Button>
 
                 {/* Filter button which opens the filter dialog */}
-                <Button variant="outlined" endIcon={<Filter />}
+                <Button variant="outlined" endIcon={<Filter/>}
                         onClick={handleFilterDialogOpen}>
                     Filter
                 </Button>
 
                 {/* Sort button which opens the sort dialog */}
-                <Button variant="outlined" endIcon={<Sort />}
+                <Button variant="outlined" endIcon={<Sort/>}
                         onClick={handleSortDialogOpen}>
                     Sort
                 </Button>
@@ -616,6 +622,15 @@ const Petitions = () => {
                     </Table>
                 </TableContainer>
             </Paper>
+
+            Petitions per page:
+            {/* Dropdown to allow user to select the number of petitions to display */}
+            <select id="perPage" value={pageSize} onChange={handleChangePageSize}>
+                {/* Allow user to select an option from 5-10 (inclusive) */}
+                {[5, 6, 7, 8, 9, 10].map(option => (
+                    <option key={option} value={option}>{option}</option>
+                ))}
+            </select>
 
             <div className="pagination-controls">
                 {/* Button to go to first page */}
@@ -663,7 +678,7 @@ const Petitions = () => {
                 onClose={handleSnackClose}
                 key={snackMessage}
             >
-                <Alert onClose={handleSnackClose} severity="success" sx={{ width: '100%' }}>
+                <Alert onClose={handleSnackClose} severity="success" sx={{width: '100%'}}>
                     {snackMessage}
                 </Alert>
             </Snackbar>
