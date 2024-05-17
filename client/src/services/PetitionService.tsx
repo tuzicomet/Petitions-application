@@ -7,7 +7,9 @@ import axios from "axios";
 export const getPetitions = async (searchQuery: string, selectedCategories: number[],
                                    supportCostQuery: string, sortQuery: string,
                                    setPetitions: Function, setErrorFlag: Function,
-                                   setErrorMessage: Function) => {
+                                   setErrorMessage: Function, count?: number,
+                                   startIndex?: number,
+                                   ) => {
     // Initialize an object to hold the query parameters
     // Query parameters will be passed in only if they are given
     const queryParams: Record<string, string | number[]> = {};
@@ -33,6 +35,16 @@ export const getPetitions = async (searchQuery: string, selectedCategories: numb
     // check if a sorting method was selected
     if (sortQuery !== "") {
         queryParams['sortBy'] = sortQuery; // add as the sortBy parameter
+    }
+
+    // If count is provided, add it to the queryParams
+    if (count !== undefined) {
+        queryParams['count'] = count.toString();
+    }
+
+    // If startIndex is provided, add it to the queryParams
+    if (startIndex !== undefined) {
+        queryParams['startIndex'] = startIndex.toString();
     }
 
     axios.get('http://localhost:4941/api/v1/petitions', {
@@ -166,4 +178,48 @@ export const changePetitionImage = async (uploadedImage: File,
             setErrorMessage("Error reading the file.");
         };
     });
+};
+
+
+// Function to fetch number of petitions matching the given specifications
+// Similar to getPetitions but does not apply pagination, and only returns the number of results
+export const getNumberOfPetitions = async (
+    searchQuery: string,
+    selectedCategories: number[],
+    supportCostQuery: string,
+    sortQuery: string
+): Promise<number> => {
+    // Initialize an object to hold the query parameters
+    const queryParams: Record<string, string | number[]> = {};
+
+    // Check if there's a search query
+    if (searchQuery !== "") {
+        queryParams['q'] = searchQuery;
+    }
+
+    // Check if there are any categories selected
+    if (selectedCategories.length !== 0) {
+        queryParams['categoryIds'] = selectedCategories;
+    }
+
+    // Check if a maximum support cost filter query is given
+    if (supportCostQuery !== "") {
+        queryParams['supportingCost'] = supportCostQuery;
+    }
+
+    // Check if a sorting method was selected
+    if (sortQuery !== "") {
+        queryParams['sortBy'] = sortQuery;
+    }
+
+    try {
+        const response = await axios.get('http://localhost:4941/api/v1/petitions', {
+            params: queryParams
+        });
+        console.log("Number of petitions: ", response.data.petitions.length)
+        return response.data.petitions.length; // Return the number of petitions
+    } catch (error) {
+        console.error('Error fetching number of petitions:', error);
+        return 0; // Return 0 in case of an error
+    }
 };

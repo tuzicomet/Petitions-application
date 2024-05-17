@@ -13,7 +13,7 @@ import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 
 import { datetimeToDDMMYYYY } from "../utils/Utils";
-import { getPetitions, getPetitionImage } from "../services/PetitionService";
+import { getPetitions, getPetitionImage, getNumberOfPetitions } from "../services/PetitionService";
 import { getUserImage } from "../services/UserService";
 
 // interface for table head cell
@@ -73,10 +73,14 @@ const Petitions = () => {
     const [supportCostQuery, setSupportCostQuery] = React.useState(""); // queried support cost filter
     const [tempSupportCostQuery, setTempSupportCostQuery] = React.useState("");
 
-
     const [openSortDialog, setOpenSortDialog] = React.useState(false);
     const [sortQuery, setSortQuery] = React.useState(""); // rule to sort the petition list by
     const [tempSortQuery, setTempSortQuery] = React.useState("");
+
+    // State variables for pagination
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const [pageSize, setPageSize] = React.useState(10); // number of petitions per page
+    const [totalPetitions, setTotalPetitions] = React.useState(0); // number of petitions
 
     const [snackOpen, setSnackOpen] = React.useState(false);
     const [snackMessage, setSnackMessage] = React.useState("");
@@ -85,6 +89,57 @@ const Petitions = () => {
 
     // State variable to hold the petition rows in the petition list
     const [petitionRows, setPetitionRows] = React.useState<React.ReactNode[]>([]);
+
+    // Function to handle pagination
+    const handlePagination = (action: string) => {
+        switch (action) {
+            case 'next':
+                setCurrentPage((prevPage) => prevPage + 1);
+                break;
+            case 'prev':
+                setCurrentPage((prevPage) => prevPage - 1);
+                break;
+            case 'first':
+                setCurrentPage(1);
+                break;
+            case 'last':
+                setCurrentPage(Math.ceil(totalPetitions / pageSize));
+                break;
+            default:
+                break;
+        }
+    };
+
+    // Function to fetch petitions based on pagination
+    const fetchPetitionsWithPagination = () => {
+        const startIndex = (currentPage - 1) * pageSize;
+        // Call getNumberOfPetitions to retrieve total number of petitions
+        getNumberOfPetitions(
+            searchQuery,
+            selectedCategories,
+            supportCostQuery,
+            sortQuery
+        ).then(totalCount => {
+            setTotalPetitions(totalCount);
+        });
+        // Fetch petitions with pagination
+        getPetitions(
+            searchQuery,
+            selectedCategories,
+            supportCostQuery,
+            sortQuery,
+            setPetitions,
+            setErrorFlag,
+            setErrorMessage,
+            pageSize,
+            startIndex
+        );
+    };
+
+    // React.useEffect hook to fetch petitions when page changes
+    React.useEffect(() => {
+        fetchPetitionsWithPagination();
+    }, [currentPage, pageSize, searchQuery, selectedCategories, supportCostQuery, sortQuery]);
 
 
     // Function to close Snackbar
@@ -103,11 +158,12 @@ const Petitions = () => {
             sortQuery,
             setPetitions,
             setErrorFlag,
-            setErrorMessage);
+            setErrorMessage,
+            pageSize);
     }, []);
 
 
-    // React.useEffect hook, runs whenever the page is rendered
+    // React.useEffect hook, runs whenever petitions changes
     React.useEffect(() => {
         // create the rows for the petition list
         const createPetitionRows = async () => {
@@ -297,6 +353,13 @@ const Petitions = () => {
     const handleSort = () => {
         setSortQuery(tempSortQuery); // Update sort query
         getPetitions(searchQuery, selectedCategories, supportCostQuery, tempSortQuery, setPetitions, setErrorFlag, setErrorMessage); // Perform sort
+    };
+
+    // Handle page size change
+    const handlePageSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        const value = event.target.value as number; // Parse the value to a number
+        setPageSize(value);
+        setCurrentPage(1); // Reset to the first page when changing page size
     };
 
     // Function to add a new petition
@@ -553,6 +616,44 @@ const Petitions = () => {
                     </Table>
                 </TableContainer>
             </Paper>
+
+            <div className="pagination-controls">
+                {/* Button to go to first page */}
+                <Button
+                    onClick={() => handlePagination('first')}
+                    disabled={currentPage === 1}
+                >
+                    First
+                </Button>
+
+                {/* Button to go to previous page */}
+                <Button
+                    onClick={() => handlePagination('prev')}
+                    disabled={currentPage === 1}
+                >
+                    Prev
+                </Button>
+
+                {/* Display current page index */}
+                <span>Page {currentPage}</span>
+
+                {/* Button to go to next page */}
+                <Button
+                    onClick={() => handlePagination('next')}
+                    disabled={currentPage === Math.ceil(totalPetitions / pageSize)}
+                >
+                    Next
+                </Button>
+
+                {/* Button to go to last page */}
+                <Button
+                    onClick={() => handlePagination('last')}
+                    disabled={currentPage === Math.ceil(totalPetitions / pageSize)}
+                >
+                    Last
+                </Button>
+            </div>
+
 
             {/* Snackbar component to wrap the error Alert in */}
             {/* This displays a pop-up message on screen informing the user of the error */}
