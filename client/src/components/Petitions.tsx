@@ -110,19 +110,20 @@ const Petitions = () => {
         }
     };
 
-    // Function to fetch petitions based on pagination
-    const fetchPetitionsWithPagination = () => {
+    // Function to get petitions, using pagination
+    const getPetitionsWithPagination = () => {
         const startIndex = (currentPage - 1) * pageSize;
-        // Call getNumberOfPetitions to retrieve total number of petitions
+        // Call getNumberOfPetitions to get he total number of petitions
         getNumberOfPetitions(
             searchQuery,
             selectedCategories,
             supportCostQuery,
             sortQuery
         ).then(totalCount => {
+            // set the result to the totalPetitions variable
             setTotalPetitions(totalCount);
         });
-        // Fetch petitions with pagination
+        // get petitions with pagination
         getPetitions(
             searchQuery,
             selectedCategories,
@@ -136,9 +137,9 @@ const Petitions = () => {
         );
     };
 
-    // React.useEffect hook to fetch petitions when page changes
+    // React.useEffect hook to get petitions when page changes (when any of the dependencies change)
     React.useEffect(() => {
-        fetchPetitionsWithPagination();
+        getPetitionsWithPagination();
     }, [currentPage, pageSize, searchQuery, selectedCategories, supportCostQuery, sortQuery]);
 
     // Function to change to the selected page size (number of petitions per page)
