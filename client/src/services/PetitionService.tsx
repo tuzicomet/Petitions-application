@@ -206,7 +206,7 @@ export const changePetitionImage = async (uploadedImage: File,
     });
 };
 
-// Function to handle uploading an image for a petition (when creating an image)
+// Function to handle uploading an image for a petition (when creating a petition)
 export const uploadPetitionImage = async (uploadedImage: File,
                                       id: number, savedAuthToken: string | null,
                                       setErrorFlag: (flag: boolean) => void, setErrorMessage: (message: string) => void

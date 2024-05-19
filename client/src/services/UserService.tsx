@@ -131,3 +131,58 @@ export const changeUserImage = async (uploadedImage: File,
         };
     });
 };
+
+// Function to handle uploading an image for a user (when creating a user)
+export const uploadUserImage = async (uploadedImage: File,
+                                          id: number, savedAuthToken: string | null,
+                                          setErrorFlag: (flag: boolean) => void, setErrorMessage: (message: string) => void
+) => {
+    // wrap everything in a promise to ensure that everything must be finished before moving on
+    return new Promise<void>((resolve, reject) => {
+
+        // Resource used for turning the uploaded image into binary data
+        // (which is what the image needs to be sent as to the server)
+        // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+
+        // Create a FileReader object to read the file content
+        const fileReader = new FileReader();
+
+        // Start reading the contents of the image file, with the result containing
+        // an ArrayBuffer representing the file's data
+        fileReader.readAsArrayBuffer(uploadedImage);
+
+        // after file reading is complete
+        fileReader.onload = async () => {
+            const fileData = fileReader.result as ArrayBuffer;
+            // Send a PUT request to set the petition's image,
+            // with the raw binary data in the request body
+            await axios.put(`http://localhost:4941/api/v1/users/${id}/image`, fileData, {
+                headers: {
+                    'X-Authorization': savedAuthToken,
+                    // Set the content type based on the type of the image file
+                    'Content-Type': uploadedImage.type
+                }
+            })
+                .then(() => {
+                    // Refresh petition image after successful upload
+                    getUserImage(id.toString());
+                    // resolve the promise
+                    resolve();
+                })
+                .catch((error) => {
+                    // Set error flag and message if upload fails
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                    // reject the promise
+                    reject();
+                });
+        };
+
+        // if there was an error reading the file
+        fileReader.onerror = () => {
+            // Set error flag and message
+            setErrorFlag(true);
+            setErrorMessage("Error reading the file.");
+        };
+    });
+};

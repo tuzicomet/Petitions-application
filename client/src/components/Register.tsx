@@ -5,9 +5,11 @@ import {
     Button, Paper, TextField, Alert, AlertTitle, InputAdornment, IconButton
 } from "@mui/material"; // Material-UI components for styling
 // icons for the password visibility toggle button
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {AddCircle, Visibility, VisibilityOff} from "@mui/icons-material";
 import CSS from 'csstype';
 import Navbar from "./Navbar";
+import defaultImage from "../assets/default_picture.jpg";
+import {uploadUserImage} from "../services/UserService";
 
 // CSS properties for the card style
 const card: CSS.Properties = {
@@ -27,6 +29,10 @@ const Register = () => {
     const [email, setEmail] = useState(""); // email input
     const [password, setPassword] = useState(""); // password input
     const [showPassword, setShowPassword] = useState(false); // bool for whether to show the password text
+    const [uploadedUserImage, setUploadedUserImage] = React.useState<File | null>(null); // State variable for user image file
+    const supportedTypes = ['image/png', 'image/jpeg', 'image/gif']; // allowed MIME types for uploaded images
+    // reference to the hidden file input element
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const navigate = useNavigate(); // navigation function for navigating to different pages
 
@@ -36,41 +42,66 @@ const Register = () => {
         setShowPassword(!showPassword);
     };
 
-    // Function to register the user
-    const registerUser = () => {
-        // Make a post request to the register endpoint with the entered in values
-        axios.post("http://localhost:4941/api/v1/users/register", {
-            firstName,
-            lastName,
-            email,
-            password,
-        })
-            // if register was successful
-            .then((response) => {
-                console.log("Registration successful:", response.data);
-                // log in the user automatically after successful registration
-                loginUser();
-            })
-            // if there was an error with the registration
-            .catch((error) => {
-                console.error("Registration failed:", error);
-                // if the response had an error message
-                if (error.response && error.response.data) {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                } else { // if not, just set a generic error message
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
+    // Function to handle change in user image input
+    const handleChangeUserImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            // the uploaded file must be an accepted type (png, jpeg, gif)
+            if (supportedTypes.includes(event.target.files[0].type)) {
+                setUploadedUserImage(event.target.files[0]); // Set the selected image file
+            } else {
+                setErrorFlag(true);
+                setErrorMessage("Uploaded images must be of MIME type: image/png, image/jpeg, or image/gif")
+            }
+        }
+    };
 
+    // Function to handle form submission
+    const handleSubmit = async () => {
+        // Call createPetition function to handle creating the petition
+        await registerUser()
+            .then(async (userId) => {
+                // automatically log the user in
+                await loginUser();
+
+                // Get the saved authToken from local storage
+                const savedAuthToken = localStorage.getItem("savedAuthToken");
+
+                // If the user uploaded an image in the register form
+                if (uploadedUserImage !== null) {
+                    // Change the petition's image with the uploaded image
+                    await uploadUserImage(uploadedUserImage, userId, savedAuthToken, setErrorFlag, setErrorMessage)
                 }
+
+                // Redirect after success
+                navigate(`/users/${userId}`);
+            })
+    };
+
+    // Function to register the user
+    const registerUser = async () => {
+        try {
+            // Make a post request to the register endpoint with the entered in values
+            const response = await axios.post(
+                "http://localhost:4941/api/v1/users/register", {
+                firstName,
+                lastName,
+                email,
+                password,
             });
+            // If registration was successful, return the userId
+            return response.data.userId;
+        } catch (error) {
+            console.error("Registration failed:", error);
+            // Return null if there was an error with the registration
+            return null;
+        }
     };
 
     // Function to log in the user, used for automatic login after registration
     // (TODO: Duplicate of the function in Login.tsx, can try importing instead)
-    const loginUser = () => {
+    const loginUser = async () => {
         // Make a post request to the login endpoint with the passed in user credentials
-        axios.post("http://localhost:4941/api/v1/users/login", {
+        await axios.post("http://localhost:4941/api/v1/users/login", {
             email,
             password,
         })
@@ -79,8 +110,8 @@ const Register = () => {
                 console.log("Login successful:", response.data);
                 // Save authentication token to browser storage so that user stays logged in
                 localStorage.setItem("savedAuthToken", response.data.token);
-                // Redirect after successful login
-                navigate("/");
+                // Save the id of the user which the client is logged in as
+                localStorage.setItem("clientUserId", response.data.userId);
             })
             // if there was an error with the login
             .catch((error) => {
@@ -110,24 +141,61 @@ const Register = () => {
                 </Alert>
             }
 
-            {/* Petition table section */}
+            {/* User table section */}
             <Paper elevation={3} style={card}>
 
                 {/* Page Title */}
                 <h1>Register</h1>
-
-                {/* TODO: show default image and let user submit a photo */}
 
                 {/* registration form */}
                 <form
                     // handle form submission
                     onSubmit={(e) => {
                         e.preventDefault();
-                        registerUser(); // Call registerUser function to handle registering the user
+                        handleSubmit(); // Call handleSubmit on submission
                     }}
                 >
                     {/* Container for the form components */}
                     <div className="vertical-form-container">
+
+                        {/* Container holding the user image and the icon to edit it */}
+                        <div className="image-container">
+                            {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
+                            {/* Button to change user image */}
+                            <div className="add-image-icon-container">
+                                <IconButton aria-label="add"
+                                            onClick={() => fileInputRef.current?.click()}>
+                                    <AddCircle className="add-image-icon" />
+                                </IconButton>
+                            </div>
+                            {/* Preview of user image */}
+                            {uploadedUserImage ? (
+                                // If the user has uploaded an image (userImage exists)
+                                <img
+                                    // create a URL from the uploaded userImage to display
+                                    src={URL.createObjectURL(uploadedUserImage)}
+                                    alt="User Image Preview"
+                                    className="circle-img"
+                                />
+                            ) : (
+                                // Otherwise, display a default image
+                                <img
+                                    src={defaultImage}
+                                    alt="Default"
+                                    className="circle-img"
+                                />
+                            )}
+
+                            {/* Hidden user image upload input */}
+                            <input
+                                id="file-input"
+                                type="file"
+                                accept="image/*"
+                                ref={fileInputRef} // variable which references this element
+                                style={{display: 'none'}} // Hide the input
+                                onChange={handleChangeUserImage}
+                            />
+                        </div>
 
                         {/* First Name input field */}
                         <div id="first-name-input-field">
