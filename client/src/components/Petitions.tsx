@@ -15,6 +15,7 @@ import defaultImage from "../assets/default_picture.jpg"; // default user image
 import { datetimeToDDMMYYYY } from "../utils/Utils";
 import { getPetitions, getPetitionImage, getNumberOfPetitions, getPetitionSupportCost } from "../services/PetitionService";
 import { getUserImage } from "../services/UserService";
+import PetitionList from './PetitionList';
 
 // interface for table head cell
 interface HeadCell {
@@ -170,106 +171,6 @@ const Petitions = () => {
             pageSize);
     }, []);
 
-
-    // React.useEffect hook, runs whenever petitions changes
-    React.useEffect(() => {
-        // create the rows for the petition list
-        const createPetitionRows = async () => {
-            // store all rows in this variable, Promise.all is used to wait until all of them are finished
-            const rows = await Promise.all(
-                // Map through each petition in the petitions array, so we can make a TableRow for each
-                petitions.map(async (petition: PetitionFull) => {
-                    // Convert the creation-date column (in timestamp format), into DD/MM/YYYY (NZ time)
-                    const creationDate = datetimeToDDMMYYYY(petition.creationDate);
-                    // Get the supporting cost for the petition's cheapest tier:
-                    const supportingCost = await getPetitionSupportCost(petition.petitionId);
-                    // get the petition image url, using the getPetitionImage
-                    // method from PetitionService
-                    const imageUrl = await getPetitionImage(petition.petitionId);
-                    // get the image url for the petition owner's profile picture, using getUserImage
-                    // method from UserService
-                    const ownerImageUrl = await getUserImage(petition.ownerId.toString());
-
-                    return (
-                        // TableRow created for each petition, with the petition id as the key
-                        <TableRow key={petition.petitionId} className="petition-row">
-
-                            <TableCell>{petition.petitionId}</TableCell>
-
-                            {/* Petition Hero Image */}
-                            <TableCell>
-                                {/* If the petition's imageUrl is present, display it */}
-                                {/* (all petitions should have an image, but we can do this to be safe) */}
-                                {imageUrl &&
-                                    <img src={imageUrl} alt="Petition Image"/>}
-                            </TableCell>
-
-                            {/* Petition title */}
-                            <TableCell>
-                                <div className="name-link">
-                                    {/* Clicking the title links the client to that petition's page */}
-                                    <Link to={`/petitions/${petition.petitionId}`}>
-                                        {petition.title}
-                                    </Link>
-                                </div>
-                            </TableCell>
-
-                            {/* Petition creation date */}
-                            <TableCell>
-                                {creationDate}
-                            </TableCell>
-
-                            {/* Petition minimum support cost */}
-                            <TableCell>
-                                {supportingCost}
-                            </TableCell>
-
-
-                            {/* Petition category */}
-                            <TableCell>
-                                {/* From the categories array, find the record where the
-                                 id value matches the petition.categoryId value */}
-                                {/* See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
-                                under 'Using arrow function and destructuring'*/}
-                                {categories.find(
-                                    category =>
-                                        category.id === petition.categoryId
-                                )?.name} {/* Use optional chaining to select the 'name' value, if the category exists */}
-                                         {/* see https://www.geeksforgeeks.org/how-to-use-optional-chaining-with-arrays-and-functions-in-typescript/ */}
-                            </TableCell>
-
-                            {/* Petition owner's profile picture */}
-                            <TableCell className="petition-owner-tablecell">
-                                {/* Clicking the owner's name links to their user page */}
-                                <Link to={`/users/${petition.ownerId}`}>
-                                    {/* If owner has no image (imageUrl is null),
-                                     display the default image */}
-                                    <img src={ownerImageUrl || defaultImage}
-                                         alt="Owner Profile Picture"
-                                    />
-                                </Link>
-                            </TableCell>
-
-                            {/* Petition owner name */}
-                            <TableCell>
-                                <div className="name-link">
-                                    {/* Clicking the owner's name links to their user page */}
-                                    <Link to={`/users/${petition.ownerId}`}>
-                                        {petition.ownerFirstName} {petition.ownerLastName}
-                                    </Link>
-                                </div>
-                            </TableCell>
-
-                        </TableRow>
-                    );
-                })
-            );
-            setPetitionRows(rows);
-        };
-
-        createPetitionRows();
-    }, [petitions]);
-
     // Function to open the search petition dialog
     const handleSearchDialogOpen = () => {
         // reset the temporary search query
@@ -354,43 +255,10 @@ const Petitions = () => {
         setOpenSortDialog(false);
     };
 
-    // apply any temporary sorting query
-    const applySortQuery = () => {
-        setSortQuery(tempSortQuery);
-        setOpenSortDialog(false);
-    };
-
     // Function to handle the confirm sort action
     const handleSort = () => {
         setSortQuery(tempSortQuery); // Update sort query
         getPetitions(searchQuery, selectedCategories, supportCostQuery, tempSortQuery, setPetitions, setErrorFlag, setErrorMessage); // Perform sort
-    };
-
-    // Handle page size change
-    const handlePageSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-        const value = event.target.value as number; // Parse the value to a number
-        setPageSize(value);
-        setCurrentPage(1); // Reset to the first page when changing page size
-    };
-
-    // Function to add a new petition
-    const addPetition = () => {
-        axios.post('http://localhost:4941/api/v1/petitions', { title: newPetitionTitle })
-            .then(() => {
-                setNewPetitionTitle(""); // Reset the title field after submission
-                getPetitions(
-                    searchQuery,
-                    selectedCategories,
-                    supportCostQuery,
-                    sortQuery,
-                    setPetitions,
-                    setErrorFlag,
-                    setErrorMessage);
-            })
-            .catch((error) => {
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
     };
 
     return (
@@ -605,27 +473,7 @@ const Petitions = () => {
                 </Button>
 
                 {/* Petition table */}
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                {headCells.map((headCell) => (
-                                    <TableCell
-                                        key={headCell.id}
-                                        align={'left'}
-                                        padding={'normal'}
-                                    >
-                                        {headCell.label}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {/* Display the petition rows */}
-                            {petitionRows}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                <PetitionList petitions={petitions} />
             </Paper>
 
             Petitions per page:
