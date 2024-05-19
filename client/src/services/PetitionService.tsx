@@ -3,6 +3,8 @@
 
 import axios from "axios";
 
+
+
 // Function to fetch petitions from API, which match the specifications given
 export const getPetitions = async (searchQuery: string, selectedCategories: number[],
                                    supportCostQuery: string, sortQuery: string,
@@ -61,6 +63,26 @@ export const getPetitions = async (searchQuery: string, selectedCategories: numb
         });
 };
 
+// Function to fetch petition data
+export const getPetition = async (id: string | undefined, savedAuthToken: string | null,
+                                  setPetition: Function,
+                                  setErrorFlag: Function, setErrorMessage: Function) => {
+    axios.get<PetitionFull>(`http://localhost:4941/api/v1/petitions/${id}`, {
+        headers: {
+            'X-Authorization': savedAuthToken
+        }
+    })
+        .then((response) => {
+            setErrorFlag(false);
+            setErrorMessage("");
+            setPetition(response.data); // Set petition data in state
+        })
+        .catch((error) => {
+            setErrorFlag(true);
+            setErrorMessage(error.toString()); // Set error message
+        });
+};
+
 // Function to get the hero image for the petition with the given id
 export const getPetitionImage = async ( id: number ) => {
     try {
@@ -77,8 +99,8 @@ export const getPetitionImage = async ( id: number ) => {
         // Create an image url out of the blob object, and return it
         return URL.createObjectURL(blob);
     } catch (error) {
-        // if petition has no image, or the petition's image cannot be retrieved
-        return;
+        // if petition has no image, or the petition's image cannot be retrieved, return null
+        return null;
     }
 }
 
@@ -125,8 +147,67 @@ export const createPetition = async  (savedAuthToken: string | null,
     return createdPetitionId;
 };
 
-// Function to handle uploading an image for a petition
+// Function to handle uploading a new image for an existing petition
 export const changePetitionImage = async (uploadedImage: File,
+                                      petitionId: number, savedAuthToken: string | null,
+                                      setErrorFlag: (flag: boolean) => void, setErrorMessage: (message: string) => void,
+                                      setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void,
+): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+        // Resource used for turning the uploaded image into binary data
+        // (which is what the image needs to be sent as to the server)
+        // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+
+        // Create a FileReader object to read the file content
+        const fileReader = new FileReader();
+
+        // Start reading the contents of the image file, with the result containing
+        // an ArrayBuffer representing the file's data
+        fileReader.readAsArrayBuffer(uploadedImage);
+
+        // after file reading is complete
+        fileReader.onload = () => {
+            const fileData = fileReader.result as ArrayBuffer;
+            // Send a PUT request to set the user's image,
+            // with the raw binary data in the request body
+            axios.put(`http://localhost:4941/api/v1/petitions/${petitionId}/image`, fileData, {
+                headers: {
+                    'X-Authorization': savedAuthToken,
+                    // Set the content type based on the type of the image file
+                    'Content-Type': uploadedImage.type
+                }
+            })
+                .then(() => {
+                    // Refresh petition image after successful upload
+                    getPetitionImage(petitionId)
+                        .then(() => {
+                            resolve();
+                        })
+                    // Display success message in Snackbar
+                    setSnackMessage("Image uploaded successfully");
+                    setSnackOpen(true);
+                    console.log("done");
+                })
+                .catch((error) => {
+                    // Set error flag and message if upload fails
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                    reject(error);
+                });
+        };
+
+        // if there was an error reading the file
+        fileReader.onerror = () => {
+            // Set error flag and message
+            setErrorFlag(true);
+            setErrorMessage("Error reading the file.");
+            reject(new Error("Error reading the file."));
+        };
+    });
+};
+
+// Function to handle uploading an image for a petition (when creating an image)
+export const uploadPetitionImage = async (uploadedImage: File,
                                       id: number, savedAuthToken: string | null,
                                       setErrorFlag: (flag: boolean) => void, setErrorMessage: (message: string) => void
                                       ) => {

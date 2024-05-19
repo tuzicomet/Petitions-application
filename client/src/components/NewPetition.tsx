@@ -4,7 +4,7 @@ import React from "react";
 import {useNavigate} from 'react-router-dom';
 import {Button, Paper, TextField, Alert, AlertTitle, MenuItem, IconButton} from "@mui/material"; // Material-UI components for styling
 import Navbar from "./Navbar";
-import {changePetitionImage, createPetition} from "../services/PetitionService";
+import {uploadPetitionImage, createPetition} from "../services/PetitionService";
 import defaultImage from "../assets/default_picture.jpg";
 import {AddCircle} from "@mui/icons-material";
 
@@ -123,7 +123,7 @@ const NewPetition = () => {
             // If the result was not null (i.e. was successful, thus returning the created petition's id)
             if (createdPetitionId !== null) {
                 // Change the petition's image with the uploaded image
-                await changePetitionImage(uploadedPetitionImage, createdPetitionId, savedAuthToken, setErrorFlag, setErrorMessage)
+                await uploadPetitionImage(uploadedPetitionImage, createdPetitionId, savedAuthToken, setErrorFlag, setErrorMessage)
 
                 // navigate to the newly created petition's page
                 navigate(`/petitions/${createdPetitionId}`);

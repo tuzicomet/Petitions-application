@@ -2,22 +2,16 @@ import axios from 'axios';
 import React from "react";
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    TextField,
-    Snackbar,
-    Alert,
-    AlertTitle, Paper, TableRow, TableCell, TableContainer, Table, TableHead, TableBody, MenuItem
+    Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField,
+    Snackbar, Alert, AlertTitle, Paper, TableRow, TableCell, TableContainer, Table, TableHead,
+    TableBody, MenuItem, IconButton
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import { AddCircle, Edit } from "@mui/icons-material";
 import Navbar from "./Navbar";
 import { datetimeToDDMMYYYY } from "../utils/Utils";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 import {getUserImage} from "../services/UserService";
+import {getPetition, getPetitionImage, changePetitionImage} from "../services/PetitionService";
 
 // interface for table head cell
 interface HeadCell {
@@ -86,7 +80,37 @@ const Petition = () => {
     // State variable boolean, true if the user is authenticated as the owner of the petition, false otherwise
     const [authenticatedAsOwner, setAuthenticatedAsOwner] = React.useState(false);
     const clientUserId = localStorage.getItem("clientUserId"); // get the client's user id from local storage
+    // allowed MIME types for uploaded images
+    const supportedTypes = ['image/png', 'image/jpeg', 'image/gif'];
+    // reference to the hidden file input element
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    // State variable for the uploaded petition image file
+    const [uploadedPetitionImage, setUploadedPetitionImage] = React.useState<File | null>(null);
 
+    // Function to handle change in petition image input
+    const handleChangePetitionImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            // the uploaded file must be an accepted type (png, jpeg, gif)
+            if (supportedTypes.includes(event.target.files[0].type)) {
+                // Change the petition's image with the uploaded image
+                await changePetitionImage(event.target.files[0], petition.petitionId, savedAuthToken,
+                    setErrorFlag, setErrorMessage, setSnackMessage, setSnackOpen)
+
+                // re-fetch the petition's image so the new image will be displayed
+                const fetchPetitionImageUrl = async () => {
+                    console.log("updating now")
+                    // get the petition's hero image using getPetitionImage from PetitionService
+                    const petitionImageUrl = await getPetitionImage(petition.petitionId);
+                    // set the image to the petitionImage state variable
+                    setPetitionImage(petitionImageUrl);
+                }
+                await fetchPetitionImageUrl();
+            } else {
+                setErrorFlag(true);
+                setErrorMessage("Uploaded images must be of MIME type: image/png, image/jpeg, or image/gif")
+            }
+        }
+    };
 
     // Function to close the Snackbar
     const handleSnackClose = () => {
@@ -95,50 +119,26 @@ const Petition = () => {
 
     // React useEffect hook which runs whenever id changes
     React.useEffect(() => {
-        // Function to fetch petition details
-        const getPetition = () => {
-            axios.get<PetitionFull>(`http://localhost:4941/api/v1/petitions/${id}`, {
-                headers: {
-                    // Include the savedAuthToken in the request header as X-Authorization
-                    'X-Authorization': savedAuthToken
+        if (id !== undefined) {
+            // Function to fetch petition details
+            getPetition(id, savedAuthToken, setPetition, setErrorFlag, setErrorMessage);
+
+            // if the client is logged in as the owner of the petition whose page they are viewing
+            if (clientUserId !== null) {
+                if (parseInt(clientUserId, 10) == petition.ownerId) {
+                    setAuthenticatedAsOwner(true);
                 }
-            })
-                .then((response) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
-                    setPetition(response.data);
-                })
-                .catch((error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
-        };
-
-        // Function to retrieve the petition's saved image (if it exists)
-        const getPetitionImage = async () => {
-            try {
-                // Send a request to retrieve the petition's image
-                const response = await axios.get(`http://localhost:4941/api/v1/petitions/${id}/image`, {
-                    // Treat the response as binary data
-                    responseType: 'arraybuffer',
-                    // Send the saved authentication token in the header
-                    headers: {
-                        'X-Authorization': savedAuthToken
-                    }
-                });
-                // Create a blob object containing the image data, along with its MIME (content) type
-                const blob = new Blob([response.data], { type: response.headers['content-type'] });
-                // Create a URL for the blob object to use it as the image URL
-                const imageUrl = URL.createObjectURL(blob);
-                // Set the image URL in the state to display the image
-                setPetitionImage(imageUrl);
-            } catch (error) {
-                console.error("Error fetching petition image:", error);
             }
-        };
 
-        getPetition();
-        getPetitionImage();
+            // get the petition's hero image and set its url in the petitionImage variable
+            const fetchPetitionImageUrl = async () => {
+                // get the petition's hero image using getPetitionImage from PetitionService
+                const petitionImageUrl = await getPetitionImage(parseInt(id, 10));
+                // set the image to the petitionImage state variable
+                setPetitionImage(petitionImageUrl);
+            }
+            fetchPetitionImageUrl();
+        }
     }, [id]);
 
     // React useEffect hook which runs whenever petition changes
@@ -233,6 +233,46 @@ const Petition = () => {
                         </div>
                     </div>
 
+                    {/* Container holding the petition image and the icon to edit it */}
+                    <div className="image-container">
+                        {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
+
+                        {/* Button to change petition image, only show to owner */}
+                        {authenticatedAsOwner &&
+                            <div className="add-image-icon-container">
+                                <IconButton aria-label="add"
+                                            onClick={() => fileInputRef.current?.click()}>
+                                    <AddCircle className="add-image-icon"/>
+                                </IconButton>
+                            </div>
+                        }
+
+                        {/* Preview of petition image */}
+                        {uploadedPetitionImage ? (
+                            // If the user has uploaded an image (petitionImage exists)
+                            <img
+                                // create a URL from the uploaded petitionImage to display
+                                src={URL.createObjectURL(uploadedPetitionImage)}
+                                alt="Petition Preview"
+                            />
+                        ) : (
+                            // Otherwise, display the petition's current image, if it exists
+                            petitionImage && (
+                                <img src={petitionImage} alt="Petition Profile" />
+                            )
+                        )}
+
+                        {/* Hidden petition image upload input */}
+                        <input
+                            id="file-input"
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef} // variable which references this element
+                            style={{display: 'none'}} // Hide the input
+                            onChange={handleChangePetitionImage}
+                        />
+                    </div>
+
                     {/* Petition description section */}
                     <div id="petition-description">
                         {petition.description}
@@ -241,7 +281,7 @@ const Petition = () => {
                     {/* Only display if the client is authenticated as the owner fo the petition they're viewing */}
                     {authenticatedAsOwner &&
                         // Button to edit the petition, opens the edit dialog
-                        <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
+                        <Button variant="outlined" startIcon={<Edit/>} onClick={() => setOpenEditDialog(true)}>
                             Edit
                         </Button>
                     }
