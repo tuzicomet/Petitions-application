@@ -86,6 +86,15 @@ const Petition = () => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     // State variable for the uploaded petition image file
     const [uploadedPetitionImage, setUploadedPetitionImage] = React.useState<File | null>(null);
+    // State variables for support tier editing
+    const [editedSupportTier, setEditedSupportTier] = React.useState({ title: "", description: "", cost: "" });
+    const [editedTierIndex, setEditedTierIndex] = React.useState(-1);
+    // State variable to hold the support tiers
+    const [supportTiers, setSupportTiers] = React.useState<SupportTier[]>([
+        { supportTierId: -1, title: "", description: "", cost: 0 }
+    ]);
+    const [editMode, setEditMode] = React.useState<{[key: number]: boolean}>({});
+    const [tempSupportTiers, setTempSupportTiers] = React.useState<SupportTier[]>([]);
 
     // Function to handle change in petition image input
     const handleChangePetitionImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,30 +152,22 @@ const Petition = () => {
 
     // React useEffect hook which runs whenever petition changes
     React.useEffect(() => {
+        if (petition && petition.supportTiers) {
+            setSupportTiers(petition.supportTiers.map(tier => ({
+                supportTierId: tier.supportTierId,
+                title: tier.title,
+                description: tier.description,
+                cost: tier.cost
+            })));
+        }
+
         // get and set the petition owner's image url
         const findOwnerImageUrl = async () => {
             // get and set the petition owner's profile image
             setPetitionOwnerImage(await getUserImage(petition.ownerId.toString()));
         }
-        // create the rows for the support tier list
-        const createSupportTierRows = async () => {
-            // Map through each row and make a TableRow for it with all necessary information
-            const rows = await Promise.all(
-                petition.supportTiers.map(async (supportTier) => {
-                    return (
-                        <TableRow key={supportTier.supportTierId} className="support-tier-row">
-                            <TableCell>{supportTier.title}</TableCell>
-                            <TableCell>{supportTier.description}</TableCell>
-                            <TableCell>{supportTier.cost}</TableCell>
-                        </TableRow>
-                    );
-                })
-            );
-            // save the rows to the support tier rows variable
-            setSupportTierRows(rows);
-        };
+
         findOwnerImageUrl();
-        createSupportTierRows();
 
         // check whether client is authenticated as the owner of the petition they're viewing
         if (clientUserId !== null) {
@@ -178,10 +179,6 @@ const Petition = () => {
 
     // Function to edit the petition details
     const editPetition = () => {
-        /* TODO: Filter out fields with empty values
-        TODO: (otherwise, if you type in a field then delete it, it still submits as "")
-        */
-
         axios.patch(`http://localhost:4941/api/v1/petitions/${id}`, editPetitionDetails, {
             headers: {
                 // Include the savedAuthToken in the request header as X-Authorization
@@ -197,6 +194,65 @@ const Petition = () => {
                 setErrorFlag(true);
                 setErrorMessage(error.toString());
             });
+    };
+
+    const handleTierChange = (index: number, field: string, value: string) => {
+        const newSupportTiers = [...supportTiers];
+        newSupportTiers[index] = { ...newSupportTiers[index], [field]: value };
+        setSupportTiers(newSupportTiers);
+    };
+
+    // Function to handle when the Add Tier button is clicked
+    const handleAddTier = () => {
+        if (supportTiers.length < 3) {
+            setSupportTiers([...supportTiers, { supportTierId: -1, title: "", description: "", cost: 0 }]);
+        }
+    };
+
+    // Function to handle when the Remove button is clicked for a support tier
+    const handleRemoveTier = (index: number) => {
+        if (supportTiers.length > 1) {
+            const updatedSupportTiers = supportTiers.filter((_, i) => i !== index);
+            setSupportTiers(updatedSupportTiers);
+        }
+    };
+
+    // Function to handle when the Edit button is clicked for a support tier
+    const handleEditTierButton = (index: number) => {
+        setEditMode({...editMode, [index]: true});
+        setTempSupportTiers([...supportTiers]);
+    };
+
+    // Function to handle when the Save button is clicked when editing a tier
+    const handleSaveTierEdits = async (index: number) => {
+        const updatedTier = tempSupportTiers[index];
+        try {
+            await axios.patch(`http://localhost:4941/api/v1/petitions/${id}/supportTiers/${updatedTier.supportTierId}`, updatedTier, {
+                headers: {
+                    'X-Authorization': savedAuthToken
+                }
+            });
+            const newSupportTiers = [...supportTiers];
+            newSupportTiers[index] = updatedTier;
+            setSupportTiers(newSupportTiers);
+            setEditMode({...editMode, [index]: false});
+        } catch (error) {
+            setErrorFlag(true);
+            //TODO: setErrorMessage(error.toString());
+        }
+    };
+
+    // Function to handle when the Cancel button is clicked when editing a support tier
+    const handleCancelEditTiersButton = (index: number) => {
+        setEditMode({...editMode, [index]: false});
+        setTempSupportTiers([...supportTiers]);
+    };
+
+    // Function to update the temp support tier values when editing a support tier
+    const handleTempTierChange = (index: number, field: string, value: string | number) => {
+        const newTempSupportTiers = [...tempSupportTiers];
+        newTempSupportTiers[index] = { ...newTempSupportTiers[index], [field]: value };
+        setTempSupportTiers(newTempSupportTiers);
     };
 
     return (
@@ -258,7 +314,7 @@ const Petition = () => {
                         ) : (
                             // Otherwise, display the petition's current image, if it exists
                             petitionImage && (
-                                <img src={petitionImage} alt="Petition Profile" />
+                                <img src={petitionImage} alt="Petition Profile"/>
                             )
                         )}
 
@@ -367,20 +423,29 @@ const Petition = () => {
                             <TextField
                                 label="Title"
                                 value={editPetitionDetails.title || ""}
-                                onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, title: e.target.value })}
+                                onChange={(e) => setEditPetitionDetails({
+                                    ...editPetitionDetails,
+                                    title: e.target.value
+                                })}
                             >
                             </TextField>
                             <TextField
                                 label="Description"
                                 value={editPetitionDetails.description || ""}
-                                onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, description: e.target.value })}
+                                onChange={(e) => setEditPetitionDetails({
+                                    ...editPetitionDetails,
+                                    description: e.target.value
+                                })}
                             >
                             </TextField>
                             <TextField
                                 label="Category"
                                 select
                                 value={editPetitionDetails.categoryId || ""}
-                                onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, categoryId: Number(e.target.value) })}
+                                onChange={(e) => setEditPetitionDetails({
+                                    ...editPetitionDetails,
+                                    categoryId: Number(e.target.value)
+                                })}
                                 variant="outlined"
                             >
                                 {/* Display each category in the dropdown */}
@@ -397,30 +462,86 @@ const Petition = () => {
                         </DialogActions>
                     </Dialog>
 
-                    <h3> Support Tiers </h3>
+                    <div id="support-tiers-container">
+                        <Paper elevation={3} className="card">
+                            <h3>Support Tiers</h3>
 
-                    {/* Support Tier table */}
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    {supportTierHeadCells.map((headCell) => (
-                                        <TableCell
-                                            key={headCell.id}
-                                            align={'left'}
-                                            padding={'normal'}
-                                        >
-                                            {headCell.label}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {/* Display the petition's support tier rows */}
-                                {supportTierRows}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                            {/* Only allow client to add a tier if they own the petition,
+                             and there are less than 3 support tiers */}
+                            {authenticatedAsOwner && supportTiers.length < 3 &&
+                                <Button variant="outlined" onClick={handleAddTier}>
+                                    Add Tier
+                                </Button>
+                            }
+
+                            {supportTiers.map((tier, index) => (
+                                <Paper elevation={3} className="support-tier-container-card">
+                                    <div key={index} className="support-tier-card">
+                                        {editMode[index] ? (
+                                            <div className="support-tier-edit-fields">
+                                                <TextField
+                                                    label="Title"
+                                                    value={tempSupportTiers[index].title}
+                                                    onChange={(e) => handleTempTierChange(index, "title", e.target.value)}
+                                                />
+                                                <TextField
+                                                    label="Description"
+                                                    value={tempSupportTiers[index].description}
+                                                    multiline
+                                                    onChange={(e) => handleTempTierChange(index, "description", e.target.value)}
+                                                />
+                                                <TextField
+                                                    label="Cost"
+                                                    type="number"
+                                                    value={tempSupportTiers[index].cost}
+                                                    onChange={(e) => handleTempTierChange(index, "cost", Number(e.target.value))}
+                                                />
+                                                <Button variant="outlined" onClick={() => handleSaveTierEdits(index)}>
+                                                    Save
+                                                </Button>
+                                                <Button variant="outlined" onClick={() => handleCancelEditTiersButton(index)}>
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="support-tier-information">
+                                                <Table>
+                                                    <TableBody>
+                                                        <TableRow>
+                                                            <TableCell><strong>Title:</strong></TableCell>
+                                                            <TableCell>{tier.title}</TableCell>
+                                                        </TableRow>
+                                                        <TableRow>
+                                                            <TableCell><strong>Description:</strong></TableCell>
+                                                            <TableCell>{tier.description}</TableCell>
+                                                        </TableRow>
+                                                        <TableRow>
+                                                            <TableCell><strong>Cost:</strong></TableCell>
+                                                            <TableCell>{tier.cost}</TableCell>
+                                                        </TableRow>
+                                                    </TableBody>
+                                                </Table>
+                                                {authenticatedAsOwner && tier.supportTierId !== -1 && (
+                                                    <Button variant="outlined" onClick={() => handleEditTierButton(index)}>
+                                                        Edit
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Only allow user to remove a tier if they own the petition
+                                         and there are more than 1 support tiers*/}
+                                        {authenticatedAsOwner && supportTiers.length > 1 &&
+                                            <Button className="delete-button" variant="outlined"
+                                                    onClick={() => handleRemoveTier(index)}>
+                                                Remove
+                                            </Button>
+                                        }
+                                    </div>
+                                </Paper>
+                            ))}
+                        </Paper>
+                    </div>
 
                     {/* Snackbar component */}
                     <Snackbar
