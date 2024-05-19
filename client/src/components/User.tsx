@@ -11,7 +11,8 @@ import {
     TextField,
     Snackbar,
     Alert,
-    IconButton
+    IconButton,
+    Paper
 } from "@mui/material"; // Material-UI components
 import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
@@ -19,6 +20,8 @@ import defaultImage from "../assets/default_picture.jpg";
 
 import { getUser, getUserImage, editUser, changeUserImage } from "../services/UserService";
 import {AddCircle} from "@mui/icons-material";
+import PetitionList from "./PetitionList";
+import {getPetitionsSupportedByUserId, getPetitionsWithOwnerId} from "../services/PetitionService";
 
 // User functional component
 const User = () => {
@@ -50,6 +53,10 @@ const User = () => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     // State variable for the uploaded petition image file
     const [uploadedImage, setUploadedImage] = React.useState<File | null>(null);
+    const [ownedPetitions, setOwnedPetitions] = React.useState<Array<PetitionFull>>([]);
+    const [supportedPetitions, setSupportedPetitions] = React.useState<Array<PetitionFull>>([]);
+
+
 
     // run whenever id changes
     React.useEffect(() => {
@@ -66,6 +73,17 @@ const User = () => {
             setUserImage(userImage);
         }
         getProfileImage();
+
+        // get the petitions which the user owns, and the petitions which they support
+        const getRelatedPetitions = async () => {
+            if (id !== undefined) {
+                const ownedPetitions = await getPetitionsWithOwnerId(parseInt(id, 10));
+                setOwnedPetitions(ownedPetitions);
+                const supportedPetitions = await getPetitionsSupportedByUserId(parseInt(id, 10))
+                setSupportedPetitions(supportedPetitions)
+            }
+        }
+        getRelatedPetitions();
     }, [id]);
 
     // Snackbar close handler
@@ -235,6 +253,19 @@ const User = () => {
                     <Button onClick={handleEditUser}>Save</Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Only display if client is viewing their own user profile */}
+            {authenticatedAsUser &&
+                <Paper elevation={3} className="card">
+                    {/* Owned Petitions table */}
+                    <h3>Owned Petitions</h3>
+                    <PetitionList petitions={ownedPetitions}/>
+
+                    {/* Supported Petitions table */}
+                    <h3>Supported Petitions</h3>
+                    <PetitionList petitions={supportedPetitions}/>
+                </Paper>
+            }
 
             {/* Snackbar component for displaying success message */}
             <Snackbar
