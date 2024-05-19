@@ -11,7 +11,13 @@ import Navbar from "./Navbar";
 import { datetimeToDDMMYYYY } from "../utils/Utils";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 import {getUserImage} from "../services/UserService";
-import {getPetition, getPetitionImage, changePetitionImage, createSupportTier} from "../services/PetitionService";
+import {
+    getPetition,
+    getPetitionImage,
+    changePetitionImage,
+    createSupportTier,
+    removeSupportTier
+} from "../services/PetitionService";
 
 // interface for table head cell
 interface HeadCell {
@@ -220,6 +226,26 @@ const Petition = () => {
         setTempSupportTiers(newTempSupportTiers);
     };
 
+    // Function to handle when the Save button is clicked when editing a tier
+    const handleSaveTierEdits = async (index: number) => {
+        const updatedTier = tempSupportTiers[index];
+        try {
+            await axios.patch(`http://localhost:4941/api/v1/petitions/${id}/supportTiers/${updatedTier.supportTierId}`, updatedTier, {
+                headers: {
+                    'X-Authorization': savedAuthToken
+                }
+            });
+            // Update the support tiers state with the edited tier
+            const newSupportTiers = [...supportTiers];
+            newSupportTiers[index] = updatedTier;
+            setSupportTiers(newSupportTiers);
+            setEditMode({ ...editMode, [index]: false });
+        } catch (error: any) {
+            setErrorFlag(true);
+            setErrorMessage(error.toString());
+        }
+    };
+
     // Function to open the Add Support Tier dialog
     const handleOpenAddTierDialog = () => {
         setOpenAddTierDialog(true);
@@ -240,25 +266,20 @@ const Petition = () => {
             })
     }
 
-    // Function to handle when the Save button is clicked when editing a tier
-    const handleSaveTierEdits = async (index: number) => {
-        const updatedTier = tempSupportTiers[index];
+    // function to handle the remove button on a support tier
+    const handleRemoveSupportTier = async (supportTierId: number) => {
         try {
-            await axios.patch(`http://localhost:4941/api/v1/petitions/${id}/supportTiers/${updatedTier.supportTierId}`, updatedTier, {
-                headers: {
-                    'X-Authorization': savedAuthToken
-                }
-            });
-            // Update the support tiers state with the edited tier
-            const newSupportTiers = [...supportTiers];
-            newSupportTiers[index] = updatedTier;
-            setSupportTiers(newSupportTiers);
-            setEditMode({ ...editMode, [index]: false });
+            // remove the support tier
+            await removeSupportTier(petition.petitionId, supportTierId, savedAuthToken,
+                setErrorFlag, setErrorMessage, setSnackMessage, setSnackOpen)
+
+            // remove from the local support tier list as well
+            setSupportTiers(supportTiers.filter(tier => tier.supportTierId !== supportTierId));
         } catch (error: any) {
             setErrorFlag(true);
             setErrorMessage(error.toString());
         }
-    };
+    }
 
     return (
         <div>
@@ -537,7 +558,8 @@ const Petition = () => {
                                         {/* Only allow user to remove a tier if they own the petition
                                          and there are more than 1 support tiers*/}
                                         {authenticatedAsOwner && supportTiers.length > 1 &&
-                                            <Button className="delete-button" variant="outlined">
+                                            <Button className="delete-button" variant="outlined"
+                                                    onClick={() => handleRemoveSupportTier(tier.supportTierId)}>
                                                 Remove
                                             </Button>
                                         }

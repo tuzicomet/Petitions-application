@@ -347,7 +347,7 @@ export const createSupportTier = async  (petitionId: number, savedAuthToken: str
             setSnackOpen(true); // Open snackbar
             setErrorFlag(false);
         })
-        // if there was an error with the registration
+        // if there was an error with the creation
         .catch((error) => {
             console.error("Support tier creation failed: ", error);
             // if the response had an error message
@@ -355,3 +355,30 @@ export const createSupportTier = async  (petitionId: number, savedAuthToken: str
             setErrorMessage(error.toString());
         });
 };
+
+// function to remove a given support tier
+export const removeSupportTier = async  (petitionId: number, tierId: number, savedAuthToken: string | null,
+                                         setErrorFlag: Function, setErrorMessage: Function,
+                                         setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void
+) => {
+    // Make a post request to the petition endpoint with the entered in values
+    await axios.delete(`http://localhost:4941/api/v1/petitions/${petitionId}/supportTiers/${tierId}`, {
+        headers: {
+            'X-Authorization': savedAuthToken
+        }
+    })
+        // if support tier deletion was successful
+        .then((response) => {
+            console.log("Support tier successfully deleted ", response.data);
+            setSnackMessage("Support tier deleted successfully"); // Set success message for snackbar
+            setSnackOpen(true); // Open snackbar
+            setErrorFlag(false);
+        })
+        // if there was an error with the deletion
+        .catch((error) => {
+            console.error("Support tier deletion failed: ", error);
+            // if the response had an error message
+            setErrorFlag(true);
+            setErrorMessage(error.toString());
+        });
+}
