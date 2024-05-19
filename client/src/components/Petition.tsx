@@ -48,6 +48,17 @@ const categories = [
     { id: 12, name: "Sports and Recreation" }
 ];
 
+// support type definition
+type Supporter = {
+    supportId: number;
+    supportTierId: number;
+    message: string;
+    supporterId: number;
+    supporterFirstName: string;
+    supporterLastName: string;
+    timestamp: string;
+};
+
 /**
  * Petition component displays the details of a single petition.
  * It allows users to view, edit, and delete a petition.
@@ -105,6 +116,10 @@ const Petition = () => {
         description: "",
         cost: 0
     });
+    const [supporters, setSupporters] = React.useState<Supporter[]>([]);
+    // State variable to hold the supporter rows in the petition list
+    const [supporterRows, setSupporterRows] = React.useState<React.ReactNode[]>([]);
+
 
     // Function to handle change in petition image input
     const handleChangePetitionImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,6 +177,7 @@ const Petition = () => {
 
     // React useEffect hook which runs whenever petition changes
     React.useEffect(() => {
+        // initialise the supportTiers variable with the petition's support tiers
         if (petition && petition.supportTiers) {
             setSupportTiers(petition.supportTiers.map(tier => ({
                 supportTierId: tier.supportTierId,
@@ -178,6 +194,56 @@ const Petition = () => {
         }
 
         findOwnerImageUrl();
+
+        // get the petition's supporters
+        const fetchSupporters = async () => {
+            try {
+                const response = await axios.get(`http://localhost:4941/api/v1/petitions/${id}/supporters`);
+                setSupporters(response.data);
+            } catch (error) {
+                console.error("Error fetching supporters:", error);
+            }
+        };
+
+        fetchSupporters();
+
+        // create the rows for the petition list
+        const createSupporterRows = async () => {
+            // store all rows in this variable, Promise.all is used to wait until all of them are finished
+            const rows = await Promise.all(
+                supporters.map(async (supporter: Supporter, index) => {
+
+                    // get the supporter's image url
+                    const supporterImageUrl = await getUserImage(supporter.supporterId.toString())
+
+                    return (
+                        // TableRow created for each petition, with the petition id as the key
+                        <TableRow key={supporter.supporterId} className="petition-row">
+
+                            <TableCell>{supporter.supportTierId}</TableCell>
+
+                            <TableCell>{supporter.message}</TableCell>
+
+                            <TableCell>{supporter.timestamp}</TableCell>
+
+                            {/* Supporter Image */}
+                            <TableCell>
+                                {/* If the supporterImageUrl is present, display it, otherwise show default */}
+                                <img src={supporterImageUrl || defaultImage}
+                                     alt="Petition Image"/>
+                            </TableCell>
+
+                            <TableCell>
+                                {supporter.supporterFirstName} {supporter.supporterLastName}
+                            </TableCell>
+                        </TableRow>
+                    )
+                })
+            )
+            setSupporterRows(rows);
+        };
+
+        createSupporterRows();
 
         // check whether client is authenticated as the owner of the petition they're viewing
         if (clientUserId !== null) {
@@ -256,6 +322,7 @@ const Petition = () => {
         setOpenAddTierDialog(false);
     };
 
+    // Function to create a new support tier
     const handleCreateSupportTier = async () => {
         await createSupportTier(petition.petitionId, savedAuthToken,
             newSupportTier.title, newSupportTier.description, newSupportTier.cost,
@@ -280,6 +347,8 @@ const Petition = () => {
             setErrorMessage(error.toString());
         }
     }
+
+
 
     return (
         <div>
@@ -600,6 +669,13 @@ const Petition = () => {
                             <Button onClick={handleCreateSupportTier}>Create</Button>
                         </DialogActions>
                     </Dialog>
+
+
+                    {/* Display list of supporters */}
+                    <div>
+                        <h2>Supporters</h2>
+                        {supporterRows}
+                    </div>
 
                     {/* Snackbar component */}
                     <Snackbar

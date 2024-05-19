@@ -382,3 +382,18 @@ export const removeSupportTier = async  (petitionId: number, tierId: number, sav
             setErrorMessage(error.toString());
         });
 }
+
+// function to get the supporters of a petition, given by its id
+export const getPetitionSupporters = async  (petitionId: number, savedAuthToken: string | null,
+                                             setErrorFlag: Function, setErrorMessage: Function,
+                                             setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void
+) => {
+    axios.get(`http://localhost:4941/api/v1/petitions/${petitionId}/supporters\n`)
+        .then((response) => {
+            setErrorFlag(false);
+            setErrorMessage("");
+        }, (error) => {
+            setErrorFlag(true);
+            setErrorMessage(error.toString());
+        });
+};
