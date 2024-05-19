@@ -139,6 +139,7 @@
   position: relative;
   width: 100%;
   min-height: 8em;
+  margin-bottom: 1em;
   /* make the image background cover this div */
   background-size: cover;
   background-position: center;
@@ -240,16 +241,37 @@
   border-color: red !important;
 }
 
-/* Styling for the preview image on the create petition form */
-#petition-image-preview img {
-  width: 8em;
-  height: 8em;
-  border-radius: 1em;
-}
-
 .vertical-dialog {
   display: flex;
   flex-direction: column;
   gap: 1em; /* gap between components */
   padding-bottom: 2em;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  max-width: 8em;
+  max-height: 8em;
+  /* Centre elements horizontally */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  border-radius: 1em;
+}
+
+.add-image-icon-container {
+  cursor: pointer;
+  position: absolute;
+  z-index: 2;
+  right: 0;
+}
+
+.add-image-icon {
+  transform: scale(1.8);
+  color: #1b61db;
 }

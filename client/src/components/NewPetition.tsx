@@ -2,10 +2,11 @@
 
 import React from "react";
 import {useNavigate} from 'react-router-dom';
-import { Button, Paper, TextField, Alert, AlertTitle, MenuItem } from "@mui/material"; // Material-UI components for styling
+import {Button, Paper, TextField, Alert, AlertTitle, MenuItem, IconButton} from "@mui/material"; // Material-UI components for styling
 import Navbar from "./Navbar";
 import {changePetitionImage, createPetition} from "../services/PetitionService";
 import defaultImage from "../assets/default_picture.jpg";
+import {AddCircle} from "@mui/icons-material";
 
 // Available petition categories
 const categories = [
@@ -44,7 +45,7 @@ const NewPetition = () => {
         { title: "", description: "", cost: "" }
     ]);
 
-    const [petitionImage, setPetitionImage] = React.useState<File | null>(null); // State variable for petition image file
+    const [uploadedPetitionImage, setUploadedPetitionImage] = React.useState<File | null>(null); // State variable for petition image file
     const supportedTypes = ['image/png', 'image/jpeg', 'image/gif']; // allowed MIME types for uploaded images
     // reference to the hidden file input element
     const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -54,7 +55,7 @@ const NewPetition = () => {
         if (event.target.files && event.target.files.length > 0) {
             // the uploaded file must be an accepted type (png, jpeg, gif)
             if (supportedTypes.includes(event.target.files[0].type)) {
-                setPetitionImage(event.target.files[0]); // Set the selected image file
+                setUploadedPetitionImage(event.target.files[0]); // Set the selected image file
             } else {
                 setErrorFlag(true);
                 setErrorMessage("Uploaded images must be of MIME type: image/png, image/jpeg, or image/gif")
@@ -115,14 +116,14 @@ const NewPetition = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         // An image must have been uploaded in order to attempt submission
-        if (petitionImage !== null) {
+        if (uploadedPetitionImage !== null) {
             // Call createPetition function to handle creating the petition
             const createdPetitionId = await createPetition(savedAuthToken, title, description, categoryId, supportTiers,
                 setErrorFlag, setErrorMessage);
             // If the result was not null (i.e. was successful, thus returning the created petition's id)
             if (createdPetitionId !== null) {
                 // Change the petition's image with the uploaded image
-                await changePetitionImage(petitionImage, createdPetitionId, savedAuthToken, setErrorFlag, setErrorMessage)
+                await changePetitionImage(uploadedPetitionImage, createdPetitionId, savedAuthToken, setErrorFlag, setErrorMessage)
 
                 // navigate to the newly created petition's page
                 navigate(`/petitions/${createdPetitionId}`);
@@ -154,17 +155,24 @@ const NewPetition = () => {
                 <form onSubmit={handleSubmit}>
 
                     {/* Container for the form components */}
-                    <div id="vertical-form-container">
+                    <div className="vertical-form-container">
 
-                        {/* Preview of petition image. When clicked, prompts user to upload an image */}
-                        {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
-                        <div id="petition-image-preview"
-                             onClick={() => fileInputRef.current?.click()}>
-                            {petitionImage ? (
+                        {/* Container holding the petition image and the icon to edit it */}
+                        <div className="image-container">
+                            {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
+                            {/* Button to change petition image */}
+                            <div className="add-image-icon-container">
+                                <IconButton aria-label="add"
+                                            onClick={() => fileInputRef.current?.click()}>
+                                    <AddCircle className="add-image-icon" />
+                                </IconButton>
+                            </div>
+                            {/* Preview of petition image */}
+                            {uploadedPetitionImage ? (
                                 // If the user has uploaded an image (petitionImage exists)
                                 <img
                                     // create a URL from the uploaded petitionImage to display
-                                    src={URL.createObjectURL(petitionImage)}
+                                    src={URL.createObjectURL(uploadedPetitionImage)}
                                     alt="Petition Preview"
                                 />
                             ) : (
@@ -175,17 +183,17 @@ const NewPetition = () => {
                                     alt="Default"
                                 />
                             )}
-                        </div>
 
-                        {/* Hidden petition image upload input */}
-                        <input
-                            id="file-input"
-                            type="file"
-                            accept="image/*"
-                            ref={fileInputRef} // variable which references this element
-                            style={{ display: 'none' }} // Hide the input
-                            onChange={handleChangePetitionImage}
-                        />
+                            {/* Hidden petition image upload input */}
+                            <input
+                                id="file-input"
+                                type="file"
+                                accept="image/*"
+                                ref={fileInputRef} // variable which references this element
+                                style={{display: 'none'}} // Hide the input
+                                onChange={handleChangePetitionImage}
+                            />
+                        </div>
 
                         {/* Title input field */}
                         <div id="title-input-field-container">
@@ -241,7 +249,7 @@ const NewPetition = () => {
                             <h3>Support Tiers</h3>
 
                             {/* Only show if there are less than 3 support tiers */}
-                            {supportTiers.length <3 &&
+                            {supportTiers.length < 3 &&
                                 // Button to add a new Support Tier
                                 <Button variant="outlined" onClick={handleAddTier}>
                                     Add Tier
@@ -287,7 +295,7 @@ const NewPetition = () => {
                                         }
                                     </div>
                                 </Paper>
-                                ))}
+                            ))}
 
                         </div>
 
@@ -303,7 +311,7 @@ const NewPetition = () => {
             </Paper>
 
         </div>
-);
+    );
 };
 
 export default NewPetition;
