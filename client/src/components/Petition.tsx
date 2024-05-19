@@ -226,18 +226,27 @@ const Petition = () => {
             const rows = await Promise.all(
                 supporters.map(async (supporter: Supporter, index) => {
 
+                    // find the title of the tier they are supporting, by using the supportTiers variable
+                    const supportedTierTitle = supportTiers.find(tier =>
+                        // search supportTiers to find the tier with the matching supportTierId
+                        tier.supportTierId === supporter.supportTierId
+                    )?.title // get the title value
+
                     // get the supporter's image url
                     const supporterImageUrl = await getUserImage(supporter.supporterId.toString())
+
+                    // Convert the timestamp column (in timestamp format), into DD/MM/YYYY (NZ time)
+                    const timestamp = datetimeToDDMMYYYY(supporter.timestamp);
 
                     return (
                         // TableRow created for each petition, with the petition id as the key
                         <TableRow key={supporter.supporterId} className="petition-row">
 
-                            <TableCell>{supporter.supportTierId}</TableCell>
+                            <TableCell>{supportedTierTitle}</TableCell>
 
                             <TableCell>{supporter.message}</TableCell>
 
-                            <TableCell>{supporter.timestamp}</TableCell>
+                            <TableCell>{timestamp}</TableCell>
 
                             {/* Supporter Image */}
                             <TableCell>
