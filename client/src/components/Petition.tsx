@@ -16,7 +16,7 @@ import {
     getPetitionImage,
     changePetitionImage,
     createSupportTier,
-    removeSupportTier
+    removeSupportTier, getSimilarPetitions, getPetitionSupportCost
 } from "../services/PetitionService";
 
 // interface for table head cell
@@ -119,6 +119,8 @@ const Petition = () => {
     const [supporters, setSupporters] = React.useState<Supporter[]>([]);
     // State variable to hold the supporter rows in the petition list
     const [supporterRows, setSupporterRows] = React.useState<React.ReactNode[]>([]);
+    const [similarPetitions, setSimilarPetitions] = React.useState<Array<PetitionFull>>([]);
+    const [similarPetitionRows, setSimilarPetitionRows] = React.useState<React.ReactNode[]>([]);
 
 
     // Function to handle change in petition image input
@@ -154,8 +156,16 @@ const Petition = () => {
     // React useEffect hook which runs whenever id changes
     React.useEffect(() => {
         if (id !== undefined) {
-            // Function to fetch petition details
-            getPetition(id, savedAuthToken, setPetition, setErrorFlag, setErrorMessage);
+            // get the petition's details and hero image and set its url in the petitionImage variable
+            const fetchPetitionDetails = async () => {
+                await getPetition(id, savedAuthToken, setPetition, setErrorFlag, setErrorMessage)
+
+                // get the petition's hero image using getPetitionImage from PetitionService
+                const petitionImageUrl = await getPetitionImage(parseInt(id, 10));
+                // set the image to the petitionImage state variable
+                setPetitionImage(petitionImageUrl);
+            }
+            fetchPetitionDetails();
 
             // if the client is logged in as the owner of the petition whose page they are viewing
             if (clientUserId !== null) {
@@ -163,15 +173,6 @@ const Petition = () => {
                     setAuthenticatedAsOwner(true);
                 }
             }
-
-            // get the petition's hero image and set its url in the petitionImage variable
-            const fetchPetitionImageUrl = async () => {
-                // get the petition's hero image using getPetitionImage from PetitionService
-                const petitionImageUrl = await getPetitionImage(parseInt(id, 10));
-                // set the image to the petitionImage state variable
-                setPetitionImage(petitionImageUrl);
-            }
-            fetchPetitionImageUrl();
 
             // get the petition's supporters
             const fetchSupporters = async () => {
@@ -201,13 +202,21 @@ const Petition = () => {
             })));
         }
 
-        // get and set the petition owner's image url
-        const findOwnerImageUrl = async () => {
-            // get and set the petition owner's profile image
-            setPetitionOwnerImage(await getUserImage(petition.ownerId.toString()));
+        // set petition details
+        const setPetitionDetails = async () => {
+            if (petition.ownerId !== 0) {
+                // get and set the petition owner's profile image
+                setPetitionOwnerImage(await getUserImage(petition.ownerId.toString()));
+            }
+
+            if (petition.categoryId !== 0) {
+                // get and set the petitions similar to this one
+                await getSimilarPetitions(petition.categoryId, petition.ownerId, setSimilarPetitions);
+                console.log("Similar petitions: ", similarPetitions);
+            }
         }
 
-        findOwnerImageUrl();
+        setPetitionDetails();
 
         // check whether client is authenticated as the owner of the petition they're viewing
         if (clientUserId !== null) {
@@ -219,54 +228,157 @@ const Petition = () => {
 
     // run when supporters changes
     React.useEffect(() => {
-        // create the rows for the petition list
-        const createSupporterRows = async () => {
-            console.log("supporters: ", supporters);
-            // store all rows in this variable, Promise.all is used to wait until all of them are finished
-            const rows = await Promise.all(
-                supporters.map(async (supporter: Supporter, index) => {
-
-                    // find the title of the tier they are supporting, by using the supportTiers variable
-                    const supportedTierTitle = supportTiers.find(tier =>
-                        // search supportTiers to find the tier with the matching supportTierId
-                        tier.supportTierId === supporter.supportTierId
-                    )?.title // get the title value
-
-                    // get the supporter's image url
-                    const supporterImageUrl = await getUserImage(supporter.supporterId.toString())
-
-                    // Convert the timestamp column (in timestamp format), into DD/MM/YYYY (NZ time)
-                    const timestamp = datetimeToDDMMYYYY(supporter.timestamp);
-
-                    return (
-                        // TableRow created for each petition, with the petition id as the key
-                        <TableRow key={supporter.supporterId} className="petition-row">
-
-                            <TableCell>{supportedTierTitle}</TableCell>
-
-                            <TableCell>{supporter.message}</TableCell>
-
-                            <TableCell>{timestamp}</TableCell>
-
-                            {/* Supporter Image */}
-                            <TableCell>
-                                {/* If the supporterImageUrl is present, display it, otherwise show default */}
-                                <img src={supporterImageUrl || defaultImage}
-                                     alt="Petition Image"/>
-                            </TableCell>
-
-                            <TableCell>
-                                {supporter.supporterFirstName} {supporter.supporterLastName}
-                            </TableCell>
-                        </TableRow>
-                    )
-                })
-            )
-            setSupporterRows(rows);
-        };
-
         createSupporterRows();
     }, [supporters]);
+
+    // create the rows for the petition list
+    const createSupporterRows = async () => {
+        console.log("supporters: ", supporters);
+        // store all rows in this variable, Promise.all is used to wait until all of them are finished
+        const rows = await Promise.all(
+            supporters.map(async (supporter: Supporter, index) => {
+
+                // find the title of the tier they are supporting, by using the supportTiers variable
+                const supportedTierTitle = supportTiers.find(tier =>
+                    // search supportTiers to find the tier with the matching supportTierId
+                    tier.supportTierId === supporter.supportTierId
+                )?.title // get the title value
+
+                // get the supporter's image url
+                const supporterImageUrl = await getUserImage(supporter.supporterId.toString())
+
+                // Convert the timestamp column (in timestamp format), into DD/MM/YYYY (NZ time)
+                const timestamp = datetimeToDDMMYYYY(supporter.timestamp);
+
+                return (
+                    // TableRow created for each petition, with the petition id as the key
+                    <TableRow key={supporter.supporterId} className="petition-row">
+
+                        {/* Title of the tier which the supporter supports */}
+                        <TableCell>{supportedTierTitle}</TableCell>
+
+                        {/* Display the supporter's message if provided, otherwise empty string */}
+                        <TableCell>{supporter.message || ""}</TableCell>
+
+                        {/* The timestamp of when the supporter began supporting */}
+                        <TableCell>{timestamp}</TableCell>
+
+                        {/* Supporter Image */}
+                        <TableCell>
+                            {/* If the supporterImageUrl is present, display it, otherwise show default */}
+                            <img src={supporterImageUrl || defaultImage}
+                                 alt="Petition Image"/>
+                        </TableCell>
+
+                        <TableCell>
+                            {supporter.supporterFirstName} {supporter.supporterLastName}
+                        </TableCell>
+                    </TableRow>
+                )
+            })
+        )
+        setSupporterRows(rows);
+    };
+
+    // run when similar petitions changes
+    React.useEffect(() => {
+        createSimilarPetitionRows();
+    }, [similarPetitions]);
+
+    // create the rows for the similar petitions list
+    const createSimilarPetitionRows = async () => {
+        console.log("creating rows...")
+        // store all rows in this variable, Promise.all is used to wait until all of them are finished
+        const rows = await Promise.all(
+            // Map through each petition in the petitions array, so we can make a TableRow for each
+            similarPetitions.map(async (petition: PetitionFull) => {
+                // Convert the creation-date column (in timestamp format), into DD/MM/YYYY (NZ time)
+                const creationDate = datetimeToDDMMYYYY(petition.creationDate);
+                // Get the supporting cost for the petition's cheapest tier:
+                const supportingCost = await getPetitionSupportCost(petition.petitionId);
+                // get the petition image url, using the getPetitionImage
+                // method from PetitionService
+                const imageUrl = await getPetitionImage(petition.petitionId);
+                // get the image url for the petition owner's profile picture, using getUserImage
+                // method from UserService
+                const ownerImageUrl = await getUserImage(petition.ownerId.toString());
+
+                return (
+                    // TableRow created for each petition, with the petition id as the key
+                    <TableRow key={petition.petitionId} className="petition-row">
+
+                        <TableCell>{petition.petitionId}</TableCell>
+
+                        {/* Petition Hero Image */}
+                        <TableCell>
+                            {/* If the petition's imageUrl is present, display it */}
+                            {/* (all petitions should have an image, but we can do this to be safe) */}
+                            {imageUrl &&
+                                <img src={imageUrl} alt="Petition Image"/>}
+                        </TableCell>
+
+                        {/* Petition title */}
+                        <TableCell>
+                            <div className="name-link">
+                                {/* Clicking the title links the client to that petition's page */}
+                                <Link to={`/petitions/${petition.petitionId}`}>
+                                    {petition.title}
+                                </Link>
+                            </div>
+                        </TableCell>
+
+                        {/* Petition creation date */}
+                        <TableCell>
+                            {creationDate}
+                        </TableCell>
+
+                        {/* Petition minimum support cost */}
+                        <TableCell>
+                            {supportingCost}
+                        </TableCell>
+
+
+                        {/* Petition category */}
+                        <TableCell>
+                            {/* From the categories array, find the record where the
+                                 id value matches the petition.categoryId value */}
+                            {/* See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
+                                under 'Using arrow function and destructuring'*/}
+                            {categories.find(
+                                category =>
+                                    category.id === petition.categoryId
+                            )?.name} {/* Use optional chaining to select the 'name' value, if the category exists */}
+                            {/* see https://www.geeksforgeeks.org/how-to-use-optional-chaining-with-arrays-and-functions-in-typescript/ */}
+                        </TableCell>
+
+                        {/* Petition owner's profile picture */}
+                        <TableCell className="petition-owner-tablecell">
+                            {/* Clicking the owner's name links to their user page */}
+                            <Link to={`/users/${petition.ownerId}`}>
+                                {/* If owner has no image (imageUrl is null),
+                                     display the default image */}
+                                <img src={ownerImageUrl || defaultImage}
+                                     alt="Owner Profile Picture"
+                                />
+                            </Link>
+                        </TableCell>
+
+                        {/* Petition owner name */}
+                        <TableCell>
+                            <div className="name-link">
+                                {/* Clicking the owner's name links to their user page */}
+                                <Link to={`/users/${petition.ownerId}`}>
+                                    {petition.ownerFirstName} {petition.ownerLastName}
+                                </Link>
+                            </div>
+                        </TableCell>
+
+                    </TableRow>
+                );
+            })
+        )
+        setSimilarPetitionRows(rows);
+    }
 
     // Function to edit the petition details
     const editPetition = () => {
@@ -686,11 +798,27 @@ const Petition = () => {
                     </Dialog>
 
 
-                    {/* Display list of supporters */}
-                    <div>
+                    {/* List of supporters */}
+                    <TableContainer component={Paper}>
                         <h2>Supporters</h2>
-                        {supporterRows}
-                    </div>
+                        <Table>
+                            <TableBody>
+                                {/* Display the supporter rows */}
+                                {supporterRows}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+
+
+                    <TableContainer component={Paper}>
+                        <h2>Similar Petitions</h2>
+                        <Table>
+                            <TableBody>
+                                {/* Display the similar petition rows */}
+                                {similarPetitionRows}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
 
                     {/* Snackbar component */}
                     <Snackbar

@@ -383,17 +383,32 @@ export const removeSupportTier = async  (petitionId: number, tierId: number, sav
         });
 }
 
-// function to get the supporters of a petition, given by its id
-export const getPetitionSupporters = async  (petitionId: number, savedAuthToken: string | null,
-                                             setErrorFlag: Function, setErrorMessage: Function,
-                                             setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void
-) => {
-    axios.get(`http://localhost:4941/api/v1/petitions/${petitionId}/supporters\n`)
-        .then((response) => {
-            setErrorFlag(false);
-            setErrorMessage("");
-        }, (error) => {
-            setErrorFlag(true);
-            setErrorMessage(error.toString());
+// Given the category id and owner id of a petition, returns petitions which are the same in either
+export const getSimilarPetitions = async (categoryId: number, ownerId: number, setSimilarPetitions: Function) => {
+    console.log("category id: ", categoryId, "owner id: ", ownerId);
+
+    try {
+        // get petitions with matching category ID
+        const categoryResponse = await axios.get('http://localhost:4941/api/v1/petitions', {
+            params: { categoryIds: categoryId }
         });
+
+        // get petitions with matching owner ID
+        const ownerResponse = await axios.get('http://localhost:4941/api/v1/petitions', {
+            params: { ownerId: ownerId }
+        });
+
+        // Combine results and remove duplicates
+        const combinedPetitions = [...categoryResponse.data.petitions, ...ownerResponse.data.petitions];
+
+        // TODO: only get unique ones! code below is broken :(
+        // const uniquePetitions = Array.from(new Set(combinedPetitions.map(petition => petition.id)))
+        //     .map(id => combinedPetitions.find(petition => petition.id === id));
+
+        // save the result to similarPetitions
+        setSimilarPetitions(combinedPetitions);
+        console.log("BITCH!");
+    } catch (error) {
+        console.error("Fetching similar petitions failed: ", error);
+    }
 };
