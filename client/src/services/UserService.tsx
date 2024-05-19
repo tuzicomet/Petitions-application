@@ -2,7 +2,6 @@
 // contains methods for to getting or modifying user-related data
 
 import axios from 'axios';
-import React from "react";
 
 // Function to fetch user data
 export const getUser = async (id: string | undefined, savedAuthToken: string | null,

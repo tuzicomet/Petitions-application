@@ -19,7 +19,6 @@ const PetitionList = ({ petitions }: { petitions: Array<PetitionFull> }) => {
     // Define table head cells
     // (the columns in the petitions list)
     const headCells: readonly HeadCell[] = [
-        { id: 'ID', label: 'ID' },
         { id: 'image', label: 'Image' },
         { id: 'title', label: 'Title' },
         { id: 'creationDate', label: 'Creation Date' },
@@ -65,8 +64,6 @@ const PetitionList = ({ petitions }: { petitions: Array<PetitionFull> }) => {
                     return (
                         // TableRow created for each petition, with the petition id as the key
                         <TableRow key={petition.petitionId} className="petition-row">
-
-                            <TableCell>{petition.petitionId}</TableCell>
 
                             {/* Petition Hero Image */}
                             <TableCell>

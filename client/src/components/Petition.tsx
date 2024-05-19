@@ -16,7 +16,7 @@ import {
     getPetitionImage,
     changePetitionImage,
     createSupportTier,
-    removeSupportTier, getSimilarPetitions, getPetitionSupportCost, supportGivenTier
+    removeSupportTier, getSimilarPetitions, supportGivenTier
 } from "../services/PetitionService";
 import PetitionList from "./PetitionList";
 

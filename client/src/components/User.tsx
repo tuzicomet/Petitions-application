@@ -1,6 +1,5 @@
-import axios from 'axios'; // Axios library for making HTTP requests
-import React, { ChangeEvent } from "react";
-import { Link, useNavigate, useParams } from 'react-router-dom'; // React Router for navigation
+import React from "react";
+import { useParams } from 'react-router-dom'; // React Router for navigation
 import {
     Button,
     Dialog,
@@ -26,7 +25,6 @@ import {getPetitionsSupportedByUserId, getPetitionsWithOwnerId} from "../service
 // User functional component
 const User = () => {
     const { id } = useParams(); // Get route parameters
-    const navigate = useNavigate(); // Navigation function for navigating to different pages
     const [user, setUser] = React.useState<User>({ // Define state variable for user data
         id: 0,
         firstName: "",
@@ -56,12 +54,10 @@ const User = () => {
     const [ownedPetitions, setOwnedPetitions] = React.useState<Array<PetitionFull>>([]);
     const [supportedPetitions, setSupportedPetitions] = React.useState<Array<PetitionFull>>([]);
 
-
-
     // run whenever id changes
     React.useEffect(() => {
         // if the client is logged in as the user whose page they are viewing
-        if (clientUserId == id) {
+        if (clientUserId === id) {
             setAuthenticatedAsUser(true);
         }
         getUser(id, savedAuthToken, setUser, setErrorFlag, setErrorMessage);
@@ -84,7 +80,7 @@ const User = () => {
             }
         }
         getRelatedPetitions();
-    }, [id]);
+    }, [id, clientUserId, savedAuthToken]);
 
     // Snackbar close handler
     const handleSnackClose = () => {
@@ -166,12 +162,12 @@ const User = () => {
                     <img
                         // create a URL from the uploaded petitionImage to display
                         src={URL.createObjectURL(uploadedImage)}
-                        alt="Petition Preview"
+                        alt="User Profile"
                         className="circle-img"
                     />
                 ) : (
                     // Otherwise, display the user's current image, if it exists, otherwise default image
-                    <img src={userImage || defaultImage} alt="User Profile Picture" className="circle-img"/>
+                    <img src={userImage || defaultImage} alt="User Profile" className="circle-img"/>
                 )}
 
                 {/* Hidden user image upload input */}

@@ -1,39 +1,16 @@
-import axios from 'axios'; // used for making HTTP requests
 import React from "react";
 import {Link} from 'react-router-dom';
 import {
-    Button, Dialog, DialogActions, DialogContent, DialogContentText,
-    DialogTitle, Paper, TextField, TableContainer, Table, TableBody, TableHead,
-    TableRow, TableCell, Stack, Alert, AlertTitle, Snackbar, IconButton,
+    Button, Dialog, DialogActions, DialogContent,
+    DialogTitle, Paper, TextField, Alert, AlertTitle, Snackbar,
     Chip, MenuItem, InputLabel, Select
 } from "@mui/material"; // Material-UI components for styling
 // import icons from MUI
 import { Search, Filter, Sort } from "@mui/icons-material";
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
-
-import { datetimeToDDMMYYYY } from "../utils/Utils";
 import { getPetitions, getPetitionImage, getNumberOfPetitions, getPetitionSupportCost } from "../services/PetitionService";
-import { getUserImage } from "../services/UserService";
 import PetitionList from './PetitionList';
-
-// interface for table head cell
-interface HeadCell {
-    id: string;
-    label: string;
-}
-
-// Define table head cells
-// (the columns in the petitions list)
-const headCells: readonly HeadCell[] = [
-    { id: 'ID', label: 'ID' },
-    { id: 'image', label: 'Image' },
-    { id: 'title', label: 'Title' },
-    { id: 'creationDate', label: 'Creation Date' },
-    { id: 'supportingCost', label: 'Supporting Cost' },
-    { id: 'category', label: 'Category' },
-    { id: 'owner', label: 'Owner' }
-];
 
 // Available petition categories
 const categories = [
@@ -60,7 +37,6 @@ const Petitions = () => {
     const [petitions, setPetitions] = React.useState<Array<PetitionFull>>([]);
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
-    const [newPetitionTitle, setNewPetitionTitle] = React.useState("");
 
     const [openSearchDialog, setOpenSearchDialog] = React.useState(false);
     // query to search the petition list with
@@ -88,9 +64,6 @@ const Petitions = () => {
     const [snackMessage, setSnackMessage] = React.useState("");
 
     const savedAuthToken = localStorage.getItem("savedAuthToken"); // Get the saved authToken from local storage
-
-    // State variable to hold the petition rows in the petition list
-    const [petitionRows, setPetitionRows] = React.useState<React.ReactNode[]>([]);
 
     // Function to handle pagination
     const handlePagination = (action: string) => {

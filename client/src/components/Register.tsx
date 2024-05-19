@@ -174,7 +174,7 @@ const Register = () => {
                                 <img
                                     // create a URL from the uploaded userImage to display
                                     src={URL.createObjectURL(uploadedUserImage)}
-                                    alt="User Image Preview"
+                                    alt="User Preview"
                                     className="circle-img"
                                 />
                             ) : (
