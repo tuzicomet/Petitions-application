@@ -18,6 +18,7 @@ import {
     createSupportTier,
     removeSupportTier, getSimilarPetitions, getPetitionSupportCost, supportGivenTier
 } from "../services/PetitionService";
+import PetitionList from "./PetitionList";
 
 // interface for table head cell
 interface HeadCell {
@@ -283,106 +284,6 @@ const Petition = () => {
         )
         setSupporterRows(rows);
     };
-
-    // run when similar petitions changes
-    React.useEffect(() => {
-        createSimilarPetitionRows();
-    }, [similarPetitions]);
-
-    // create the rows for the similar petitions list
-    const createSimilarPetitionRows = async () => {
-        console.log("creating rows...")
-        // store all rows in this variable, Promise.all is used to wait until all of them are finished
-        const rows = await Promise.all(
-            // Map through each petition in the petitions array, so we can make a TableRow for each
-            similarPetitions.map(async (petition: PetitionFull) => {
-                // Convert the creation-date column (in timestamp format), into DD/MM/YYYY (NZ time)
-                const creationDate = datetimeToDDMMYYYY(petition.creationDate);
-                // Get the supporting cost for the petition's cheapest tier:
-                const supportingCost = await getPetitionSupportCost(petition.petitionId);
-                // get the petition image url, using the getPetitionImage
-                // method from PetitionService
-                const imageUrl = await getPetitionImage(petition.petitionId);
-                // get the image url for the petition owner's profile picture, using getUserImage
-                // method from UserService
-                const ownerImageUrl = await getUserImage(petition.ownerId.toString());
-
-                return (
-                    // TableRow created for each petition, with the petition id as the key
-                    <TableRow key={petition.petitionId} className="petition-row">
-
-                        <TableCell>{petition.petitionId}</TableCell>
-
-                        {/* Petition Hero Image */}
-                        <TableCell>
-                            {/* If the petition's imageUrl is present, display it */}
-                            {/* (all petitions should have an image, but we can do this to be safe) */}
-                            {imageUrl &&
-                                <img src={imageUrl} alt="Petition Image"/>}
-                        </TableCell>
-
-                        {/* Petition title */}
-                        <TableCell>
-                            <div className="name-link">
-                                {/* Clicking the title links the client to that petition's page */}
-                                <Link to={`/petitions/${petition.petitionId}`}>
-                                    {petition.title}
-                                </Link>
-                            </div>
-                        </TableCell>
-
-                        {/* Petition creation date */}
-                        <TableCell>
-                            {creationDate}
-                        </TableCell>
-
-                        {/* Petition minimum support cost */}
-                        <TableCell>
-                            {supportingCost}
-                        </TableCell>
-
-
-                        {/* Petition category */}
-                        <TableCell>
-                            {/* From the categories array, find the record where the
-                                 id value matches the petition.categoryId value */}
-                            {/* See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
-                                under 'Using arrow function and destructuring'*/}
-                            {categories.find(
-                                category =>
-                                    category.id === petition.categoryId
-                            )?.name} {/* Use optional chaining to select the 'name' value, if the category exists */}
-                            {/* see https://www.geeksforgeeks.org/how-to-use-optional-chaining-with-arrays-and-functions-in-typescript/ */}
-                        </TableCell>
-
-                        {/* Petition owner's profile picture */}
-                        <TableCell className="petition-owner-tablecell">
-                            {/* Clicking the owner's name links to their user page */}
-                            <Link to={`/users/${petition.ownerId}`}>
-                                {/* If owner has no image (imageUrl is null),
-                                     display the default image */}
-                                <img src={ownerImageUrl || defaultImage}
-                                     alt="Owner Profile Picture"
-                                />
-                            </Link>
-                        </TableCell>
-
-                        {/* Petition owner name */}
-                        <TableCell>
-                            <div className="name-link">
-                                {/* Clicking the owner's name links to their user page */}
-                                <Link to={`/users/${petition.ownerId}`}>
-                                    {petition.ownerFirstName} {petition.ownerLastName}
-                                </Link>
-                            </div>
-                        </TableCell>
-
-                    </TableRow>
-                );
-            })
-        )
-        setSimilarPetitionRows(rows);
-    }
 
     // Function to edit the petition details
     const editPetition = () => {
@@ -898,15 +799,9 @@ const Petition = () => {
                     </TableContainer>
 
 
-                    <TableContainer component={Paper}>
-                        <h2>Similar Petitions</h2>
-                        <Table>
-                            <TableBody>
-                                {/* Display the similar petition rows */}
-                                {similarPetitionRows}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    {/* Similar Petitions table */}
+                    <h3>Similar Petitions</h3>
+                    <PetitionList petitions={similarPetitions} />
 
                     {/* Snackbar component */}
                     <Snackbar
