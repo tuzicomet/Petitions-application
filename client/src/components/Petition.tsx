@@ -211,7 +211,8 @@ const Petition = () => {
 
             if (petition.categoryId !== 0) {
                 // get and set the petitions similar to this one
-                await getSimilarPetitions(petition.categoryId, petition.ownerId, setSimilarPetitions);
+                await getSimilarPetitions(petition.petitionId, petition.categoryId,
+                    petition.ownerId, setSimilarPetitions);
                 console.log("Similar petitions: ", similarPetitions);
             }
         }

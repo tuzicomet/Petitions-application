@@ -384,7 +384,8 @@ export const removeSupportTier = async  (petitionId: number, tierId: number, sav
 }
 
 // Given the category id and owner id of a petition, returns petitions which are the same in either
-export const getSimilarPetitions = async (categoryId: number, ownerId: number, setSimilarPetitions: Function) => {
+export const getSimilarPetitions = async (petitionId: number, categoryId: number,
+                                          ownerId: number, setSimilarPetitions: Function) => {
     console.log("category id: ", categoryId, "owner id: ", ownerId);
 
     try {
@@ -398,16 +399,28 @@ export const getSimilarPetitions = async (categoryId: number, ownerId: number, s
             params: { ownerId: ownerId }
         });
 
-        // Combine results and remove duplicates
+        // Combine results together
         const combinedPetitions = [...categoryResponse.data.petitions, ...ownerResponse.data.petitions];
 
-        // TODO: only get unique ones! code below is broken :(
-        // const uniquePetitions = Array.from(new Set(combinedPetitions.map(petition => petition.id)))
-        //     .map(id => combinedPetitions.find(petition => petition.id === id));
+        // Remove any duplicates by making a set with the ids, and then turning it back into a petition array
+        const uniquePetitions = Array.from(
+            // Create a Set of unique petitionId values from the combinedPetitions array
+            new Set(
+                // Map the combinedPetitions array to an array of petitionId values
+                combinedPetitions.map(petition => petition.petitionId)
+            )
+        ).map(
+            // For each unique petitionId, find the corresponding petition object
+            id => combinedPetitions.find(
+                petition => petition.petitionId === id
+            )
+        );
+
+        // Filter out the petition with the given petitionId
+        const filteredPetitions = uniquePetitions.filter(petition => petition.petitionId !== petitionId);
 
         // save the result to similarPetitions
-        setSimilarPetitions(combinedPetitions);
-        console.log("BITCH!");
+        setSimilarPetitions(filteredPetitions);
     } catch (error) {
         console.error("Fetching similar petitions failed: ", error);
     }
