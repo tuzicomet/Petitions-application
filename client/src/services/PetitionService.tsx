@@ -458,3 +458,30 @@ export const supportGivenTier = async  (petitionId: number, savedAuthToken: stri
             setErrorMessage(error.toString());
         });
 };
+
+// Get all petitions which belong to an owner, given by their user id
+export const getPetitionsWithOwnerId = async (ownerId: number) => {
+    try {
+        // get petitions with matching owner ID
+        const response = await axios.get(
+            'http://localhost:4941/api/v1/petitions', {
+            params: { ownerId: ownerId }
+        });
+        return response.data.petitions;
+    } catch (error) {
+        console.error("Fetching owned petitions failed: ", error);
+    }
+};
+
+// Get all petitions which are supported by a user, given by their user id
+export const getPetitionsSupportedByUserId = async (userId: number) => {
+    try {
+        const response = await axios.get(
+            'http://localhost:4941/api/v1/petitions', {
+                params: { supporterId: userId }
+            });
+        return response.data.petitions;
+    } catch (error) {
+        console.error("Fetching supported petitions failed: ", error);
+    }
+};
