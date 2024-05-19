@@ -172,6 +172,20 @@ const Petition = () => {
                 setPetitionImage(petitionImageUrl);
             }
             fetchPetitionImageUrl();
+
+            // get the petition's supporters
+            const fetchSupporters = async () => {
+                try {
+                    await axios.get(`http://localhost:4941/api/v1/petitions/${id}/supporters`)
+                        .then((response) => {
+                            setSupporters(response.data)
+                        })
+                } catch (error) {
+                    console.error("Error fetching supporters:", error);
+                }
+            };
+
+            fetchSupporters();
         }
     }, [id]);
 
@@ -195,20 +209,19 @@ const Petition = () => {
 
         findOwnerImageUrl();
 
-        // get the petition's supporters
-        const fetchSupporters = async () => {
-            try {
-                const response = await axios.get(`http://localhost:4941/api/v1/petitions/${id}/supporters`);
-                setSupporters(response.data);
-            } catch (error) {
-                console.error("Error fetching supporters:", error);
+        // check whether client is authenticated as the owner of the petition they're viewing
+        if (clientUserId !== null) {
+            if (parseInt(clientUserId, 10) == petition.ownerId) {
+                setAuthenticatedAsOwner(true);
             }
-        };
+        }
+    }, [petition]);
 
-        fetchSupporters();
-
+    // run when supporters changes
+    React.useEffect(() => {
         // create the rows for the petition list
         const createSupporterRows = async () => {
+            console.log("supporters: ", supporters);
             // store all rows in this variable, Promise.all is used to wait until all of them are finished
             const rows = await Promise.all(
                 supporters.map(async (supporter: Supporter, index) => {
@@ -244,14 +257,7 @@ const Petition = () => {
         };
 
         createSupporterRows();
-
-        // check whether client is authenticated as the owner of the petition they're viewing
-        if (clientUserId !== null) {
-            if (parseInt(clientUserId, 10) == petition.ownerId) {
-                setAuthenticatedAsOwner(true);
-            }
-        }
-    }, [petition]);
+    }, [supporters]);
 
     // Function to edit the petition details
     const editPetition = () => {
