@@ -16,7 +16,7 @@ import {
     getPetitionImage,
     changePetitionImage,
     createSupportTier,
-    removeSupportTier, getSimilarPetitions, getPetitionSupportCost
+    removeSupportTier, getSimilarPetitions, getPetitionSupportCost, supportGivenTier
 } from "../services/PetitionService";
 
 // interface for table head cell
@@ -121,7 +121,10 @@ const Petition = () => {
     const [supporterRows, setSupporterRows] = React.useState<React.ReactNode[]>([]);
     const [similarPetitions, setSimilarPetitions] = React.useState<Array<PetitionFull>>([]);
     const [similarPetitionRows, setSimilarPetitionRows] = React.useState<React.ReactNode[]>([]);
-
+    const [openSupportThisTierDialog, setOpenSupportThisTierDialog] = React.useState(false);
+    const [supportMessage, setSupportMessage] = React.useState<string | null>("");
+    // State variable to hold the currently selected support tier id
+    const [selectedTierIdToSupport, setSelectedTierIdToSupport] = React.useState<number | null>(null);
 
     // Function to handle change in petition image input
     const handleChangePetitionImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -440,6 +443,35 @@ const Petition = () => {
         }
     };
 
+    // Function to open the Support This Tier dialog
+    const handleOpenSupportThisTierDialog = (supportTierId: number) => {
+        // Reset the support message
+        setSupportMessage("");
+        // Set the selected support tier id for which the dialog is opened
+        setSelectedTierIdToSupport(supportTierId);
+        // Open the dialog
+        setOpenSupportThisTierDialog(true);
+    };
+
+    // Function to close the Support This Tier dialog
+    const handleCloseSupportThisTierDialog = () => {
+        // Close the dialog
+        setOpenSupportThisTierDialog(false);
+    };
+
+    // Function to handle what happens when the Support button for a tier (given by id) is clicked
+    const handleSupportThisTier = () => {
+        if (selectedTierIdToSupport !== null) {
+            // attempt to support the tier
+            supportGivenTier(petition.petitionId, savedAuthToken, selectedTierIdToSupport,
+                supportMessage, setErrorFlag, setErrorMessage, setSnackMessage, setSnackOpen)
+                .then(() => {
+                    // if successful, close the dialog after submission
+                    setOpenSupportThisTierDialog(false);
+                })
+        }
+    }
+
     // Function to open the Add Support Tier dialog
     const handleOpenAddTierDialog = () => {
         setOpenAddTierDialog(true);
@@ -744,9 +776,15 @@ const Petition = () => {
                                                         </TableRow>
                                                     </TableBody>
                                                 </Table>
-                                                {authenticatedAsOwner && tier.supportTierId !== -1 && (
+                                                {authenticatedAsOwner && tier.supportTierId !== -1 ? (
                                                     <Button variant="outlined" onClick={() => handleEditTierButton(index)}>
                                                         Edit
+                                                    </Button>
+                                                ) : (
+                                                    // If client does not own the petition, show the support button
+                                                    <Button variant="outlined"
+                                                            onClick={() => handleOpenSupportThisTierDialog(tier.supportTierId)}>
+                                                        Support
                                                     </Button>
                                                 )}
                                             </div>
@@ -795,6 +833,32 @@ const Petition = () => {
                         <DialogActions>
                             <Button onClick={handleCloseAddTierDialog}>Cancel</Button>
                             <Button onClick={handleCreateSupportTier}>Create</Button>
+                        </DialogActions>
+                    </Dialog>
+
+                    {/* Dialog for supporting this tier */}
+                    <Dialog open={openSupportThisTierDialog} onClose={handleCloseSupportThisTierDialog}>
+                        <DialogTitle>Support This Tier</DialogTitle>
+                        <DialogContent>
+                            {/* Text field for entering support message */}
+                            <TextField
+                                id="support-message"
+                                label="Support Message"
+                                type="text"
+                                multiline
+                                value={supportMessage}
+                                onChange={(event) => setSupportMessage(event.target.value)}
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            {/* Button to cancel */}
+                            <Button onClick={handleCloseSupportThisTierDialog}>
+                                Cancel
+                            </Button>
+                            {/* Button to confirm support */}
+                            <Button onClick={handleSupportThisTier}>
+                                Submit
+                            </Button>
                         </DialogActions>
                     </Dialog>
 

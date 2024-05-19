@@ -425,3 +425,36 @@ export const getSimilarPetitions = async (petitionId: number, categoryId: number
         console.error("Fetching similar petitions failed: ", error);
     }
 };
+
+
+// Function to support a petition's support tier, given by its id
+export const supportGivenTier = async  (petitionId: number, savedAuthToken: string | null,
+                                         supportTierId: number, message: string | null,
+                                         setErrorFlag: Function, setErrorMessage: Function,
+                                         setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void
+) => {
+    console.log("supporting tier with id: ", supportTierId)
+    // Make a post request to the petition endpoint with the entered in values
+    await axios.post(`http://localhost:4941/api/v1/petitions/${petitionId}/supporters`, {
+        supportTierId: supportTierId,
+        message: message
+    }, {
+        headers: {
+            'X-Authorization': savedAuthToken
+        }
+    })
+        // if support tier was successfully supported
+        .then((response) => {
+            console.log("Tier successfully supported ", response.data);
+            setSnackMessage("Tier successfully supported"); // Set success message for snackbar
+            setSnackOpen(true); // Open snackbar
+            setErrorFlag(false);
+        })
+        // if there was an error with the creation
+        .catch((error) => {
+            console.error("Failed to support the tier: ", error);
+            // if the response had an error message
+            setErrorFlag(true);
+            setErrorMessage(error.toString());
+        });
+};
