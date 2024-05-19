@@ -127,7 +127,7 @@ const Register = () => {
                     }}
                 >
                     {/* Container for the form components */}
-                    <div id="vertical-form-container">
+                    <div className="vertical-form-container">
 
                         {/* First Name input field */}
                         <div id="first-name-input-field">

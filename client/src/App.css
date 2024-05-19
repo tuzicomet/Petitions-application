@@ -81,7 +81,7 @@
 }
 
 /* Styling for vertical forms, where everything in it is stacked vertically */
-#vertical-form-container {
+.vertical-form-container {
   /* Stack elements vertically */
   display: flex;
   flex-direction: column;
@@ -90,7 +90,7 @@
 }
 
 /* Add styling to the input TextFields inside of the vertical form container */
-#vertical-form-container .MuiInputBase-root {
+.vertical-form-container .MuiInputBase-root {
   width: 20em;
 }
 
@@ -245,4 +245,11 @@
   width: 8em;
   height: 8em;
   border-radius: 1em;
+}
+
+.vertical-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 1em; /* gap between components */
+  padding-bottom: 2em;
 }

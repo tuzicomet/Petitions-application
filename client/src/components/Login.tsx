@@ -85,7 +85,7 @@ const Login = () => {
                     }}
                 >
                     {/* Container for the form components */}
-                    <div id="vertical-form-container">
+                    <div className="vertical-form-container">
 
                         {/* Email input field */}
                         <div id="email-input-field">

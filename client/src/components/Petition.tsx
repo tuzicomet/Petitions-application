@@ -11,7 +11,7 @@ import {
     TextField,
     Snackbar,
     Alert,
-    AlertTitle, Paper, TableRow, TableCell, TableContainer, Table, TableHead, TableBody
+    AlertTitle, Paper, TableRow, TableCell, TableContainer, Table, TableHead, TableBody, MenuItem
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
@@ -317,7 +317,7 @@ const Petition = () => {
                         onClose={() => setOpenEditDialog(false)}
                     >
                         <DialogTitle>Edit Petition</DialogTitle>
-                        <DialogContent>
+                        <DialogContent className="vertical-form-container">
                             <DialogContentText>
                                 Make changes to petition details:
                             </DialogContentText>
@@ -325,21 +325,28 @@ const Petition = () => {
                                 label="Title"
                                 value={editPetitionDetails.title || ""}
                                 onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, title: e.target.value })}
-                            /><br />
+                            >
+                            </TextField>
                             <TextField
                                 label="Description"
                                 value={editPetitionDetails.description || ""}
                                 onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, description: e.target.value })}
-                            /><br />
+                            >
+                            </TextField>
                             <TextField
-                                label="CategoryId"
+                                label="Category"
+                                select
                                 value={editPetitionDetails.categoryId || ""}
-                                onChange={(e) =>
-                                    setEditPetitionDetails({
-                                        ...editPetitionDetails,
-                                        categoryId: parseInt(e.target.value, 10)
-                                    })} // TODO: maybe a selector instead?
-                            /><br />
+                                onChange={(e) => setEditPetitionDetails({ ...editPetitionDetails, categoryId: Number(e.target.value) })}
+                                variant="outlined"
+                            >
+                                {/* Display each category in the dropdown */}
+                                {categories.map((category) => (
+                                    <MenuItem key={category.id} value={category.id}>
+                                        {category.name}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
