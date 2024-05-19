@@ -156,7 +156,7 @@ const User = () => {
                     <img src={userImage || defaultImage} alt="User Profile Picture" className="circle-img"/>
                 )}
 
-                {/* Hidden petition image upload input */}
+                {/* Hidden user image upload input */}
                 <input
                     id="file-input"
                     type="file"
@@ -179,9 +179,6 @@ const User = () => {
                 )}
             </div>
 
-            {/* Link to navigate back to the users list */}
-            <Link to={"/users"}>Back to users</Link>
-
             {/* Only display if the client is authenticated as user */}
             {authenticatedAsUser && (
                 <>
@@ -189,24 +186,6 @@ const User = () => {
                     <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
                         Edit
                     </Button>
-
-                    {/* Button to upload a new profile picture */}
-                    {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
-                    {/* TODO: make a button on top of the curent image instead? */}
-                    {/* TODO: let users remove their profile picture (how would this fit with above?) */}
-                    <Button variant="outlined" onClick={() => fileInputRef.current?.click()}>
-                        {/* When clicked, it clicks the hidden file input element */}
-                        Change Picture
-                    </Button>
-                    {/* Hidden file input element */}
-                    <input
-                        type="file"
-                        accept="image/*"
-                        style={{ display: 'none' }} // Hide the element
-                        ref={fileInputRef} // variable which references this element
-                        // When an image is uploaded, call the handleImageUpload function
-                        onChange={handleChangeUserImage}
-                    />
                 </>
             )}
 
