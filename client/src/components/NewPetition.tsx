@@ -5,7 +5,7 @@ import {useNavigate} from 'react-router-dom';
 import {Button, Paper, TextField, Alert, AlertTitle, MenuItem, IconButton} from "@mui/material"; // Material-UI components for styling
 import Navbar from "./Navbar";
 import {uploadPetitionImage, createPetition} from "../services/PetitionService";
-import defaultImage from "../assets/default_picture.jpg";
+import defaultPetitionImage from "../assets/default_petition_image.jpg";
 import {AddCircle} from "@mui/icons-material";
 
 // Available petition categories
@@ -177,9 +177,8 @@ const NewPetition = () => {
                                 />
                             ) : (
                                 // Otherwise, display a default image
-                                // TODO: change default image
                                 <img
-                                    src={defaultImage}
+                                    src={defaultPetitionImage}
                                     alt="Default"
                                 />
                             )}
