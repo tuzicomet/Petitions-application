@@ -831,35 +831,58 @@ const Petition = () => {
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={handleCloseAddTierDialog}>Cancel</Button>
-                            <Button onClick={handleCreateSupportTier}>Create</Button>
+                            <Button variant="outlined" onClick={handleCloseAddTierDialog}>Cancel</Button>
+                            <Button variant="outlined" onClick={handleCreateSupportTier}>Create</Button>
                         </DialogActions>
                     </Dialog>
 
                     {/* Dialog for supporting this tier */}
                     <Dialog open={openSupportThisTierDialog} onClose={handleCloseSupportThisTierDialog}>
-                        <DialogTitle>Support This Tier</DialogTitle>
-                        <DialogContent>
-                            {/* Text field for entering support message */}
-                            <TextField
-                                id="support-message"
-                                label="Support Message"
-                                type="text"
-                                multiline
-                                value={supportMessage}
-                                onChange={(event) => setSupportMessage(event.target.value)}
-                            />
-                        </DialogContent>
-                        <DialogActions>
-                            {/* Button to cancel */}
-                            <Button onClick={handleCloseSupportThisTierDialog}>
-                                Cancel
-                            </Button>
-                            {/* Button to confirm support */}
-                            <Button onClick={handleSupportThisTier}>
-                                Submit
-                            </Button>
-                        </DialogActions>
+                        {clientUserId ?
+                            (<>
+                                {/* If user is logged in, show the support form */}
+                                <DialogTitle>Support This Tier</DialogTitle>
+                                <DialogContent>
+                                    {/* Text field for entering support message */}
+                                    <TextField
+                                        id="support-message"
+                                        label="Support Message"
+                                        type="text"
+                                        multiline
+                                        value={supportMessage}
+                                        onChange={(event) => setSupportMessage(event.target.value)}
+                                    />
+                                </DialogContent>
+                                <DialogActions>
+                                    {/* Button to cancel */}
+                                    <Button variant="outlined" onClick={handleCloseSupportThisTierDialog}>
+                                        Cancel
+                                    </Button>
+                                    {/* Button to confirm support */}
+                                    <Button variant="outlined" onClick={handleSupportThisTier}>
+                                        Submit
+                                    </Button>
+                                </DialogActions>
+                            </>)
+                            : (
+                                <>
+                                    {/* If user is not logged in, prompt them to register/login */}
+                                    <DialogTitle>You must be logged in to support</DialogTitle>
+                                    <DialogActions>
+                                        <Link to="/register">
+                                            <Button variant="outlined">
+                                                Register
+                                            </Button>
+                                        </Link>
+                                        <Link to="/login">
+                                            <Button variant="outlined">
+                                                Login
+                                            </Button>
+                                        </Link>
+                                    </DialogActions>
+                                </>
+                            )
+                        }
                     </Dialog>
 
 
