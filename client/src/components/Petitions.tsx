@@ -13,7 +13,7 @@ import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 
 import { datetimeToDDMMYYYY } from "../utils/Utils";
-import { getPetitions, getPetitionImage, getNumberOfPetitions } from "../services/PetitionService";
+import { getPetitions, getPetitionImage, getNumberOfPetitions, getPetitionSupportCost } from "../services/PetitionService";
 import { getUserImage } from "../services/UserService";
 
 // interface for table head cell
@@ -29,6 +29,7 @@ const headCells: readonly HeadCell[] = [
     { id: 'image', label: 'Image' },
     { id: 'title', label: 'Title' },
     { id: 'creationDate', label: 'Creation Date' },
+    { id: 'supportingCost', label: 'Supporting Cost' },
     { id: 'category', label: 'Category' },
     { id: 'owner', label: 'Owner' }
 ];
@@ -180,6 +181,8 @@ const Petitions = () => {
                 petitions.map(async (petition: PetitionFull) => {
                     // Convert the creation-date column (in timestamp format), into DD/MM/YYYY (NZ time)
                     const creationDate = datetimeToDDMMYYYY(petition.creationDate);
+                    // Get the supporting cost for the petition's cheapest tier:
+                    const supportingCost = await getPetitionSupportCost(petition.petitionId);
                     // get the petition image url, using the getPetitionImage
                     // method from PetitionService
                     const imageUrl = await getPetitionImage(petition.petitionId);
@@ -216,6 +219,12 @@ const Petitions = () => {
                                 {creationDate}
                             </TableCell>
 
+                            {/* Petition minimum support cost */}
+                            <TableCell>
+                                {supportingCost}
+                            </TableCell>
+
+
                             {/* Petition category */}
                             <TableCell>
                                 {/* From the categories array, find the record where the
@@ -249,11 +258,6 @@ const Petitions = () => {
                                         {petition.ownerFirstName} {petition.ownerLastName}
                                     </Link>
                                 </div>
-                            </TableCell>
-
-                            {/* Petition supporting cost (of the minimum tier) */}
-                            <TableCell>
-                                {/* TODO */}
                             </TableCell>
 
                         </TableRow>

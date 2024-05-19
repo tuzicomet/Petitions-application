@@ -223,3 +223,21 @@ export const getNumberOfPetitions = async (
         return 0; // Return 0 in case of an error
     }
 };
+
+// Function to get the minimum supporting cost for a given petition's tiers
+export const getPetitionSupportCost = async (petitionId: number): Promise<number> => {
+    try {
+        const response = await axios.get<PetitionFull>(
+            `http://localhost:4941/api/v1/petitions/${petitionId}`
+        );
+        const petition = response.data;
+        // Map through each of the petition's support tiers to get their cost, and get the minimum value
+        const minCost = Math.min(
+            ...petition.supportTiers.map(tier => tier.cost)
+        );
+        return minCost;
+    } catch (error) {
+        console.error('Error fetching number of petitions:', error);
+        return 0; // Return 0 in case of an error
+    }
+};
