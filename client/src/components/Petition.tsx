@@ -86,15 +86,19 @@ const Petition = () => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     // State variable for the uploaded petition image file
     const [uploadedPetitionImage, setUploadedPetitionImage] = React.useState<File | null>(null);
-    // State variables for support tier editing
-    const [editedSupportTier, setEditedSupportTier] = React.useState({ title: "", description: "", cost: "" });
-    const [editedTierIndex, setEditedTierIndex] = React.useState(-1);
     // State variable to hold the support tiers
     const [supportTiers, setSupportTiers] = React.useState<SupportTier[]>([
         { supportTierId: -1, title: "", description: "", cost: 0 }
     ]);
     const [editMode, setEditMode] = React.useState<{[key: number]: boolean}>({});
     const [tempSupportTiers, setTempSupportTiers] = React.useState<SupportTier[]>([]);
+    // State variables for Add Support Tier dialog
+    const [openAddTierDialog, setOpenAddTierDialog] = React.useState(false);
+    const [newSupportTier, setNewSupportTier] = React.useState({
+        title: "",
+        description: "",
+        cost: 0
+    });
 
     // Function to handle change in petition image input
     const handleChangePetitionImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -196,50 +200,10 @@ const Petition = () => {
             });
     };
 
-    const handleTierChange = (index: number, field: string, value: string) => {
-        const newSupportTiers = [...supportTiers];
-        newSupportTiers[index] = { ...newSupportTiers[index], [field]: value };
-        setSupportTiers(newSupportTiers);
-    };
-
-    // Function to handle when the Add Tier button is clicked
-    const handleAddTier = () => {
-        if (supportTiers.length < 3) {
-            setSupportTiers([...supportTiers, { supportTierId: -1, title: "", description: "", cost: 0 }]);
-        }
-    };
-
-    // Function to handle when the Remove button is clicked for a support tier
-    const handleRemoveTier = (index: number) => {
-        if (supportTiers.length > 1) {
-            const updatedSupportTiers = supportTiers.filter((_, i) => i !== index);
-            setSupportTiers(updatedSupportTiers);
-        }
-    };
-
     // Function to handle when the Edit button is clicked for a support tier
     const handleEditTierButton = (index: number) => {
         setEditMode({...editMode, [index]: true});
         setTempSupportTiers([...supportTiers]);
-    };
-
-    // Function to handle when the Save button is clicked when editing a tier
-    const handleSaveTierEdits = async (index: number) => {
-        const updatedTier = tempSupportTiers[index];
-        try {
-            await axios.patch(`http://localhost:4941/api/v1/petitions/${id}/supportTiers/${updatedTier.supportTierId}`, updatedTier, {
-                headers: {
-                    'X-Authorization': savedAuthToken
-                }
-            });
-            const newSupportTiers = [...supportTiers];
-            newSupportTiers[index] = updatedTier;
-            setSupportTiers(newSupportTiers);
-            setEditMode({...editMode, [index]: false});
-        } catch (error) {
-            setErrorFlag(true);
-            //TODO: setErrorMessage(error.toString());
-        }
     };
 
     // Function to handle when the Cancel button is clicked when editing a support tier
@@ -253,6 +217,36 @@ const Petition = () => {
         const newTempSupportTiers = [...tempSupportTiers];
         newTempSupportTiers[index] = { ...newTempSupportTiers[index], [field]: value };
         setTempSupportTiers(newTempSupportTiers);
+    };
+
+    // Function to open the Add Support Tier dialog
+    const handleOpenAddTierDialog = () => {
+        setOpenAddTierDialog(true);
+    };
+
+    // Function to close the Add Support Tier dialog
+    const handleCloseAddTierDialog = () => {
+        setOpenAddTierDialog(false);
+    };
+
+    // Function to handle when the Save button is clicked when editing a tier
+    const handleSaveTierEdits = async (index: number) => {
+        const updatedTier = tempSupportTiers[index];
+        try {
+            await axios.patch(`http://localhost:4941/api/v1/petitions/${id}/supportTiers/${updatedTier.supportTierId}`, updatedTier, {
+                headers: {
+                    'X-Authorization': savedAuthToken
+                }
+            });
+            // Update the support tiers state with the edited tier
+            const newSupportTiers = [...supportTiers];
+            newSupportTiers[index] = updatedTier;
+            setSupportTiers(newSupportTiers);
+            setEditMode({ ...editMode, [index]: false });
+        } catch (error: any) {
+            setErrorFlag(true);
+            setErrorMessage(error.toString());
+        }
     };
 
     return (
@@ -469,7 +463,7 @@ const Petition = () => {
                             {/* Only allow client to add a tier if they own the petition,
                              and there are less than 3 support tiers */}
                             {authenticatedAsOwner && supportTiers.length < 3 &&
-                                <Button variant="outlined" onClick={handleAddTier}>
+                                <Button variant="outlined" onClick={handleOpenAddTierDialog}>
                                     Add Tier
                                 </Button>
                             }
@@ -532,8 +526,7 @@ const Petition = () => {
                                         {/* Only allow user to remove a tier if they own the petition
                                          and there are more than 1 support tiers*/}
                                         {authenticatedAsOwner && supportTiers.length > 1 &&
-                                            <Button className="delete-button" variant="outlined"
-                                                    onClick={() => handleRemoveTier(index)}>
+                                            <Button className="delete-button" variant="outlined">
                                                 Remove
                                             </Button>
                                         }
@@ -542,6 +535,38 @@ const Petition = () => {
                             ))}
                         </Paper>
                     </div>
+
+                    {/* Add support tier dialog*/}
+                    <Dialog
+                        open={openAddTierDialog}
+                        onClose={() => setOpenAddTierDialog(false)}
+                    >
+                        <DialogTitle>Add a Support Tier</DialogTitle>
+                        <DialogContent className="vertical-form-container">
+                            <TextField
+                                label="Title"
+                                value={newSupportTier.title || ""}
+                                onChange={(e) => setNewSupportTier({ ...newSupportTier, title: e.target.value })}
+                            />
+                            <TextField
+                                label="Description"
+                                value={newSupportTier.description || ""}
+                                multiline
+                                onChange={(e) => setNewSupportTier({ ...newSupportTier, description: e.target.value })}
+                            />
+                            <TextField
+                                label="Cost"
+                                type="number"
+                                value={newSupportTier.cost || ""}
+                                onChange={(e) =>
+                                    setNewSupportTier({ ...newSupportTier, cost: Number(e.target.value) })}
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleCloseAddTierDialog}>Cancel</Button>
+                            <Button>Create</Button>
+                        </DialogActions>
+                    </Dialog>
 
                     {/* Snackbar component */}
                     <Snackbar
