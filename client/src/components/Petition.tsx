@@ -278,18 +278,19 @@ const Petition = () => {
                         {petition.description}
                     </div>
 
-                    {/* Only display if the client is authenticated as the owner fo the petition they're viewing */}
-                    {authenticatedAsOwner &&
-                        // Button to edit the petition, opens the edit dialog
-                        <Button variant="outlined" startIcon={<Edit/>} onClick={() => setOpenEditDialog(true)}>
-                            Edit
-                        </Button>
-                    }
-
                     {/* Display information about the petition */}
                     <div id="petition-information">
                         <Paper elevation={1} className="card">
                             <h4>Information</h4>
+
+                            {/* Only display if the client is authenticated as the owner fo the petition they're viewing */}
+                            {authenticatedAsOwner &&
+                                // Button to edit the petition's basic information, opens the edit dialog
+                                <Button variant="outlined" startIcon={<Edit/>} onClick={() => setOpenEditDialog(true)}>
+                                    Edit
+                                </Button>
+                            }
+
                             <Table>
                                 <TableBody>
                                     {/* Display category name based on category id */}
