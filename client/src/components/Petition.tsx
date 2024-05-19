@@ -310,7 +310,9 @@ const Petition = () => {
                                     {/* Display the petition's total amount of money raised */}
                                     <TableRow>
                                         <TableCell><strong>Money Raised:</strong></TableCell>
-                                        <TableCell>{petition.moneyRaised}</TableCell>
+                                        {/* If moneyRaised is null (no supporters), display 0, otherwise show the amount */}
+                                        <TableCell>{petition.moneyRaised === null ? 0 :
+                                            petition.moneyRaised}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
