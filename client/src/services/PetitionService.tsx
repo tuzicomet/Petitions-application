@@ -322,3 +322,36 @@ export const getPetitionSupportCost = async (petitionId: number): Promise<number
         return 0; // Return 0 in case of an error
     }
 };
+
+
+// Function to add a new support tier to an existing petition
+export const createSupportTier = async  (petitionId: number, savedAuthToken: string | null,
+                                      title: string, description: string, cost: number,
+                                      setErrorFlag: Function, setErrorMessage: Function,
+                                      setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void
+) => {
+    // Make a post request to the petition endpoint with the entered in values
+    await axios.put(`http://localhost:4941/api/v1/petitions/${petitionId}/supportTiers`, {
+        title,
+        description,
+        cost
+    }, {
+        headers: {
+            'X-Authorization': savedAuthToken
+        }
+    })
+        // if support tier creation was successful
+        .then((response) => {
+            console.log("Support tier successfully added ", response.data);
+            setSnackMessage("Support tier added successfully"); // Set success message for snackbar
+            setSnackOpen(true); // Open snackbar
+            setErrorFlag(false);
+        })
+        // if there was an error with the registration
+        .catch((error) => {
+            console.error("Support tier creation failed: ", error);
+            // if the response had an error message
+            setErrorFlag(true);
+            setErrorMessage(error.toString());
+        });
+};

@@ -11,7 +11,7 @@ import Navbar from "./Navbar";
 import { datetimeToDDMMYYYY } from "../utils/Utils";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
 import {getUserImage} from "../services/UserService";
-import {getPetition, getPetitionImage, changePetitionImage} from "../services/PetitionService";
+import {getPetition, getPetitionImage, changePetitionImage, createSupportTier} from "../services/PetitionService";
 
 // interface for table head cell
 interface HeadCell {
@@ -193,6 +193,7 @@ const Petition = () => {
                 setOpenEditDialog(false);
                 setSnackMessage("Petition details updated successfully");
                 setSnackOpen(true);
+                setErrorFlag(false);
             })
             .catch((error) => {
                 setErrorFlag(true);
@@ -228,6 +229,16 @@ const Petition = () => {
     const handleCloseAddTierDialog = () => {
         setOpenAddTierDialog(false);
     };
+
+    const handleCreateSupportTier = async () => {
+        await createSupportTier(petition.petitionId, savedAuthToken,
+            newSupportTier.title, newSupportTier.description, newSupportTier.cost,
+            setErrorFlag, setErrorMessage, setSnackMessage, setSnackOpen)
+            .then(() => {
+                // close the add tier dialog
+                handleCloseAddTierDialog();
+            })
+    }
 
     // Function to handle when the Save button is clicked when editing a tier
     const handleSaveTierEdits = async (index: number) => {
@@ -564,7 +575,7 @@ const Petition = () => {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleCloseAddTierDialog}>Cancel</Button>
-                            <Button>Create</Button>
+                            <Button onClick={handleCreateSupportTier}>Create</Button>
                         </DialogActions>
                     </Dialog>
 
