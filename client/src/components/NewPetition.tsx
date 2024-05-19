@@ -259,9 +259,9 @@ const NewPetition = () => {
                             {/* (if we add/remove tiers, it automatically updates) */}
                             {supportTiers.map((tier, index) => (
                                 // Individual support tier
-                                <Paper elevation={3} className="card">
-                                    <div key={index} className="support-tier-creation-card">
-                                        <div className="support-tier-creation-fields">
+                                <Paper elevation={3} className="support-tier-container-card">
+                                    <div key={index} className="support-tier-card">
+                                        <div className="support-tier-edit-fields">
                                             <TextField
                                                 label="Title"
                                                 value={tier.title}

@@ -220,20 +220,6 @@
   text-align: left;
 }
 
-/* Styling for the support tier cards on Create Petition */
-.support-tier-creation-card {
-  display: inline-block;
-  margin: 0.5em;
-}
-
-/* Styling for the container holding the input fields in the support tier cards on Create Petition */
-.support-tier-creation-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em; /* gap between components */
-  padding-bottom: 1em;
-}
-
 /* Styling for delete buttons */
 .delete-button {
   /* !important added to override MUI element styling */
@@ -274,4 +260,29 @@
 .add-image-icon {
   transform: scale(1.8);
   color: #1b61db;
+}
+
+/* Styling for the container holding the support tier cards */
+.support-tier-container-card {
+  width: 30em;
+  margin: 1em auto;
+  padding: 1em;
+}
+
+/* Styling for the support tier cards */
+.support-tier-card {
+  display: inline-block;
+  margin: 0.5em;
+}
+
+/* Styling for the container holding the input fields when editing a the support tier card */
+.support-tier-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em; /* gap between components */
+}
+
+/* Styling for the input TextField MUI elements in the support tier cards */
+.support-tier-edit-fields .MuiInputBase-input {
+  width: 26em;
 }
