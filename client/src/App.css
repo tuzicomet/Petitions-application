@@ -250,6 +250,11 @@
   border-radius: 1em;
 }
 
+/* If the image in image-container has the circle-img class, then override its border radius */
+.image-container .circle-img {
+  border-radius: 100em !important;
+}
+
 .add-image-icon-container {
   cursor: pointer;
   position: absolute;

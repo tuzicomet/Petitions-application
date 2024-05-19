@@ -1,12 +1,24 @@
 import axios from 'axios'; // Axios library for making HTTP requests
 import React, { ChangeEvent } from "react";
 import { Link, useNavigate, useParams } from 'react-router-dom'; // React Router for navigation
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Snackbar, Alert } from "@mui/material"; // Material-UI components
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    TextField,
+    Snackbar,
+    Alert,
+    IconButton
+} from "@mui/material"; // Material-UI components
 import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg";
 
 import { getUser, getUserImage, editUser, changeUserImage } from "../services/UserService";
+import {AddCircle} from "@mui/icons-material";
 
 // User functional component
 const User = () => {
@@ -21,7 +33,7 @@ const User = () => {
         imageFilename: "",
         authToken: ""
     });
-    const [imageUrl, setImageUrl] = React.useState<string | null>(null); // url to the user's image file
+    const [userImage, setUserImage] = React.useState<string | null>(null); // url to the user's image file
     const [editUserDetails, setEditUserDetails] = React.useState<Partial<User>>({}); // Partial<User> to allow only some fields to be edited
     const [currentPassword, setCurrentPassword] = React.useState(""); // State variable for current password input
     const [errorFlag, setErrorFlag] = React.useState(false); // Flag for error status
@@ -32,9 +44,12 @@ const User = () => {
     const savedAuthToken = localStorage.getItem("savedAuthToken"); // Get the saved authToken from local storage
     const clientUserId = localStorage.getItem("clientUserId"); // get the client's user id from local storage
     const [authenticatedAsUser, setAuthenticatedAsUser] = React.useState(false); // boolean saying whether the client is authenticated as the user
-
+    // allowed MIME types for uploaded images
+    const supportedTypes = ['image/png', 'image/jpeg', 'image/gif'];
     // reference to the hidden file input element
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    // State variable for the uploaded petition image file
+    const [uploadedImage, setUploadedImage] = React.useState<File | null>(null);
 
     // run whenever id changes
     React.useEffect(() => {
@@ -48,7 +63,7 @@ const User = () => {
             // use the getUserImage method from UserService to get the user's profile photo
             const userImage = await getUserImage(id);
             // set the image to the imageUrl variable
-            setImageUrl(userImage);
+            setUserImage(userImage);
         }
         getProfileImage();
     }, [id]);
@@ -75,18 +90,27 @@ const User = () => {
     };
 
     // method to handle uploading a new image for a user's profile picture
-    const handleChangeUserImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-        // call the uploadUserImage method from userService with the relevant parameters,
-        // and it will handle uploading and updating the user's profile photo
-        changeUserImage(
-            event,
-            id,
-            savedAuthToken,
-            setErrorFlag,
-            setErrorMessage,
-            setSnackMessage,
-            setSnackOpen
-        );
+    const handleChangeUserImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            // the uploaded file must be an accepted type (png, jpeg, gif)
+            if (supportedTypes.includes(event.target.files[0].type)) {
+                // Change the petition's image with the uploaded image
+                await changeUserImage(event.target.files[0], id, savedAuthToken,
+                    setErrorFlag, setErrorMessage, setSnackMessage, setSnackOpen)
+
+                // re-fetch the user's image so the new image will be displayed
+                const fetchUserImageUrl = async () => {
+                    // get the petition's hero image using getUserImage from UserService
+                    const userImageUrl = await getUserImage(id);
+                    // set the image url to the userImage state variable
+                    setUserImage(userImageUrl);
+                }
+                await fetchUserImageUrl();
+            } else {
+                setErrorFlag(true);
+                setErrorMessage("Uploaded images must be of MIME type: image/png, image/jpeg, or image/gif")
+            }
+        }
     };
 
     return (
@@ -104,13 +128,44 @@ const User = () => {
 
             <h1>User</h1>
 
-            {/* Display user's image.
-             If userImage is null, then display the default image */}
-            <img src={imageUrl || defaultImage}
-                 alt="User Profile"
-                 // TODO move this styling out
-                 style={{width: 100, height: 100, borderRadius: "10%"}}
-            />
+            {/* Container holding the user image and the icon to edit it */}
+            <div className="image-container">
+                {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
+
+                {/* Button to change user image, only show if logged in as the user */}
+                {authenticatedAsUser &&
+                    <div className="add-image-icon-container">
+                        <IconButton aria-label="add"
+                                    onClick={() => fileInputRef.current?.click()}>
+                            <AddCircle className="add-image-icon"/>
+                        </IconButton>
+                    </div>
+                }
+
+                {/* Display user image */}
+                {uploadedImage ? (
+                    // If the user has uploaded an image (petitionImage exists)
+                    <img
+                        // create a URL from the uploaded petitionImage to display
+                        src={URL.createObjectURL(uploadedImage)}
+                        alt="Petition Preview"
+                        className="circle-img"
+                    />
+                ) : (
+                    // Otherwise, display the user's current image, if it exists, otherwise default image
+                    <img src={userImage || defaultImage} alt="User Profile Picture" className="circle-img"/>
+                )}
+
+                {/* Hidden petition image upload input */}
+                <input
+                    id="file-input"
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef} // variable which references this element
+                    style={{display: 'none'}} // Hide the input
+                    onChange={handleChangeUserImage}
+                />
+            </div>
 
             <div>
                 {/* Display user details */}

@@ -152,7 +152,7 @@ export const changePetitionImage = async (uploadedImage: File,
                                       petitionId: number, savedAuthToken: string | null,
                                       setErrorFlag: (flag: boolean) => void, setErrorMessage: (message: string) => void,
                                       setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void,
-): Promise<void> => {
+                                    ): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
         // Resource used for turning the uploaded image into binary data
         // (which is what the image needs to be sent as to the server)

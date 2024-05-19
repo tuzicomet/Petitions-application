@@ -75,60 +75,59 @@ export const editUser = async (id: string | undefined, savedAuthToken: string | 
 
 
 // Function to handle uploading an image for a user profile picture
-export const changeUserImage = async (event: React.ChangeEvent<HTMLInputElement>,
+export const changeUserImage = async (uploadedImage: File,
                                  id: string | undefined, savedAuthToken: string | null,
                                  setErrorFlag: (flag: boolean) => void, setErrorMessage: (message: string) => void,
                                  setSnackMessage: (message: string) => void, setSnackOpen: (isOpen: boolean) => void,
-                                 ) => {
-    if (!event.target.files) {
-        // if no files were selected, then return early
-        return;
-    }
+                                 ): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+        // Resource used for turning the uploaded image into binary data
+        // (which is what the image needs to be sent as to the server)
+        // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
 
-    // Get the first selected file
-    const imageFile = event.target.files[0];
+        // Create a FileReader object to read the file content
+        const fileReader = new FileReader();
 
-    // Resource used for turning the uploaded image into binary data
-    // (which is what the image needs to be sent as to the server)
-    // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+        // Start reading the contents of the image file, with the result containing
+        // an ArrayBuffer representing the file's data
+        fileReader.readAsArrayBuffer(uploadedImage);
 
-    // Create a FileReader object to read the file content
-    const fileReader = new FileReader();
-
-    // Start reading the contents of the image file, with the result containing
-    // an ArrayBuffer representing the file's data
-    fileReader.readAsArrayBuffer(imageFile);
-
-    // after file reading is complete
-    fileReader.onload = () => {
-        const fileData = fileReader.result as ArrayBuffer;
-        // Send a PUT request to set the user's image,
-        // with the raw binary data in the request body
-        axios.put(`http://localhost:4941/api/v1/users/${id}/image`, fileData, {
-            headers: {
-                'X-Authorization': savedAuthToken,
-                // Set the content type based on the type of the image file
-                'Content-Type': imageFile.type
-            }
-        })
-            .then(() => {
-                // Refresh user image after successful upload
-                getUserImage(id);
-                // Display success message in Snackbar
-                setSnackMessage("Image uploaded successfully");
-                setSnackOpen(true);
+        // after file reading is complete
+        fileReader.onload = () => {
+            const fileData = fileReader.result as ArrayBuffer;
+            // Send a PUT request to set the user's image,
+            // with the raw binary data in the request body
+            axios.put(`http://localhost:4941/api/v1/users/${id}/image`, fileData, {
+                headers: {
+                    'X-Authorization': savedAuthToken,
+                    // Set the content type based on the type of the image file
+                    'Content-Type': uploadedImage.type
+                }
             })
-            .catch((error) => {
-                // Set error flag and message if upload fails
-                setErrorFlag(true);
-                setErrorMessage(error.toString());
-            });
-    };
+                .then(() => {
+                    // Refresh user image after successful upload
+                    getUserImage(id)
+                        .then(() => {
+                            resolve();
+                        })
+                    // Display success message in Snackbar
+                    setSnackMessage("Image uploaded successfully");
+                    setSnackOpen(true);
+                })
+                .catch((error) => {
+                    // Set error flag and message if upload fails
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                    reject(error);
+                });
+        };
 
-    // if there was an error reading the file
-    fileReader.onerror = () => {
-        // Set error flag and message
-        setErrorFlag(true);
-        setErrorMessage("Error reading the file.");
-    };
+        // if there was an error reading the file
+        fileReader.onerror = () => {
+            // Set error flag and message
+            setErrorFlag(true);
+            setErrorMessage("Error reading the file.");
+            reject(new Error("Error reading the file."));
+        };
+    });
 };
