@@ -788,27 +788,41 @@ const Petition = () => {
 
                     {/* List of supporters */}
                     <TableContainer component={Paper}>
-                        <h2>Supporters</h2>
-                        <Table>
-                            <TableBody>
-                                {/* Display the supporter rows */}
-                                {supporterRows}
-                            </TableBody>
-                        </Table>
+                        <h3>Supporters</h3>
+                        {supporterRows.length === 0 ? (
+                            // If there are no supporters
+                            <p>This petition has no supporters</p>
+                        ) : (
+                            // Otherwise, display the supporter rows in a table
+                            <Table>
+                                <TableBody>
+                                    {/* Display the supporter rows */}
+                                    {supporterRows}
+                                </TableBody>
+                            </Table>
+                        )}
                     </TableContainer>
 
 
                     {/* Similar Petitions table */}
-                    <h3>Similar Petitions</h3>
-                    <PetitionList petitions={similarPetitions} />
+                    <Paper elevation={3} className="card">
+                        <h3>Similar Petitions</h3>
+                        {similarPetitions.length === 0 ? (
+                            // If there are no similar petitions
+                            <p>There are no similar petitions</p>
+                        ) : (
+                            // Otherwise, display the similar petitions in the petition list
+                            <PetitionList petitions={similarPetitions} />
+                        )}
 
-                    {/* Snackbar component */}
-                    <Snackbar
-                        open={snackOpen}
-                        autoHideDuration={6000}
-                        onClose={handleSnackClose}
-                        message={snackMessage}
-                    />
+                        {/* Snackbar component */}
+                        <Snackbar
+                            open={snackOpen}
+                            autoHideDuration={6000}
+                            onClose={handleSnackClose}
+                            message={snackMessage}
+                        />
+                    </Paper>
                 </Paper>
             </div>
         </div>
