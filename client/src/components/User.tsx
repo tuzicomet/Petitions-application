@@ -54,6 +54,7 @@ const User = () => {
     const [uploadedImage, setUploadedImage] = React.useState<File | null>(null);
     const [ownedPetitions, setOwnedPetitions] = React.useState<Array<PetitionFull>>([]);
     const [supportedPetitions, setSupportedPetitions] = React.useState<Array<PetitionFull>>([]);
+    const [changeMade, setChangeMade] = React.useState(false);
 
     // run whenever one of the dependencies changes
     React.useEffect(() => {
@@ -81,7 +82,10 @@ const User = () => {
             }
         }
         getRelatedPetitions();
-    }, [id, clientUserId, savedAuthToken, user]);
+
+        // reset the changeMade variable
+        setChangeMade(false);
+    }, [id, clientUserId, savedAuthToken, changeMade]);
 
     // Snackbar close handler
     const handleSnackClose = () => {
@@ -101,7 +105,10 @@ const User = () => {
             setSnackMessage,
             setSnackOpen,
             setOpenEditDialog
-        );
+        )
+            .then(() => {
+                setChangeMade(true);
+            })
     };
 
     // method to handle uploading a new image for a user's profile picture
@@ -121,6 +128,7 @@ const User = () => {
                     setUserImage(userImageUrl);
                 }
                 await fetchUserImageUrl();
+                setChangeMade(true);
             } else {
                 setErrorFlag(true);
                 setErrorMessage("Uploaded images must be of MIME type: image/png, image/jpeg, or image/gif")

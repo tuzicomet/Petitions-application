@@ -21,19 +21,6 @@ import {
 } from "../services/PetitionService";
 import PetitionList from "./PetitionList";
 
-// interface for table head cell
-interface HeadCell {
-    id: string;
-    label: string;
-}
-
-// Define the head cells (column names) for the Support Tier list
-const supportTierHeadCells: readonly HeadCell[] = [
-    { id: 'title', label: 'Title' },
-    { id: 'description', label: 'Description' },
-    { id: 'cost', label: 'Cost' }
-];
-
 // Available petition categories
 const categories = [
     { id: 1, name: "Wildlife" },
@@ -94,8 +81,6 @@ const Petition = () => {
     // petitionImage should either accept string or null (if no image/unauthorized)
     const [petitionImage, setPetitionImage] = React.useState<string | null>(null);
     const [petitionOwnerImage, setPetitionOwnerImage] = React.useState<string | null>("");
-    // State variable to hold the support tier rows in the petition list
-    const [supportTierRows, setSupportTierRows] = React.useState<React.ReactNode[]>([]);
     // State variable boolean, true if the user is authenticated as the owner of the petition, false otherwise
     const [authenticatedAsOwner, setAuthenticatedAsOwner] = React.useState(false);
     const clientUserId = localStorage.getItem("clientUserId"); // get the client's user id from local storage
@@ -122,11 +107,11 @@ const Petition = () => {
     // State variable to hold the supporter rows in the petition list
     const [supporterRows, setSupporterRows] = React.useState<React.ReactNode[]>([]);
     const [similarPetitions, setSimilarPetitions] = React.useState<Array<PetitionFull>>([]);
-    const [similarPetitionRows, setSimilarPetitionRows] = React.useState<React.ReactNode[]>([]);
     const [openSupportThisTierDialog, setOpenSupportThisTierDialog] = React.useState(false);
     const [supportMessage, setSupportMessage] = React.useState<string | null>("");
     // State variable to hold the currently selected support tier id
     const [selectedTierIdToSupport, setSelectedTierIdToSupport] = React.useState<number | null>(null);
+    const [changeMade, setChangeMade] = React.useState(false);
 
     // Function to handle change in petition image input
     const handleChangePetitionImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,7 +178,10 @@ const Petition = () => {
 
             fetchSupporters();
         }
-    }, [id]);
+
+        // reset the changeMade variable
+        setChangeMade(false);
+    }, [id, changeMade]);
 
     // React useEffect hook which runs whenever petition changes
     React.useEffect(() => {
@@ -299,6 +287,7 @@ const Petition = () => {
                 setSnackMessage("Petition details updated successfully");
                 setSnackOpen(true);
                 setErrorFlag(false);
+                setChangeMade(true);
             })
             .catch((error) => {
                 setErrorFlag(true);
@@ -339,6 +328,7 @@ const Petition = () => {
             newSupportTiers[index] = updatedTier;
             setSupportTiers(newSupportTiers);
             setEditMode({ ...editMode, [index]: false });
+            setChangeMade(true);
         } catch (error: any) {
             setErrorFlag(true);
             setErrorMessage(error.toString());
@@ -392,6 +382,7 @@ const Petition = () => {
             .then(() => {
                 // close the add tier dialog
                 handleCloseAddTierDialog();
+                setChangeMade(true);
             })
     }
 
@@ -404,6 +395,7 @@ const Petition = () => {
 
             // remove from the local support tier list as well
             setSupportTiers(supportTiers.filter(tier => tier.supportTierId !== supportTierId));
+            setChangeMade(true);
         } catch (error: any) {
             setErrorFlag(true);
             setErrorMessage(error.toString());
