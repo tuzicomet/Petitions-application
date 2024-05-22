@@ -29,9 +29,6 @@ const Navbar = () => {
         <nav>
             <div id="navigation-bar">
                 <Button>
-                    <Link to="/">Home</Link>
-                </Button>
-                <Button>
                     <Link to="/petitions">Petitions</Link>
                 </Button>
 

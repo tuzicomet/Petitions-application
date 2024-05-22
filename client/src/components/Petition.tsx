@@ -10,6 +10,7 @@ import { AddCircle, Edit } from "@mui/icons-material";
 import Navbar from "./Navbar";
 import { datetimeToDDMMYYYY } from "../utils/Utils";
 import defaultImage from "../assets/default_picture.jpg"; // default user image
+import defaultPetitionImage from "../assets/default_petition_image.jpg";
 import {getUserImage} from "../services/UserService";
 import {
     getPetition,
@@ -272,7 +273,7 @@ const Petition = () => {
                         <TableCell>
                             {/* If the supporterImageUrl is present, display it, otherwise show default */}
                             <img src={supporterImageUrl || defaultImage}
-                                 alt="Petition Image"/>
+                                 alt="Supporter Profile Image"/>
                         </TableCell>
 
                         <TableCell>
@@ -431,13 +432,11 @@ const Petition = () => {
                     <div id="petition-header">
                         {/* Use the petition image as the header background */}
                         <div id="petition-header-background">
-                            {/* Display petition's image if available */}
-                            {petitionImage && (
-                                <img
-                                    src={petitionImage}
-                                    alt="Petition Profile"
-                                />
-                            )}
+                            {/* If the petition's imageUrl is present, display it, otherwise show default */}
+                            {/* (all petitions should have an image, but we can do this to be safe) */}
+                            <img src={petitionImage || defaultPetitionImage}
+                                 alt="Petition Image"
+                            />
                         </div>
                         {/* Petition title as the page header */}
                         <div id="petition-header-title">
@@ -468,10 +467,10 @@ const Petition = () => {
                                 alt="Petition Preview"
                             />
                         ) : (
-                            // Otherwise, display the petition's current image, if it exists
-                            petitionImage && (
-                                <img src={petitionImage} alt="Petition Profile"/>
-                            )
+                            // Otherwise, display the petition's current image, or default if there is none
+                            <img src={petitionImage || defaultPetitionImage}
+                                alt="Petition Image"
+                            />
                         )}
 
                         {/* Hidden petition image upload input */}

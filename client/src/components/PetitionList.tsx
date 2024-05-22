@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from 'react-router-dom';
 import defaultImage from "../assets/default_picture.jpg"; // default user image
+import defaultPetitionImage from "../assets/default_petition_image.jpg";
 import { datetimeToDDMMYYYY } from "../utils/Utils";
 import {getPetitionImage, getPetitionSupportCost} from "../services/PetitionService";
 import { getUserImage } from "../services/UserService";
@@ -67,10 +68,12 @@ const PetitionList = ({ petitions }: { petitions: Array<PetitionFull> }) => {
 
                             {/* Petition Hero Image */}
                             <TableCell>
-                                {/* If the petition's imageUrl is present, display it */}
+                                {/* If the petition's imageUrl is present, display it, otherwise show default */}
                                 {/* (all petitions should have an image, but we can do this to be safe) */}
-                                {imageUrl &&
-                                    <img src={imageUrl} alt="Petition Image" />}
+                                <img src={imageUrl || defaultPetitionImage}
+                                     alt="Petition Image"
+                                />
+
                             </TableCell>
 
                             {/* Petition title */}
