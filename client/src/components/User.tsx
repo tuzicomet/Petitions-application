@@ -11,16 +11,17 @@ import {
     Snackbar,
     Alert,
     IconButton,
-    Paper
+    Paper, Table, TableBody, TableRow, TableCell
 } from "@mui/material"; // Material-UI components
 import EditIcon from "@mui/icons-material/Edit";
 import Navbar from "./Navbar";
 import defaultImage from "../assets/default_picture.jpg";
 
 import { getUser, getUserImage, editUser, changeUserImage } from "../services/UserService";
-import {AddCircle} from "@mui/icons-material";
+import {AddCircle, Edit} from "@mui/icons-material";
 import PetitionList from "./PetitionList";
 import {getPetitionsSupportedByUserId, getPetitionsWithOwnerId} from "../services/PetitionService";
+import {datetimeToDDMMYYYY} from "../utils/Utils";
 
 // User functional component
 const User = () => {
@@ -54,7 +55,7 @@ const User = () => {
     const [ownedPetitions, setOwnedPetitions] = React.useState<Array<PetitionFull>>([]);
     const [supportedPetitions, setSupportedPetitions] = React.useState<Array<PetitionFull>>([]);
 
-    // run whenever id changes
+    // run whenever one of the dependencies changes
     React.useEffect(() => {
         // if the client is logged in as the user whose page they are viewing
         if (clientUserId === id) {
@@ -80,7 +81,7 @@ const User = () => {
             }
         }
         getRelatedPetitions();
-    }, [id, clientUserId, savedAuthToken]);
+    }, [id, clientUserId, savedAuthToken, user]);
 
     // Snackbar close handler
     const handleSnackClose = () => {
@@ -140,68 +141,71 @@ const User = () => {
                 </Alert>
             }
 
-            <h1>User</h1>
+            <Paper elevation={1} className="user-profile-card">
 
-            {/* Container holding the user image and the icon to edit it */}
-            <div className="image-container">
-                {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
+                {/* Container holding the user image and the icon to edit it */}
+                <div className="image-container">
+                    {/* Resource used: https://medium.com/web-dev-survey-from-kyoto/how-to-customize-the-file-upload-button-in-react-b3866a5973d8 */}
 
-                {/* Button to change user image, only show if logged in as the user */}
-                {authenticatedAsUser &&
-                    <div className="add-image-icon-container">
-                        <IconButton aria-label="add"
-                                    onClick={() => fileInputRef.current?.click()}>
-                            <AddCircle className="add-image-icon"/>
-                        </IconButton>
-                    </div>
-                }
+                    {/* Button to change user image, only show if logged in as the user */}
+                    {authenticatedAsUser &&
+                        <div className="add-image-icon-container">
+                            <IconButton aria-label="add"
+                                        onClick={() => fileInputRef.current?.click()}>
+                                <AddCircle className="add-image-icon"/>
+                            </IconButton>
+                        </div>
+                    }
 
-                {/* Display user image */}
-                {uploadedImage ? (
-                    // If the user has uploaded an image (petitionImage exists)
-                    <img
-                        // create a URL from the uploaded petitionImage to display
-                        src={URL.createObjectURL(uploadedImage)}
-                        alt="User Profile"
-                        className="circle-img"
+                    {/* Display user image */}
+                    {uploadedImage ? (
+                        // If the user has uploaded an image (petitionImage exists)
+                        <img
+                            // create a URL from the uploaded petitionImage to display
+                            src={URL.createObjectURL(uploadedImage)}
+                            alt="User Profile"
+                            className="circle-img"
+                        />
+                    ) : (
+                        // Otherwise, display the user's current image, if it exists, otherwise default image
+                        <img src={userImage || defaultImage} alt="User Profile" className="circle-img"/>
+                    )}
+
+                    {/* Hidden user image upload input */}
+                    <input
+                        id="file-input"
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef} // variable which references this element
+                        style={{display: 'none'}} // Hide the input
+                        onChange={handleChangeUserImage}
                     />
-                ) : (
-                    // Otherwise, display the user's current image, if it exists, otherwise default image
-                    <img src={userImage || defaultImage} alt="User Profile" className="circle-img"/>
-                )}
+                </div>
 
-                {/* Hidden user image upload input */}
-                <input
-                    id="file-input"
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef} // variable which references this element
-                    style={{display: 'none'}} // Hide the input
-                    onChange={handleChangeUserImage}
-                />
-            </div>
+                <div className="user-profile-details">
+                    {/* Display user details */}
+                    <div className="user-profile-name">
+                        {user.firstName} {user.lastName}
+                    </div>
 
-            <div>
-                {/* Display user details */}
-                <strong>First Name:</strong> {user.firstName}<br/>
-                <strong>Last Name:</strong> {user.lastName}<br/>
-                {/* Only display the following fields if client is authenticated as user */}
-                {authenticatedAsUser && (
-                    <>
-                        <strong>Email:</strong> {user.email}<br/>
-                    </>
-                )}
-            </div>
+                    {/* Only display the following fields if client is authenticated as user */}
+                    {authenticatedAsUser && (
+                        <>
+                            <div className="user-profile-email">
+                                {user.email}
+                            </div>
 
-            {/* Only display if the client is authenticated as user */}
-            {authenticatedAsUser && (
-                <>
-                    {/* Button to edit user details (opens the Edit user dialog) */}
-                    <Button variant="outlined" startIcon={<EditIcon/>} onClick={() => setOpenEditDialog(true)}>
-                        Edit
-                    </Button>
-                </>
-            )}
+                            {/* Button to edit user details (opens the Edit user dialog) */}
+                            <Button variant="outlined" startIcon={<EditIcon/>}
+                                    onClick={() => setOpenEditDialog(true)}>
+                                Edit
+                            </Button>
+                        </>
+                    )}
+
+                </div>
+
+            </Paper>
 
             {/* Edit User Dialog (popup modal) */}
             <Dialog

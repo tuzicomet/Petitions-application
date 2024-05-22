@@ -291,3 +291,23 @@
 .support-tier-edit-fields .MuiInputBase-input {
   width: 26em;
 }
+
+.user-profile-card {
+  display: flex;
+  padding: 1em;
+  align-items: center;
+  width: 35em;
+  margin: 2em auto 3em;
+  height: 10em;
+  padding-right: 6em;
+}
+
+.user-profile-name {
+  font-weight: bold;
+  font-size: 1.8em;
+  margin-bottom: 0.2em;
+}
+
+.user-profile-email {
+  margin-bottom: 0.5em;
+}
