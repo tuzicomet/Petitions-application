@@ -94,6 +94,7 @@ const Petition = () => {
     const [supportTiers, setSupportTiers] = React.useState<SupportTier[]>([
         { supportTierId: -1, title: "", description: "", cost: 0 }
     ]);
+    const [supportedTierIds, setSupportedTierIds] = React.useState<number[]>([]);
     const [editMode, setEditMode] = React.useState<{[key: number]: boolean}>({});
     const [tempSupportTiers, setTempSupportTiers] = React.useState<SupportTier[]>([]);
     // State variables for Add Support Tier dialog
@@ -187,12 +188,22 @@ const Petition = () => {
     React.useEffect(() => {
         // initialise the supportTiers variable with the petition's support tiers
         if (petition && petition.supportTiers) {
-            setSupportTiers(petition.supportTiers.map(tier => ({
-                supportTierId: tier.supportTierId,
-                title: tier.title,
-                description: tier.description,
-                cost: tier.cost
-            })));
+            // Create a new array to hold the transformed support tiers
+            const newSupportTiers = [];
+
+            // Use a for loop to iterate over the petition.supportTiers array
+            for (const tier of petition.supportTiers) {
+                // Push the transformed object into the new array
+                newSupportTiers.push({
+                    supportTierId: tier.supportTierId,
+                    title: tier.title,
+                    description: tier.description,
+                    cost: tier.cost
+                });
+            }
+
+            // Update the state with the new array
+            setSupportTiers(newSupportTiers);
         }
 
         // set petition details
@@ -223,6 +234,9 @@ const Petition = () => {
     // run when supporters changes
     React.useEffect(() => {
         createSupporterRows();
+
+        const tierIds = new Set(supporters.map(supporter => supporter.supportTierId));
+        setSupportedTierIds(Array.from(tierIds));
     }, [supporters]);
 
     // create the rows for the petition list
@@ -668,23 +682,27 @@ const Petition = () => {
                                                         </TableRow>
                                                     </TableBody>
                                                 </Table>
-                                                {authenticatedAsOwner && tier.supportTierId !== -1 ? (
+                                                {authenticatedAsOwner && tier.supportTierId !== -1
+                                                && !supportedTierIds.includes(tier.supportTierId) ? (
                                                     <Button variant="outlined" onClick={() => handleEditTierButton(index)}>
                                                         Edit
                                                     </Button>
                                                 ) : (
+                                                    !authenticatedAsOwner && (
                                                     // If client does not own the petition, show the support button
                                                     <Button variant="outlined"
                                                             onClick={() => handleOpenSupportThisTierDialog(tier.supportTierId)}>
                                                         Support
                                                     </Button>
+                                                    )
                                                 )}
                                             </div>
                                         )}
 
                                         {/* Only allow user to remove a tier if they own the petition
                                          and there are more than 1 support tiers*/}
-                                        {authenticatedAsOwner && supportTiers.length > 1 &&
+                                        {authenticatedAsOwner && supportTiers.length > 1
+                                            && !supportedTierIds.includes(tier.supportTierId) &&
                                             <Button className="delete-button" variant="outlined"
                                                     onClick={() => handleRemoveSupportTier(tier.supportTierId)}>
                                                 Remove
